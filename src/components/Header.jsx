@@ -6,7 +6,9 @@ const Header = () => {
   return (
     <HeaderWrapper>
       <HeaderContainer>
-        <LogoIcon src={Logo} alt='Logo' />
+        <Link to='/'>
+          <LogoIcon src={Logo} alt='Logo' />
+        </Link>
         <Navigation>
           <StyledLink to='/scoreboard'>Scoreboard</StyledLink>
           <StyledLink to='/challenge'>Challenge</StyledLink>
