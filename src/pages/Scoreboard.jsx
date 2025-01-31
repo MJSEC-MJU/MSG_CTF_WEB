@@ -2,8 +2,39 @@ import { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import ReactPaginate from 'react-paginate';
 
+import BronzeIcon from '../assets/Scoreboard/BronzeIcon.svg';
+import SilverIcon from '../assets/Scoreboard/SilverIcon.svg';
+import GoldIcon from '../assets/Scoreboard/GoldIcon.svg';
+import PlatinumIcon from '../assets/Scoreboard/PlatinumIcon.svg';
+import DiamondIcon from '../assets/Scoreboard/DiamondIcon.svg';
+import ChallengerIcon from '../assets/Scoreboard/ChallengerIcon.svg';
+
 function Scoreboard() {
   const scores = [
+    { id: 'aaaaa1234', score: 1500 },
+    { id: 'aaaaa5678', score: 750 },
+    { id: 'aaaaa4949', score: 1200 },
+    { id: 'aaaaa2121', score: 500 },
+    { id: 'aaaaa1234', score: 1500 },
+    { id: 'aaaaa5678', score: 750 },
+    { id: 'aaaaa4949', score: 1200 },
+    { id: 'aaaaa2121', score: 500 },
+    { id: 'aaaaa1234', score: 1500 },
+    { id: 'aaaaa5678', score: 750 },
+    { id: 'aaaaa4949', score: 1200 },
+    { id: 'aaaaa2121', score: 500 },
+    { id: 'aaaaa1234', score: 1500 },
+    { id: 'aaaaa5678', score: 750 },
+    { id: 'aaaaa4949', score: 1200 },
+    { id: 'aaaaa2121', score: 500 },
+    { id: 'aaaaa1234', score: 1500 },
+    { id: 'aaaaa5678', score: 750 },
+    { id: 'aaaaa4949', score: 1200 },
+    { id: 'aaaaa2121', score: 500 },
+    { id: 'aaaaa1234', score: 1500 },
+    { id: 'aaaaa5678', score: 750 },
+    { id: 'aaaaa4949', score: 1200 },
+    { id: 'aaaaa2121', score: 500 },
     { id: 'aaaaa1234', score: 1500 },
     { id: 'aaaaa5678', score: 750 },
     { id: 'aaaaa4949', score: 1200 },
@@ -15,27 +46,40 @@ function Scoreboard() {
   const pagesVisited = pageNumber * scoresPerPage;
   const pageCount = Math.ceil(scores.length / scoresPerPage);
 
+  const getIconForRank = (rank) => {
+    if (rank === 1) return ChallengerIcon;
+    if (rank >= 2 && rank <= 3) return DiamondIcon;
+    if (rank >= 4 && rank <= 7) return PlatinumIcon;
+    if (rank >= 8 && rank <= 10) return GoldIcon;
+    if (rank >= 11 && rank <= 15) return SilverIcon;
+    if (rank >= 16) return BronzeIcon;
+    return '/placeholder.png';
+  };
+
   const displayScores = scores
     .slice(pagesVisited, pagesVisited + scoresPerPage)
-    .map((score, index) => (
-      <tr key={index}>
-        <td>{index + 1}</td>
-        <td>
-          <img
-            src='/placeholder.png'
-            alt='Rank'
-            style={{ width: '30px', height: '30px' }}
-          />
-        </td>
-        <td>{score.id.replace(/.(?=.{3})/g, '*')}</td>
-        <td>{score.score}</td>
-      </tr>
-    ));
+    .map((score, index) => {
+      const rank = pagesVisited + index + 1;
+      return (
+        <tr key={index}>
+          <td>{rank}</td>
+          <td>
+            <img
+              src={getIconForRank(rank)}
+              alt={`Rank ${rank}`}
+              style={{ width: '30px', height: '30px' }}
+            />
+          </td>
+          <td>{score.id.replace(/.(?=.{3})/g, '*')}</td>
+          <td>{score.score}</td>
+        </tr>
+      );
+    });
 
   for (let i = displayScores.length; i < scoresPerPage; i++) {
     displayScores.push(
       <tr key={`empty-${i}`}>
-        <td>{i + 1}</td>
+        <td>----</td>
         <td>----</td>
         <td>----</td>
         <td>----</td>
@@ -52,7 +96,7 @@ function Scoreboard() {
         <thead>
           <tr>
             <th>Rank</th>
-            <th>Icon</th>
+            <th>Tier</th>
             <th>ID</th>
             <th>SCORE</th>
           </tr>
@@ -105,9 +149,9 @@ const Title = styled.h2`
 
 const Table = styled.table`
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   margin-bottom: 20px;
-  min-width: 600px;
 
   th,
   td {
@@ -116,7 +160,6 @@ const Table = styled.table`
     text-align: center;
     color: #fff;
     background-color: #222;
-    transition: background-color 0.3s;
   }
 
   th {
@@ -133,7 +176,6 @@ const Pagination = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  cursor: pointer;
 
   .paginationBttns {
     display: flex;
@@ -160,7 +202,6 @@ const Pagination = styled.div`
     border: 1px solid #8cff66;
     background-color: #333;
     color: #fff;
-    padding: 0 10px;
   }
 
   .paginationDisabled {
