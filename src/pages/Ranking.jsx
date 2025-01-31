@@ -2,14 +2,14 @@ import { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import ReactPaginate from 'react-paginate';
 
-import BronzeIcon from '../assets/Scoreboard/BronzeIcon.svg';
-import SilverIcon from '../assets/Scoreboard/SilverIcon.svg';
-import GoldIcon from '../assets/Scoreboard/GoldIcon.svg';
-import PlatinumIcon from '../assets/Scoreboard/PlatinumIcon.svg';
-import DiamondIcon from '../assets/Scoreboard/DiamondIcon.svg';
-import ChallengerIcon from '../assets/Scoreboard/ChallengerIcon.svg';
+import BronzeIcon from '../assets/Ranking/BronzeIcon.svg';
+import SilverIcon from '../assets/Ranking/SilverIcon.svg';
+import GoldIcon from '../assets/Ranking/GoldIcon.svg';
+import PlatinumIcon from '../assets/Ranking/PlatinumIcon.svg';
+import DiamondIcon from '../assets/Ranking/DiamondIcon.svg';
+import ChallengerIcon from '../assets/Ranking/ChallengerIcon.svg';
 
-function Scoreboard() {
+function Ranking() {
   const scores = [
     { id: 'aaaaa1234', score: 1500 },
     { id: 'aaaaa5678', score: 750 },
@@ -90,8 +90,8 @@ function Scoreboard() {
   const changePage = ({ selected }) => setPageNumber(selected);
 
   return (
-    <ScoreboardWrapper>
-      <Title>Scoreboard</Title>
+    <RankingWrapper>
+      <Title>Ranking</Title>
       <Table>
         <thead>
           <tr>
@@ -116,11 +116,11 @@ function Scoreboard() {
           activeClassName={'paginationActive'}
         />
       </Pagination>
-    </ScoreboardWrapper>
+    </RankingWrapper>
   );
 }
 
-export default Scoreboard;
+export default Ranking;
 
 const glow = keyframes`
   0%, 100% {
@@ -131,7 +131,7 @@ const glow = keyframes`
   }
 `;
 
-const ScoreboardWrapper = styled.div`
+const RankingWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
