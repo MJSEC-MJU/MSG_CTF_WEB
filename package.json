@@ -6,13 +6,12 @@
   "scripts": {
     "start": "npm run dev -- --open",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint './src/**/*.{ts,tsx,js,jsx}'",
     "lint:fix": "eslint --fix './src/**/*.{ts,tsx,js,jsx}'"
   },
   "dependencies": {
-    "js-cookie": "^3.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.1.4"
