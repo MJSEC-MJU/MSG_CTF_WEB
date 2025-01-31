@@ -15,8 +15,8 @@ const HomeWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 100px;
-  background-color: #f5f5f5;
+  justify-content: center;
+  background-color: #c9baff;
   min-height: 100vh;
   width: 100%;
 `;
