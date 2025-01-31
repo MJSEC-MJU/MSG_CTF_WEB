@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import Logo from '../assets/MsgLogo.svg';
 
-// Header 컴포넌트 정의
 const Header = () => {
   return (
     <HeaderWrapper>
@@ -21,7 +20,15 @@ const Header = () => {
 
 export default Header;
 
-// 스타일 정의
+const backgroundAnimation = keyframes`
+  0% { background-position: 0 0; }
+  100% { background-position: -30px -30px; }
+`;
+
+const blink = keyframes`
+  50% { opacity: 0; }
+`;
+
 const HeaderWrapper = styled.div`
   position: fixed;
   top: 0;
@@ -29,6 +36,8 @@ const HeaderWrapper = styled.div`
   right: 0;
   padding: 0 1rem;
   background-color: #232323;
+  background-size: 60px 60px;
+  animation: ${backgroundAnimation} 3s linear infinite;
   z-index: 100;
 `;
 
@@ -42,13 +51,14 @@ const HeaderContainer = styled.header`
 const LogoIcon = styled.img`
   width: 120px;
   height: auto;
+  animation: ${blink} 1s steps(2, start) infinite;
 `;
 
 const Navigation = styled.nav`
   display: flex;
   justify-content: space-around;
   flex-grow: 1;
-  margin-left: 20px; // 로고와 네비게이션 사이의 간격
+  margin-left: 20px;
 `;
 
 const StyledLink = styled(Link)`
@@ -56,7 +66,11 @@ const StyledLink = styled(Link)`
   text-decoration: none;
   font-size: 16px;
   font-weight: bold;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+
   &:hover {
-    text-decoration: underline;
+    color: #00ff00;
+    text-decoration: none;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
   }
 `;
