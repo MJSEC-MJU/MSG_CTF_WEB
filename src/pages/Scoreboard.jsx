@@ -184,6 +184,7 @@ const Pagination = styled.div`
     gap: 8px;
     font-size: 16px;
     animation: ${glow} 2s ease-in-out infinite;
+    cursor: pointer;
   }
 
   .previousBttn,
