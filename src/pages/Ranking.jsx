@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import styled, { keyframes } from 'styled-components';
+import { useState, useMemo } from 'react';
+import styled from 'styled-components';
 import ReactPaginate from 'react-paginate';
 
 import BronzeIcon from '../assets/Ranking/BronzeIcon.svg';
@@ -10,36 +10,21 @@ import DiamondIcon from '../assets/Ranking/DiamondIcon.svg';
 import ChallengerIcon from '../assets/Ranking/ChallengerIcon.svg';
 
 function Ranking() {
-  const scores = [
-    { id: 'aaaaa1234', score: 1500 },
-    { id: 'aaaaa5678', score: 750 },
-    { id: 'aaaaa4949', score: 1200 },
-    { id: 'aaaaa2121', score: 500 },
-    { id: 'aaaaa1234', score: 1500 },
-    { id: 'aaaaa5678', score: 750 },
-    { id: 'aaaaa4949', score: 1200 },
-    { id: 'aaaaa2121', score: 500 },
-    { id: 'aaaaa1234', score: 1500 },
-    { id: 'aaaaa5678', score: 750 },
-    { id: 'aaaaa4949', score: 1200 },
-    { id: 'aaaaa2121', score: 500 },
-    { id: 'aaaaa1234', score: 1500 },
-    { id: 'aaaaa5678', score: 750 },
-    { id: 'aaaaa4949', score: 1200 },
-    { id: 'aaaaa2121', score: 500 },
-    { id: 'aaaaa1234', score: 1500 },
-    { id: 'aaaaa5678', score: 750 },
-    { id: 'aaaaa4949', score: 1200 },
-    { id: 'aaaaa2121', score: 500 },
-    { id: 'aaaaa1234', score: 1500 },
-    { id: 'aaaaa5678', score: 750 },
-    { id: 'aaaaa4949', score: 1200 },
-    { id: 'aaaaa2121', score: 500 },
-    { id: 'aaaaa1234', score: 1500 },
-    { id: 'aaaaa5678', score: 750 },
-    { id: 'aaaaa4949', score: 1200 },
-    { id: 'aaaaa2121', score: 500 },
-  ];
+  const scores = useMemo(
+    () =>
+      [
+        { id: 'aaaaa1234', score: 1500 },
+        { id: 'aaaaa5678', score: 750 },
+        { id: 'aaaaa4949', score: 1200 },
+        { id: 'aaaaa2121', score: 500 },
+        { id: 'aaaaa6789', score: 1700 },
+        { id: 'aaaaa1111', score: 900 },
+        { id: 'aaaaa2222', score: 1300 },
+        { id: 'aaaaa3333', score: 1400 },
+        { id: 'aaaaa4444', score: 1100 },
+      ].sort((a, b) => b.score - a.score),
+    []
+  );
 
   const scoresPerPage = 10;
   const [pageNumber, setPageNumber] = useState(0);
@@ -52,16 +37,18 @@ function Ranking() {
     if (rank >= 4 && rank <= 7) return PlatinumIcon;
     if (rank >= 8 && rank <= 10) return GoldIcon;
     if (rank >= 11 && rank <= 15) return SilverIcon;
-    if (rank >= 16) return BronzeIcon;
-    return '/placeholder.png';
+    return BronzeIcon;
   };
 
-  const displayScores = scores
-    .slice(pagesVisited, pagesVisited + scoresPerPage)
-    .map((score, index) => {
+  const displayScores = useMemo(() => {
+    const slicedScores = scores.slice(
+      pagesVisited,
+      pagesVisited + scoresPerPage
+    );
+    const rows = slicedScores.map((score, index) => {
       const rank = pagesVisited + index + 1;
       return (
-        <tr key={index}>
+        <tr key={score.id}>
           <td>{rank}</td>
           <td>
             <img
@@ -76,16 +63,19 @@ function Ranking() {
       );
     });
 
-  for (let i = displayScores.length; i < scoresPerPage; i++) {
-    displayScores.push(
-      <tr key={`empty-${i}`}>
-        <td>----</td>
-        <td>----</td>
-        <td>----</td>
-        <td>----</td>
-      </tr>
-    );
-  }
+    for (let i = rows.length; i < scoresPerPage; i++) {
+      rows.push(
+        <tr key={`empty-${i}`}>
+          <td>----</td>
+          <td>----</td>
+          <td>----</td>
+          <td>----</td>
+        </tr>
+      );
+    }
+
+    return rows;
+  }, [pageNumber, scores]);
 
   const changePage = ({ selected }) => setPageNumber(selected);
 
@@ -122,15 +112,6 @@ function Ranking() {
 
 export default Ranking;
 
-const glow = keyframes`
-  0%, 100% {
-    text-shadow: 0 0 10px #8cff66, 0 0 20px #8cff66, 0 0 30px #8cff66, 0 0 40px #8cff66, 0 0 50px #8cff66, 0 0 60px #8cff66, 0 0 70px #8cff66;
-  }
-  50% {
-    text-shadow: 0 0 20px #8cff66, 0 0 30px #8cff66, 0 0 40px #8cff66, 0 0 50px #8cff66, 0 0 60px #8cff66, 0 0 70px #8cff66, 0 0 80px #8cff66;
-  }
-`;
-
 const RankingWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -144,7 +125,10 @@ const RankingWrapper = styled.div`
 const Title = styled.h2`
   color: #8cff66;
   margin-bottom: 20px;
-  animation: ${glow} 2s ease-in-out infinite;
+  text-shadow: 0 0 40px rgba(0, 255, 0, 0.8);
+  font-size: 3.5rem;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: uppercase;
 `;
 
 const Table = styled.table`
@@ -183,7 +167,7 @@ const Pagination = styled.div`
     padding: 0;
     gap: 8px;
     font-size: 16px;
-    animation: ${glow} 2s ease-in-out infinite;
+
     cursor: pointer;
   }
 
@@ -197,12 +181,6 @@ const Pagination = styled.div`
     &:hover {
       transform: scale(1.1);
     }
-  }
-
-  .paginationActive {
-    border: 1px solid #8cff66;
-    background-color: #333;
-    color: #fff;
   }
 
   .paginationDisabled {
