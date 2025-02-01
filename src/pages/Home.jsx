@@ -45,7 +45,6 @@ function Home() {
 
 export default Home;
 
-/* 🔥 스타일 */
 const HomeWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -111,7 +110,6 @@ const CenteredButton = styled.button`
   }
 `;
 
-/* 🔥 그리드 애니메이션 */
 const AnimatedLines = styled.div`
   position: absolute;
   top: 0;

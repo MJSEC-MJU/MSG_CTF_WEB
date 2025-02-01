@@ -1,4 +1,3 @@
-// src/components/Scoreboard/ContentBlock.jsx
 import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
 import { useMemo } from 'react';

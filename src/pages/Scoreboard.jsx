@@ -2,8 +2,6 @@ import styled from 'styled-components';
 import { datasetsConfig } from '../components/Scoreboard/dataConfig';
 import ContentBlock from '../components/Scoreboard/ContentBlock';
 
-// console.log('datasetsConfig:', datasetsConfig);
-
 const Scoreboard = () => {
   return (
     <Wrapper>

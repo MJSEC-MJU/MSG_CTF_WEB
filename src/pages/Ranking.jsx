@@ -24,7 +24,7 @@ function Ranking() {
         { id: 'aaaaa4444', score: 1100 },
       ].sort((a, b) => b.score - a.score),
     []
-  ); // 점수를 내림차순으로 정렬
+  );
 
   const scoresPerPage = 10;
   const [pageNumber, setPageNumber] = useState(0);

@@ -1,4 +1,3 @@
-// src/components/Scoreboard/dataConfig.jsx
 export const options = {
   responsive: true,
   maintainAspectRatio: false,
