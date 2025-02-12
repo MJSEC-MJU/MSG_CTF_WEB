@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import Logo from '../assets/MsgLogo.svg';
+import myLogo from "../assets/myLogo.png"
 
 const Header = () => {
   return (
@@ -13,8 +14,10 @@ const Header = () => {
           <StyledLink to='/scoreboard'>Scoreboard</StyledLink>
           <StyledLink to='/challenge'>Challenge</StyledLink>
           <StyledLink to='/ranking'>Ranking</StyledLink>
-          <StyledLink to='/rule'>Rule</StyledLink>
         </Navigation>
+        <Link to='/myPage'>
+          <MyLogoIcon src={myLogo} alt='myPage' />
+        </Link>
       </HeaderContainer>
     </HeaderWrapper>
   );
@@ -56,11 +59,17 @@ const LogoIcon = styled.img`
   animation: ${blink} 1s steps(2, start) infinite;
 `;
 
+const MyLogoIcon = styled.img`
+  width: 45px;
+  height: auto;
+  margin-right: 100px
+`;
+
 const Navigation = styled.nav`
   display: flex;
   justify-content: space-around;
   flex-grow: 1;
-  margin-left: 20px;
+  margin-right: 500px;
 `;
 
 const StyledLink = styled(Link)`
