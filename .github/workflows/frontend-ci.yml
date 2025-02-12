@@ -3,7 +3,7 @@ name: Frontend CI/CD
 on:
   push:
     branches:
-      - main   # 또는 배포할 브랜치
+      - main  
   workflow_dispatch:
 
 jobs:
@@ -16,14 +16,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js (v20)
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '20'
 
       - name: Install dependencies and build
         run: |
-          yarn install
+          yarn install --frozen-lockfile
           yarn build
 
       - name: Build Docker image
