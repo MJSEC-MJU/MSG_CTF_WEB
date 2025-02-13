@@ -24,13 +24,15 @@
 .problem-title {
   font-size: 40px;
   font-weight: bold;
+  font-family: "Jua",sans-serif;
   color: #784A2C;
-  margin-bottom: 0px;
+  margin-bottom: -20px;
 }
 
 /*문제 설명 */
 .problem-description {
   font-size: 20px;
+  font-family: "Jua",sans-serif;
   color: #8C5733;
   text-align: center;
   margin-bottom: 0px;
@@ -38,6 +40,7 @@
 /* 문제를 푼 사람 수 표시 */
 .solved-count {
   font-size: 20px;
+  font-family: "Jua",sans-serif;
   font-weight: bold;
   color: #8C5733; 
   margin-bottom: 15px;
@@ -57,7 +60,9 @@
   padding: 10px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 20px;
+  font-family: "Jua",sans-serif;
+  font-weight: bold;
   cursor: pointer;
   transition: 0.2s;
   text-align: center;
@@ -109,7 +114,9 @@
   padding: 10px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-family: "Jua",sans-serif;
+  font-size: 20px;
+  font-weight: bold;
   cursor: pointer;
   transition: 0.2s;
   text-align: center;
