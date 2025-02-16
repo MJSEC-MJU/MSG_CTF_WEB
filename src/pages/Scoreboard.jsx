@@ -1,14 +1,72 @@
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { datasetsConfig } from '../components/Scoreboard/dataConfig';
 import ContentBlock from '../components/Scoreboard/ContentBlock';
 
 const Scoreboard = () => {
+  const [datasetsConfig, setDatasetsConfig] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('api_token'); // 로컬 스토리지에서 토큰 가져오기
+
+        if (!token) {
+          throw new Error('API 토큰이 없습니다');
+        }
+
+        const response = await fetch(
+          'https://msg.mjsec.kr/api/leaderboard/stream',
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`, // Authorization 헤더에 토큰 추가
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`API 응답에 문제가 발생했습니다: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Fetched data:', data);
+
+        const formattedData = data.data.map((item) => ({
+          title: item.univ || 'Individual Ranking',
+          data: [
+            {
+              id: item.userid,
+              scores: [item.totalPoint],
+              color: 'rgba(54, 162, 235, 1)',
+            },
+          ],
+        }));
+
+        setDatasetsConfig(formattedData);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('데이터를 불러오는 데 실패했습니다.');
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <Wrapper>Loading...</Wrapper>;
+  }
+
   return (
     <Wrapper>
       <GlitchText>HACKER SCOREBOARD</GlitchText>
+      {error && <NoDataText>{error}</NoDataText>}
       {datasetsConfig.length > 0 ? (
-        datasetsConfig.map((dataset) => (
-          <ContentBlock key={dataset.title} dataset={dataset} />
+        datasetsConfig.map((dataset, index) => (
+          <ContentBlock key={index} dataset={dataset} />
         ))
       ) : (
         <NoDataText>No data available</NoDataText>
