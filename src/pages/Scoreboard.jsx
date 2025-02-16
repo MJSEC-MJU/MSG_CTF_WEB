@@ -8,32 +8,33 @@ const Scoreboard = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const token = localStorage.getItem('api_token');
+
+    if (!token) {
+      setError('API 토큰이 없습니다');
+      setLoading(false);
+      return;
+    }
+
+    // 쿠키 인증을 포함한 EventSource 요청
+    const eventSource = new EventSource(
+      'https://msg.mjsec.kr/api/leaderboard/stream',
+      {
+        withCredentials: true, // 쿠키를 포함시켜 요청을 보냄
+      }
+    );
+
+    eventSource.onopen = () => {
+      console.log('SSE 연결이 열렸습니다.');
+      setLoading(false); // 데이터 로딩이 완료되었음을 표시
+    };
+
+    eventSource.onmessage = (event) => {
       try {
-        const token = localStorage.getItem('api_token'); // 로컬 스토리지에서 토큰 가져오기
+        const data = JSON.parse(event.data);
 
-        if (!token) {
-          throw new Error('API 토큰이 없습니다');
-        }
-
-        const response = await fetch(
-          'https://msg.mjsec.kr/api/leaderboard/stream',
-          {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`, // Authorization 헤더에 토큰 추가
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`API 응답에 문제가 발생했습니다: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Fetched data:', data);
-
-        const formattedData = data.data.map((item) => ({
+        // 데이터를 포맷팅하여 상태에 업데이트
+        const formattedData = data.map((item) => ({
           title: item.univ || 'Individual Ranking',
           data: [
             {
@@ -45,15 +46,21 @@ const Scoreboard = () => {
         }));
 
         setDatasetsConfig(formattedData);
-        setLoading(false);
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('데이터를 불러오는 데 실패했습니다.');
-        setLoading(false);
+        console.error('데이터 처리 중 오류 발생:', err);
+        setError('데이터 처리에 실패했습니다.');
       }
     };
 
-    fetchData();
+    eventSource.onerror = (error) => {
+      console.error('SSE 오류 발생:', error);
+      setError('실시간 데이터 스트리밍에 오류가 발생했습니다.');
+    };
+
+    // 컴포넌트가 unmount될 때 SSE 연결을 닫음
+    return () => {
+      eventSource.close();
+    };
   }, []);
 
   if (loading) {
