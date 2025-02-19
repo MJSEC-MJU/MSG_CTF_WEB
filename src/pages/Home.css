@@ -22,8 +22,8 @@
   z-index: 2;
 }
 .MainLogoWrapper img{
-  width: 540px;
-  height: 528px;
+  width: 80%;
+  height: 80%;
 }
 .CtButtonWrapper{
   position: absolute;
@@ -35,12 +35,12 @@
   position: absolute;
   top: 50%; /* 중앙 정렬 */
   left: 50%;
-  transform: translate(20%, -90%);
+  transform: translate(10%, -90%);
   z-index: 1;
 }
 .GamsungWrapper img{
-  width: 520px;
-  height: 340px;
+  width: 80%;
+  height: 80%;
 }
 .ClickWrapper{
   position: absolute;
