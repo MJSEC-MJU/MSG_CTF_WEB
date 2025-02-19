@@ -34,10 +34,10 @@ const ModalOverlay = styled.div`
 
 const ModalContent = styled.div`
   background-color: #111;
-  color: #0f0;
+  color: #cc0033;
   padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 0 15px #0f0;
+  box-shadow: 0 0 15px #cc0033;
   text-align: left;
   width: 90%;
   max-width: 500px;
@@ -51,7 +51,7 @@ const CloseButton = styled.button`
   font-size: 1rem;
   font-family: 'Courier New', Courier, monospace;
   color: #000;
-  background-color: #0f0;
+  background-color: #cc0033;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -61,11 +61,11 @@ const CloseButton = styled.button`
 
   &:hover {
     transform: scale(1.1);
-    background-color: #0c0;
+    background-color: #cc0033;
   }
 
   &:active {
     transform: scale(0.9);
-    background-color: #090;
+    background-color: #cc0033;
   }
 `;

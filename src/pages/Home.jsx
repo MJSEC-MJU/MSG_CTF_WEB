@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import Modal from '../components/Modal';
-import NeonBackground from '../components/Background';
+import "./Home.css";
 
 function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,16 +29,22 @@ function Home() {
 
   return (
     <HomeWrapper>
-      <NeonBackground />
-      <Title>WELCOME TO THE H4CKING GAME</Title>
-      <Subtitle>
-        즐기기에 앞서 규칙을 먼저 읽어주시기 바라며,
-        <br /> 규칙을 읽지 않아 발생하는 모든 문제의 책임은 당사자에게 있음을
-        알립니다.
-      </Subtitle>
-      <CenteredButton onClick={toggleModal}>규칙 보기</CenteredButton>
-      {isModalOpen && <Modal onClose={toggleModal} content={rulesContent} />}
-      <AnimatedLines />
+      <div className="WallWrapper">
+        <img src={`/assets/wall.png`} />
+        <div className="MainLogoWrapper">
+          <img src={`/assets/MainLogo.png`} />
+        </div>        
+        <div className="CtButtonWrapper">
+          <CenteredButton onClick={toggleModal}></CenteredButton>
+        </div>
+        {isModalOpen && <Modal onClose={toggleModal} content={rulesContent} />}
+        <div className="GamsungWrapper">
+          <img src={`/assets/gamsung.png`} />
+        </div>
+        <div className="ClickWrapper">
+          <img src={`/assets/click.png`} />
+        </div>
+      </div>
     </HomeWrapper>
   );
 }
@@ -50,30 +56,12 @@ const HomeWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #000000, #003300);
-  color: #0f0;
+  height: auto;
   min-height: 100vh;
-  width: 100%;
+  width: auto;
+  min-width: 100xw;
   overflow: hidden;
   position: relative;
-`;
-
-const Title = styled.h1`
-  font-size: 3.5rem;
-  font-family: 'Courier New', Courier, monospace;
-  text-transform: uppercase;
-  text-shadow: 0 0 40px rgba(0, 255, 0, 0.8);
-  z-index: 2;
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.2rem;
-  font-family: 'Courier New', Courier, monospace;
-  text-align: center;
-  margin-top: 1rem;
-  line-height: 1.5;
-  text-shadow: 0 0 5px #0f0;
-  z-index: 2;
 `;
 
 const CenteredButton = styled.button`
@@ -82,48 +70,24 @@ const CenteredButton = styled.button`
   font-size: 1rem;
   font-family: 'Courier New', Courier, monospace;
   color: #000;
-  background-color: #0f0;
+  background: url('/assets/ruleButton.png') no-repeat center center; 
+  background-size: contain; 
+  width: 250px; 
+  height: 100px;
   border: none;
-  border-radius: 5px;
+  border-radius: 0; 
   cursor: pointer;
-  z-index: 2;
-  box-shadow:
-    0 0 10px #0f0,
-    0 0 20px #0f0;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s,
-    background-color 0.2s;
+  z-index: 1;
+  transition: transform 0.2s, filter 0.2s;
 
   &:hover {
     transform: scale(1.1);
-    box-shadow:
-      0 0 20px #0f0,
-      0 0 40px #0f0;
+    filter: brightness(1.2);
   }
 
   &:active {
     transform: scale(0.9);
-    box-shadow:
-      0 0 5px #0f0,
-      0 0 10px #0f0;
+    filter: brightness(0.9);
   }
 `;
 
-const AnimatedLines = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 5px,
-    rgba(0, 255, 0, 0.15) 5px,
-    rgba(0, 255, 0, 0.15) 10px
-  );
-  opacity: 0.15;
-  z-index: 1;
-`;
