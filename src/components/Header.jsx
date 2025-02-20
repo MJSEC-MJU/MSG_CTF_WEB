@@ -1,9 +1,43 @@
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import Logo from '../assets/MsgLogo.svg';
-import myLogo from "../assets/myLogo.png"
+
+import loginIcon from '../assets/Login.png';
+import logoutIcon from '../assets/Logout.png';
+import profileIcon from '../assets/profile.png';
 
 const Header = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  // 임시 콘솔에서 로그인/로그아웃 상태 제어(테스트용)
+  // window.login();
+  // window.logout();
+  useEffect(() => {
+    window.login = () => {
+      setIsLoggedIn(true);
+      console.log('✅ 로그인 상태로 전환되었습니다.');
+    };
+    window.logout = () => {
+      setIsLoggedIn(false);
+      console.log('🚪 로그아웃 상태로 전환되었습니다.');
+    };
+  }, []);
+
+  const handleProfile = () => {
+    navigate('/mypage');
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    console.log('🚫 로그아웃 되었습니다.');
+  };
+
   return (
     <HeaderWrapper>
       <HeaderContainer>
@@ -15,9 +49,22 @@ const Header = () => {
           <StyledLink to='/challenge'>Challenge</StyledLink>
           <StyledLink to='/ranking'>Ranking</StyledLink>
         </Navigation>
-        <Link to='/myPage'>
-          <MyLogoIcon src={myLogo} alt='myPage' />
-        </Link>
+        <UserSection>
+          {isLoggedIn ? (
+            <>
+              <ProfileIcon
+                src={profileIcon}
+                onClick={handleProfile}
+                alt='Profile'
+              />
+              <AuthIcon src={logoutIcon} alt='Logout' onClick={handleLogout} />
+            </>
+          ) : (
+            <>
+              <AuthIcon src={loginIcon} alt='Login' onClick={handleLogin} />
+            </>
+          )}
+        </UserSection>
       </HeaderContainer>
     </HeaderWrapper>
   );
@@ -39,7 +86,7 @@ const HeaderWrapper = styled.div`
   top: 0;
   left: 0;
   right: 0;
-  padding: 0 1rem;
+
   background-color: #232323;
   background-size: 60px 60px;
   animation: ${backgroundAnimation} 3s linear infinite;
@@ -49,27 +96,28 @@ const HeaderWrapper = styled.div`
 const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   margin: 0 auto;
 `;
 
 const LogoIcon = styled.img`
   width: 120px;
-  height: auto;
+  height: 50px;
+  object-fit: contain;
+  display: block;
   animation: ${blink} 1s steps(2, start) infinite;
-`;
-
-const MyLogoIcon = styled.img`
-  width: 45px;
-  height: auto;
-  margin-right: 100px
 `;
 
 const Navigation = styled.nav`
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 10vw;
   flex-grow: 1;
-  margin-right: 500px;
+
+  @media (max-width: 768px) {
+    gap: 5vw;
+  }
 `;
 
 const StyledLink = styled(Link)`
@@ -81,7 +129,29 @@ const StyledLink = styled(Link)`
 
   &:hover {
     color: #00ff00;
-    text-decoration: none;
     text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
   }
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+`;
+
+const UserSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 30px;
+`;
+
+const AuthIcon = styled.img`
+  width: 40px;
+  height: auto;
+  cursor: pointer;
+`;
+const ProfileIcon = styled.img`
+  width: 35px;
+  height: 35px;
+  object-fit: cover;
+  cursor: pointer;
 `;
