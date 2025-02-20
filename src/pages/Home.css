@@ -69,9 +69,11 @@
 .AdminLogin {
   position: absolute;
   bottom: 0px;
-  right: 50px;
-  width: 60px;
-  height: 26px;
+  right: 6vw;
+  width: 10vw;
+  height: 5vh;
+  min-width: 50px;
+  min-height: 50px;
   cursor: pointer;
   z-index: 10;
 }
