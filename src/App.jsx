@@ -7,6 +7,7 @@ import Scoreboard from './pages/Scoreboard';
 import Challenge from './pages/Challenge';
 import ProblemDetail from './pages/ProblemDetail';
 import MyPage from './pages/MyPage';
+import AdminLogin from './pages/AdminLogin';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path='/challenge' element={<Challenge />} />
         <Route path='/problem/:id' element={<ProblemDetail />} />
         <Route path='/myPage' element={<MyPage />} />
+        <Route path='/adminLogin' element={<AdminLogin />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </Router>
