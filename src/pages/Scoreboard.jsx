@@ -1,8 +1,16 @@
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { datasetsConfig } from '../components/Scoreboard/dataConfig';
+import { fetchLeaderboardData } from '../components/Scoreboard/dataConfig';
 import ContentBlock from '../components/Scoreboard/ContentBlock';
 
 const Scoreboard = () => {
+  const [datasetsConfig, setDatasetsConfig] = useState([]);
+
+  useEffect(() => {
+    
+    fetchLeaderboardData(setDatasetsConfig);
+  }, []);
+
   return (
     <Wrapper>
       <GlitchText>HACKER SCOREBOARD</GlitchText>
