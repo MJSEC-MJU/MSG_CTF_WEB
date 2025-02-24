@@ -1,5 +1,4 @@
-// SignupApi.js (수정)
-import Axios from '../api/axios';
+import Axios from './axios';
 
 export const signUp = async (userData) => {
   try {
