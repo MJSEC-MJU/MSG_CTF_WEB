@@ -45,4 +45,4 @@ Axios.interceptors.response.use(
   }
 );
 
-export default Axios;
+export { Axios };

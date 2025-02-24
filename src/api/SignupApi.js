@@ -1,4 +1,4 @@
-import Axios from './axios';
+import { Axios } from './Axios';
 
 export const signUp = async (userData) => {
   try {
