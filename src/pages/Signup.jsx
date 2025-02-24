@@ -1,24 +1,29 @@
-import React, { useState } from 'react';
+// SignupPage.jsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { signUp, checkId, checkEmail } from '../api/SignupApi';
+import { signupSchema } from '../hook/validationYup';
 
 const SignupPage = () => {
-  // 백엔드가 요구하는 필드명: loginId, univ, email, password
   const [loginId, setLoginId] = useState('');
   const [univ, setUniv] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const [signupMessage, setSignupMessage] = useState('');
   const [isSignupError, setIsSignupError] = useState(false);
-
   const [idCheckMessage, setIdCheckMessage] = useState('');
   const [emailCheckMessage, setEmailCheckMessage] = useState('');
 
+  const [fieldErrors, setFieldErrors] = useState({
+    loginId: '',
+    univ: '',
+    email: '',
+    password: '',
+  });
+
   const navigate = useNavigate();
 
-  // 아이디 중복 체크
   const handleIdCheck = async () => {
     try {
       const data = await checkId(loginId);
@@ -28,7 +33,6 @@ const SignupPage = () => {
     }
   };
 
-  // 이메일 중복 체크
   const handleEmailCheck = async () => {
     try {
       const data = await checkEmail(email);
@@ -38,19 +42,43 @@ const SignupPage = () => {
     }
   };
 
-  // 회원가입
   const handleSignUp = async (e) => {
     e.preventDefault();
+
+    setFieldErrors({ loginId: '', univ: '', email: '', password: '' });
+    setSignupMessage('');
+
     try {
-      // 필드명: loginId, univ, email, password
+      await signupSchema.validate(
+        { loginId, univ, email, password },
+        { abortEarly: false }
+      );
+
       const data = await signUp({ loginId, univ, email, password });
       setSignupMessage(data.message);
       setIsSignupError(false);
-      // 회원가입 성공 시 로그인 페이지로 이동
-      // navigate('/login');
     } catch (err) {
-      setSignupMessage(err.message || '회원가입 실패');
-      setIsSignupError(true);
+      if (err.inner) {
+        const errorsObj = { loginId: '', univ: '', email: '', password: '' };
+        err.inner.forEach((error) => {
+          if (error.path === 'loginId') {
+            errorsObj.loginId = error.message;
+          }
+          if (error.path === 'univ') {
+            errorsObj.univ = error.message;
+          }
+          if (error.path === 'email') {
+            errorsObj.email = error.message;
+          }
+          if (error.path === 'password') {
+            errorsObj.password = error.message;
+          }
+        });
+        setFieldErrors(errorsObj);
+      } else {
+        setSignupMessage(err.message || '회원가입 실패');
+        setIsSignupError(true);
+      }
     }
   };
 
@@ -63,7 +91,6 @@ const SignupPage = () => {
       <FormContainer>
         <Title>회원가입</Title>
         <form onSubmit={handleSignUp}>
-          {/* 아이디 + 중복확인 버튼 */}
           <InputRow>
             <Input
               type='text'
@@ -81,8 +108,10 @@ const SignupPage = () => {
               {idCheckMessage}
             </Message>
           )}
+          {fieldErrors.loginId && (
+            <FieldError>{fieldErrors.loginId}</FieldError>
+          )}
 
-          {/* 학교명 */}
           <InputRow>
             <Input
               type='text'
@@ -92,8 +121,8 @@ const SignupPage = () => {
               required
             />
           </InputRow>
+          {fieldErrors.univ && <FieldError>{fieldErrors.univ}</FieldError>}
 
-          {/* 이메일 + 중복확인 버튼 */}
           <InputRow>
             <Input
               type='email'
@@ -111,8 +140,8 @@ const SignupPage = () => {
               {emailCheckMessage}
             </Message>
           )}
+          {fieldErrors.email && <FieldError>{fieldErrors.email}</FieldError>}
 
-          {/* 비밀번호 */}
           <InputRow>
             <Input
               type='password'
@@ -122,6 +151,9 @@ const SignupPage = () => {
               required
             />
           </InputRow>
+          {fieldErrors.password && (
+            <FieldError>{fieldErrors.password}</FieldError>
+          )}
 
           <Button type='submit'>회원가입</Button>
         </form>
@@ -138,7 +170,6 @@ const SignupPage = () => {
 
 export default SignupPage;
 
-/* styled-components */
 const PageContainer = styled.div`
   background-color: #000;
   min-height: 100vh;
@@ -188,6 +219,10 @@ const Input = styled.input`
 `;
 
 const CheckButton = styled.button`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
   margin-left: 0.5rem;
   padding: 0.75rem;
   background-color: #cc0033;
@@ -203,6 +238,10 @@ const CheckButton = styled.button`
 `;
 
 const Button = styled.button`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
   width: 100%;
   padding: 0.75rem;
   margin-top: 1rem;
@@ -234,4 +273,11 @@ const ToggleButton = styled.button`
 const Message = styled.p`
   margin-top: 1rem;
   color: ${({ error }) => (error ? '#f00' : '#cc0033')};
+`;
+
+const FieldError = styled.p`
+  margin: 0rem;
+  font-size: 0.8rem;
+  color: #00ff00;
+  text-align: left;
 `;

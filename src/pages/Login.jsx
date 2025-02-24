@@ -1,32 +1,51 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { signIn } from '../api/SigninApi';
+import { loginSchema } from '../hook/validationYup';
 
 const LoginPage = () => {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({ loginId: '', password: '' });
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    setFieldErrors({ loginId: '', password: '' });
+    setMessage('');
     try {
-      // 로그인 API에는 필드명이 loginId와 password로 전송 (명세에 맞춤)
+      await loginSchema.validate(
+        { ID: loginId, password },
+        { abortEarly: false }
+      );
+
       const data = await signIn({ loginId, password });
       setMessage(data.message);
       setIsError(false);
-      // 로그인 성공 후 추가 동작 처리 (예: 대시보드 이동)
-      // navigate('/dashboard');
     } catch (err) {
-      setMessage(err.message || '로그인 실패');
+      if (err.inner) {
+        const errorsObj = { loginId: '', password: '' };
+        err.inner.forEach((error) => {
+          if (error.path === 'ID') {
+            errorsObj.loginId = error.message;
+          }
+          if (error.path === 'password') {
+            errorsObj.password = error.message;
+          }
+        });
+        setFieldErrors(errorsObj);
+      } else {
+        setMessage(err.message || '로그인 실패');
+      }
       setIsError(true);
     }
   };
 
   const handleToggle = () => {
-    // 회원가입 페이지로 이동
     navigate('/signup');
   };
 
@@ -42,6 +61,9 @@ const LoginPage = () => {
             onChange={(e) => setLoginId(e.target.value)}
             required
           />
+          {fieldErrors.loginId && (
+            <FieldError>{fieldErrors.loginId}</FieldError>
+          )}
           <Input
             type='password'
             placeholder='비밀번호'
@@ -49,8 +71,12 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          {fieldErrors.password && (
+            <FieldError>{fieldErrors.password}</FieldError>
+          )}
           <Button type='submit'>로그인</Button>
         </form>
+
         {message && <Message error={isError}>{message}</Message>}
         <ToggleButton onClick={handleToggle}>회원가입 하러가기</ToggleButton>
       </FormContainer>
@@ -111,6 +137,11 @@ const Input = styled.input`
 `;
 
 const Button = styled.button`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  text-decoration: none;
   width: 100%;
   padding: 0.75rem;
   margin-top: 1rem;
@@ -141,6 +172,13 @@ const ToggleButton = styled.button`
   &:hover {
     opacity: 0.8;
   }
+`;
+
+const FieldError = styled.p`
+  margin: 0rem;
+  font-size: 0.8rem;
+  color: #00ff00;
+  text-align: left;
 `;
 
 const Message = styled.p`
