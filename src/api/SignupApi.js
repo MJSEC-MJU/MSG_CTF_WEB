@@ -1,8 +1,7 @@
-import Axios from './axios';
+import Axios from '../api/axios.js';
 
 export const signUp = async (userData) => {
   try {
-    // 👇 "header", "body" 없이, 최상위에 필드들을 넣음
     const payload = {
       loginId: userData.loginId,
       univ: userData.univ,
@@ -16,11 +15,9 @@ export const signUp = async (userData) => {
   }
 };
 
-// 아이디 중복 확인 API
 export const checkId = async (loginId) => {
   try {
     const response = await Axios.get('users/check-id', {
-      // 쿼리 파라미터는 loginId 그대로 사용
       params: { loginId },
     });
     return response.data;
@@ -29,7 +26,6 @@ export const checkId = async (loginId) => {
   }
 };
 
-// 이메일 중복 확인 API
 export const checkEmail = async (email) => {
   try {
     const response = await Axios.get('users/check-email', {

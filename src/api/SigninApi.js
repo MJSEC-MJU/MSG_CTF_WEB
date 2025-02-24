@@ -1,4 +1,4 @@
-import Axios from './axios';
+import Axios from '../api/axios.js';
 import Cookies from 'js-cookie';
 
 // 토큰 재발급 API (필요 시 호출)
