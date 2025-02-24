@@ -1,4 +1,4 @@
-import Axios from '../api/axios.js';
+import Axios from './axios';
 import Cookies from 'js-cookie';
 
 export const logout = async () => {
