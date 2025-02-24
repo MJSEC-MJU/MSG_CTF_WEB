@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { signIn } from '../api/SigninApi';
 import { loginSchema } from '../hook/validationYup';
+import Modal2 from '../components/Modal2';
 
 const LoginPage = () => {
   const [loginId, setLoginId] = useState('');
@@ -10,6 +11,7 @@ const LoginPage = () => {
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({ loginId: '', password: '' });
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -24,7 +26,8 @@ const LoginPage = () => {
       );
 
       const data = await signIn({ loginId, password });
-      setMessage(data.message);
+
+      setIsModalVisible(true);
       setIsError(false);
     } catch (err) {
       if (err.inner) {
@@ -43,6 +46,11 @@ const LoginPage = () => {
       }
       setIsError(true);
     }
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    navigate('/');
   };
 
   const handleToggle = () => {
@@ -80,6 +88,11 @@ const LoginPage = () => {
         {message && <Message error={isError}>{message}</Message>}
         <ToggleButton onClick={handleToggle}>회원가입 하러가기</ToggleButton>
       </FormContainer>
+
+      {/* 로그인 성공 시 Modal2 표시 */}
+      {isModalVisible && (
+        <Modal2 onClose={handleModalClose} content='로그인 성공' />
+      )}
     </PageContainer>
   );
 };

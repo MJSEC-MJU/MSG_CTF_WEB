@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { signUp, checkId, checkEmail } from '../api/SignupApi';
 import { signupSchema } from '../hook/validationYup';
+import Modal from '../components/Modal2';
 
 const SignupPage = () => {
   const [loginId, setLoginId] = useState('');
@@ -22,6 +23,9 @@ const SignupPage = () => {
     email: '',
     password: '',
   });
+
+  // 모달 표시 여부 상태
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const navigate = useNavigate();
 
@@ -58,6 +62,8 @@ const SignupPage = () => {
       const data = await signUp({ loginId, univ, email, password });
       setSignupMessage(data.message);
       setIsSignupError(false);
+      // 회원가입 성공 시 모달 띄움
+      setIsModalVisible(true);
     } catch (err) {
       if (err.inner) {
         const errorsObj = { loginId: '', univ: '', email: '', password: '' };
@@ -81,6 +87,12 @@ const SignupPage = () => {
         setIsSignupError(true);
       }
     }
+  };
+
+  // 모달 닫기 시 로그인 페이지로 이동
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    navigate('/login');
   };
 
   const handleToggle = () => {
@@ -165,12 +177,18 @@ const SignupPage = () => {
 
         <ToggleButton onClick={handleToggle}>로그인 하러 가기</ToggleButton>
       </FormContainer>
+
+      {/* 모달 표시 */}
+      {isModalVisible && (
+        <Modal onClose={handleModalClose} content='회원가입이 완료' />
+      )}
     </PageContainer>
   );
 };
 
 export default SignupPage;
 
+/* styled-components */
 const PageContainer = styled.div`
   background-color: #000;
   min-height: 100vh;
