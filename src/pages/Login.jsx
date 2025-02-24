@@ -1,8 +1,64 @@
-// LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { signIn } from '../api/Axios';
+import { signIn } from '../api/SigninApi';
+
+const LoginPage = () => {
+  const [loginId, setLoginId] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // 로그인 API에는 필드명이 loginId와 password로 전송 (명세에 맞춤)
+      const data = await signIn({ loginId, password });
+      setMessage(data.message);
+      setIsError(false);
+      // 로그인 성공 후 추가 동작 처리 (예: 대시보드 이동)
+      // navigate('/dashboard');
+    } catch (err) {
+      setMessage(err.message || '로그인 실패');
+      setIsError(true);
+    }
+  };
+
+  const handleToggle = () => {
+    // 회원가입 페이지로 이동
+    navigate('/signup');
+  };
+
+  return (
+    <PageContainer>
+      <FormContainer>
+        <Title>로그인</Title>
+        <form onSubmit={handleLogin}>
+          <Input
+            type='text'
+            placeholder='로그인 아이디'
+            value={loginId}
+            onChange={(e) => setLoginId(e.target.value)}
+            required
+          />
+          <Input
+            type='password'
+            placeholder='비밀번호'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button type='submit'>로그인</Button>
+        </form>
+        {message && <Message error={isError}>{message}</Message>}
+        <ToggleButton onClick={handleToggle}>회원가입 하러가기</ToggleButton>
+      </FormContainer>
+    </PageContainer>
+  );
+};
+
+export default LoginPage;
 
 const PageContainer = styled.div`
   background-color: #000;
@@ -91,59 +147,3 @@ const Message = styled.p`
   margin-top: 1rem;
   color: ${({ error }) => (error ? '#f00' : '#cc0033')};
 `;
-
-const LoginPage = () => {
-  const [loginId, setLoginId] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [isError, setIsError] = useState(false);
-  const navigate = useNavigate();
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const data = await signIn({ login_id: loginId, password });
-      setMessage(data.message);
-      setIsError(false);
-      // 로그인 성공 후 추가 동작 처리 (예: 대시보드 이동)
-      // navigate('/dashboard');
-    } catch (err) {
-      setMessage(err.message || '로그인 실패');
-      setIsError(true);
-    }
-  };
-
-  const handleToggle = () => {
-    // 회원가입 페이지로 이동
-    navigate('/signup');
-  };
-
-  return (
-    <PageContainer>
-      <FormContainer>
-        <Title>로그인</Title>
-        <form onSubmit={handleLogin}>
-          <Input
-            type='text'
-            placeholder='로그인 아이디'
-            value={loginId}
-            onChange={(e) => setLoginId(e.target.value)}
-            required
-          />
-          <Input
-            type='password'
-            placeholder='비밀번호'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Button type='submit'>로그인</Button>
-        </form>
-        {message && <Message error={isError}>{message}</Message>}
-        <ToggleButton onClick={handleToggle}>회원가입 하러 가기</ToggleButton>
-      </FormContainer>
-    </PageContainer>
-  );
-};
-
-export default LoginPage;
