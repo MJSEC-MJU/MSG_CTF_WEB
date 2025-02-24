@@ -6,16 +6,23 @@ import Logo from '../assets/MsgLogo.svg';
 import loginIcon from '../assets/Login.png';
 import logoutIcon from '../assets/Logout.png';
 import profileIcon from '../assets/profile.png';
+import { logout } from '../api/LogoutApi';
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
+  // 쿠키 상태를 주기적으로 확인하여 로그인 상태를 업데이트합니다.
   useEffect(() => {
-    const token = Cookies.get('accessToken');
-    if (token) {
-      setIsLoggedIn(true);
-    }
+    const checkLoginStatus = () => {
+      const token = Cookies.get('accessToken');
+      setIsLoggedIn(!!token);
+    };
+
+    checkLoginStatus(); // 최초 확인
+    const interval = setInterval(checkLoginStatus, 1000); // 1초마다 체크
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleProfile = () => {
@@ -26,11 +33,18 @@ const Header = () => {
     navigate('/login');
   };
 
-  const handleLogout = () => {
-    Cookies.remove('accessToken');
-    Cookies.remove('refreshToken');
-    setIsLoggedIn(false);
-    console.log('🚫 로그아웃 되었습니다.');
+  const handleLogout = async () => {
+    try {
+      const response = await logout();
+      console.log(response.message);
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+    } finally {
+      // 로그아웃 API 호출 후 쿠키 제거 및 상태 업데이트
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
+      setIsLoggedIn(false);
+    }
   };
 
   return (
