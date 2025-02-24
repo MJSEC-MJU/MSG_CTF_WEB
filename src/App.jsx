@@ -8,6 +8,8 @@ import Challenge from './pages/Challenge';
 import ProblemDetail from './pages/ProblemDetail';
 import MyPage from './pages/MyPage';
 import AdminLogin from './pages/AdminLogin';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
         <Route path='/problem/:id' element={<ProblemDetail />} />
         <Route path='/myPage' element={<MyPage />} />
         <Route path='/adminLogin' element={<AdminLogin />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/signup' element={<Signup />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </Router>

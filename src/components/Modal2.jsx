@@ -25,6 +25,7 @@ const ModalOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
+
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
@@ -37,16 +38,26 @@ const ModalContent = styled.div`
   color: #cc0033;
   padding: 2rem;
   border-radius: 10px;
+  min-height: 200px;
   box-shadow: 0 0 15px #cc0033;
-  text-align: left;
-  width: 80%;
-
+  width: 50%;
   font-family: 'Courier New', Courier, monospace;
+  font-size: 18px;
+  font-weight: bold;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
 `;
 
 const CloseButton = styled.button`
-  display: block;
-  margin: 1rem auto 0 auto;
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
   padding: 0.5rem 1rem;
   font-size: 1rem;
   font-family: 'Courier New', Courier, monospace;
@@ -55,17 +66,18 @@ const CloseButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+
   transition:
     transform 0.2s,
     background-color 0.2s;
 
   &:hover {
-    transform: scale(1.1);
+    transform: translateX(-50%) scale(1.1);
     background-color: #cc0033;
   }
 
   &:active {
-    transform: scale(0.9);
+    transform: translateX(-50%) scale(0.9);
     background-color: #cc0033;
   }
 `;
