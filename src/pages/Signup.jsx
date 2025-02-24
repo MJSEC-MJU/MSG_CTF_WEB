@@ -1,4 +1,3 @@
-// SignupPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,8 +9,10 @@ const SignupPage = () => {
   const [univ, setUniv] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   const [signupMessage, setSignupMessage] = useState('');
   const [isSignupError, setIsSignupError] = useState(false);
+
   const [idCheckMessage, setIdCheckMessage] = useState('');
   const [emailCheckMessage, setEmailCheckMessage] = useState('');
 
@@ -238,10 +239,6 @@ const CheckButton = styled.button`
 `;
 
 const Button = styled.button`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-decoration: none;
   width: 100%;
   padding: 0.75rem;
   margin-top: 1rem;
