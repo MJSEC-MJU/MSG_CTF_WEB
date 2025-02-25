@@ -20,12 +20,11 @@ export const options = {
 };
 
 // 최대 3명까지 색상을 다르게 설정
-const individualColors = ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgb(75, 192, 98)'];
-const universityColors = ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)', 'rgb(0, 255, 251)'];
+const individualColors = ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(99, 255, 182,1)'];
+const universityColors = ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)', 'rgba(255, 88, 116,1)'];
 
+//SSE함수
 export let datasetsConfig = [];
-
-// SSE를 이용한 데이터 업데이트 함수
 export const fetchLeaderboardData = (setDatasetsConfig) => {
   const eventSource = new EventSource('https://msg.mjsec.kr/api/leaderboard/stream');
 
@@ -42,23 +41,22 @@ export const fetchLeaderboardData = (setDatasetsConfig) => {
         throw new Error('응답 데이터 형식이 잘못되었습니다.');
       }
 
-      // 개인 랭킹 처리
+      // 개인 및 대학별 랭킹 데이터 저장
       const individualRanking = [];
-      const universityRanking = {};
+      const universityRanking = {}; // 대학별 개별 점수 저장
+      const universityTotalScores = {}; // 대학별 총 점수 저장
 
-      let individualColorIndex = 0;  // 개인 랭킹 색상 인덱스
-      const universityColorIndices = {};  // 대학별 색상 인덱스 관리
+      let individualColorIndex = 0;
+      const universityColorIndices = {};
 
-      parsedData.forEach((item, index) => {
-        const university = item.univ || 'Individual Ranking'; // 대학이 없으면 개인 랭킹
-
+      parsedData.forEach((item) => {
+        const university = item.univ || 'Individual Ranking';
         let color;
 
-        // 개인 랭킹 색상 적용 (대학이 있어도 개인 랭킹에 포함)
+        // **1. 개인 랭킹 처리 (대학이 있어도 포함)**
         color = individualColors[individualColorIndex % individualColors.length];
-        individualColorIndex++;  // 개인 색상 인덱스 증가
+        individualColorIndex++;
 
-        // 개인 랭킹에 데이터 추가
         individualRanking.push({
           id: item.userid,
           scores: [item.totalPoint],
@@ -66,42 +64,55 @@ export const fetchLeaderboardData = (setDatasetsConfig) => {
           lastSolvedTime: item.lastSolvedTime,
         });
 
-        // 대학별 랭킹 추가 (대학이 있는 경우)
+        // **2. 대학별 랭킹 처리 (대학이 있는 경우)**
         if (university !== 'Individual Ranking') {
           if (!universityColorIndices[university]) {
-            universityColorIndices[university] = 0;  // 대학 색상 배열 인덱스 초기화
+            universityColorIndices[university] = 0;
           }
-          color = universityColors[universityColorIndices[university] % universityColors.length];
-          universityColorIndices[university]++;  // 대학 색상 인덱스 증가
+          const universityColor = universityColors[universityColorIndices[university] % universityColors.length];
+          universityColorIndices[university]++;
 
-          // 대학별 랭킹에 데이터 추가
+          // 개별 사용자 점수 저장
           if (!universityRanking[university]) {
             universityRanking[university] = [];
           }
           universityRanking[university].push({
-            id: university,  // 대학이 id로 사용
+            id: item.userid,
             scores: [item.totalPoint],
-            color,
+            color: universityColor,
             lastSolvedTime: item.lastSolvedTime,
           });
+
+          // **대학별 총 점수 합산**
+          if (!universityTotalScores[university]) {
+            universityTotalScores[university] = 0;
+          }
+          universityTotalScores[university] += item.totalPoint;
         }
       });
 
-      // 대학별 데이터 처리 (각 대학별로 합산된 점수)
-      const groupedUniversityData = Object.keys(universityRanking).map((univ) => ({
-        title: univ,
-        data: universityRanking[univ].map((user) => ({
-          id: user.id,  // university가 id로 사용됨
-          scores: user.scores,
-          color: user.color,
-          lastSolvedTime: user.lastSolvedTime,
-        })),
+      // **3. 점수 기준 내림차순 정렬 + 동점자는 시간순 정렬**
+      individualRanking.sort((a, b) => {
+        if (b.scores[0] !== a.scores[0]) {
+          return b.scores[0] - a.scores[0]; // 점수 높은 순
+        }
+        return new Date(a.lastSolvedTime) - new Date(b.lastSolvedTime); // 동점이면 먼저 푼 순
+      });
+
+      // **4. 상위 3명만 선택**
+      const topIndividuals = individualRanking.slice(0, 3);
+
+      // **5. 대학별 점수를 하나의 표로 합산**
+      const universityRankingData = Object.keys(universityTotalScores).map((univ) => ({
+        id: univ,
+        scores: [universityTotalScores[univ]],
+        color: universityColors[Object.keys(universityTotalScores).indexOf(univ) % universityColors.length],
       }));
 
-      // 데이터 결합: 개인 랭킹과 대학별 랭킹을 합쳐서 datasetsConfig에 저장
+      // **6. 최종 데이터 생성**
       datasetsConfig = [
-        { title: 'Individual Ranking', data: individualRanking },
-        ...groupedUniversityData,
+        { title: 'Individual Ranking', data: topIndividuals }, // 상위 3명만 반영
+        { title: 'University Ranking', data: universityRankingData },
       ];
 
       console.log('✅ 업데이트된 datasetsConfig:', datasetsConfig);
