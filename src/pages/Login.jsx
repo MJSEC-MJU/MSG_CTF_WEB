@@ -30,6 +30,8 @@ const LoginPage = () => {
       localStorage.setItem('isLoggedIn', 'true');
       setIsModalVisible(true);
       setIsError(false);
+
+      navigate('/');
     } catch (err) {
       if (err.inner) {
         const errorsObj = { loginId: '', password: '' };
