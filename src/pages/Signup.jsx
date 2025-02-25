@@ -106,38 +106,6 @@ const SignupPage = () => {
         <form onSubmit={handleSignUp}>
           <InputRow>
             <Input
-              type='text'
-              placeholder='로그인 아이디'
-              value={loginId}
-              onChange={(e) => setLoginId(e.target.value)}
-              required
-            />
-            <CheckButton type='button' onClick={handleIdCheck}>
-              확인
-            </CheckButton>
-          </InputRow>
-          {idCheckMessage && (
-            <Message error={idCheckMessage.includes('사용할 수 없는')}>
-              {idCheckMessage}
-            </Message>
-          )}
-          {fieldErrors.loginId && (
-            <FieldError>{fieldErrors.loginId}</FieldError>
-          )}
-
-          <InputRow>
-            <Input
-              type='text'
-              placeholder='학교명'
-              value={univ}
-              onChange={(e) => setUniv(e.target.value)}
-              required
-            />
-          </InputRow>
-          {fieldErrors.univ && <FieldError>{fieldErrors.univ}</FieldError>}
-
-          <InputRow>
-            <Input
               type='email'
               placeholder='이메일'
               value={email}
@@ -149,11 +117,46 @@ const SignupPage = () => {
             </CheckButton>
           </InputRow>
           {emailCheckMessage && (
-            <Message error={emailCheckMessage.includes('사용 중인')}>
+            <Message error={emailCheckMessage.includes('사용 중인 아이디')}>
               {emailCheckMessage}
             </Message>
           )}
           {fieldErrors.email && <FieldError>{fieldErrors.email}</FieldError>}
+
+          <InputRow>
+            <Select
+              value={univ}
+              onChange={(e) => setUniv(e.target.value)}
+              required
+            >
+              <Option value=''>학교를 선택하세요</Option>
+              <Option value='명지대학교'>명지대학교</Option>
+              <Option value='건국대학교'>건국대학교</Option>
+              <Option value='세종대학교'>세종대학교</Option>
+            </Select>
+          </InputRow>
+          {fieldErrors.univ && <FieldError>{fieldErrors.univ}</FieldError>}
+
+          <InputRow>
+            <Input
+              type='text'
+              placeholder='로그인 아이디'
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value)}
+              required
+            />
+            <CheckButton type='button' onClick={handleIdCheck}>
+              확인
+            </CheckButton>
+          </InputRow>
+          {idCheckMessage && (
+            <Message error={idCheckMessage.includes('사용할 수 없는 아이디')}>
+              {idCheckMessage}
+            </Message>
+          )}
+          {fieldErrors.loginId && (
+            <FieldError>{fieldErrors.loginId}</FieldError>
+          )}
 
           <InputRow>
             <Input
@@ -180,7 +183,10 @@ const SignupPage = () => {
 
       {/* 모달 표시 */}
       {isModalVisible && (
-        <Modal onClose={handleModalClose} content='회원가입이 완료' />
+        <Modal
+          onClose={handleModalClose}
+          content='회원가입이 완료되었습니다.'
+        />
       )}
     </PageContainer>
   );
@@ -235,6 +241,30 @@ const Input = styled.input`
     outline: none;
     border-color: #ff3366;
   }
+`;
+
+const Select = styled.select`
+  flex: 1;
+  padding: 0.75rem;
+  background-color: #222;
+  border: 1px solid #cc0033;
+  color: #cc0033;
+  font-size: 1rem;
+  border-radius: 5px;
+  box-sizing: border-box;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+    border-color: #ff3366;
+  }
+`;
+
+const Option = styled.option`
+  background-color: #222;
+  color: #cc0033;
+  font-size: 1rem;
+  padding: 0.75rem;
+  border: none;
 `;
 
 const CheckButton = styled.button`

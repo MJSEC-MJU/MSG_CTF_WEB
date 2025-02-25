@@ -7,9 +7,11 @@ import loginIcon from '../assets/Login.png';
 import logoutIcon from '../assets/Logout.png';
 import profileIcon from '../assets/profile.png';
 import { logout } from '../api/LogoutApi';
+import Modal2 from './Modal2';
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const navigate = useNavigate();
 
   // 쿠키 상태를 주기적으로 확인하여 로그인 상태를 업데이트합니다.
@@ -37,14 +39,29 @@ const Header = () => {
     try {
       const response = await logout();
       console.log(response.message);
-    } catch (error) {
-      console.error('로그아웃 오류:', error);
-    } finally {
-      // 로그아웃 API 호출 후 쿠키 제거 및 상태 업데이트
+
       Cookies.remove('accessToken');
       Cookies.remove('refreshToken');
       setIsLoggedIn(false);
+
+      navigate('/login');
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
     }
+  };
+
+  const handleNavigation = (e, targetPage) => {
+    e.preventDefault();
+    if (!isLoggedIn) {
+      setIsModalVisible(true);
+    } else {
+      navigate(targetPage);
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    navigate('/login');
   };
 
   return (
@@ -54,9 +71,15 @@ const Header = () => {
           <LogoIcon src={Logo} alt='Logo' />
         </Link>
         <Navigation>
-          <StyledLink to='/scoreboard'>Scoreboard</StyledLink>
-          <StyledLink to='/challenge'>Challenge</StyledLink>
-          <StyledLink to='/ranking'>Ranking</StyledLink>
+          <StyledLink onClick={(e) => handleNavigation(e, '/scoreboard')}>
+            Scoreboard
+          </StyledLink>
+          <StyledLink onClick={(e) => handleNavigation(e, '/challenge')}>
+            Challenge
+          </StyledLink>
+          <StyledLink onClick={(e) => handleNavigation(e, '/ranking')}>
+            Ranking
+          </StyledLink>
         </Navigation>
         <UserSection>
           {isLoggedIn ? (
@@ -73,6 +96,9 @@ const Header = () => {
           )}
         </UserSection>
       </HeaderContainer>
+      {isModalVisible && (
+        <Modal2 onClose={handleModalClose} content='로그인 해주세요!' />
+      )}
     </HeaderWrapper>
   );
 };

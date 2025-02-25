@@ -27,6 +27,7 @@ const LoginPage = () => {
 
       const data = await signIn({ loginId, password });
 
+      localStorage.setItem('isLoggedIn', 'true');
       setIsModalVisible(true);
       setIsError(false);
     } catch (err) {
