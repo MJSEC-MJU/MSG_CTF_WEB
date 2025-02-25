@@ -7,7 +7,6 @@ const Scoreboard = () => {
   const [datasetsConfig, setDatasetsConfig] = useState([]);
 
   useEffect(() => {
-    
     fetchLeaderboardData(setDatasetsConfig);
   }, []);
 

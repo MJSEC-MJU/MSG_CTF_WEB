@@ -5,7 +5,7 @@ import { signIn } from '../api/SigninApi';
 import { loginSchema } from '../hook/validationYup';
 import Modal2 from '../components/Modal2';
 
-const LoginPage = () => {
+const Login = ({ setIsLoggedIn }) => {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -28,6 +28,8 @@ const LoginPage = () => {
       const data = await signIn({ loginId, password });
 
       localStorage.setItem('isLoggedIn', 'true');
+      setIsLoggedIn(true);
+
       setIsModalVisible(true);
       setIsError(false);
 
@@ -100,7 +102,7 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Login;
 
 const PageContainer = styled.div`
   background-color: #000;

@@ -19,12 +19,25 @@ import Signup from './pages/Signup';
 import NotFound from './pages/NotFound';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const savedLoginStatus = localStorage.getItem('isLoggedIn');
+    return savedLoginStatus === 'true';
+  });
 
   useEffect(() => {
     const loginStatus = localStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(loginStatus);
   }, []);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('isLoggedIn', 'true');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('isLoggedIn');
+  };
 
   return (
     <Router>
@@ -49,7 +62,11 @@ function App() {
           element={isLoggedIn ? <MyPage /> : <Navigate to='/login' />}
         />
         <Route path='/adminLogin' element={<AdminLogin />} />
-        <Route path='/login' element={<Login />} />
+        <Route
+          path='/login'
+          element={<Login setIsLoggedIn={setIsLoggedIn} />}
+        />
+
         <Route path='/signup' element={<Signup />} />
         <Route path='*' element={<NotFound />} />
       </Routes>

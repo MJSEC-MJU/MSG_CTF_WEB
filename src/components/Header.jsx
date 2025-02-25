@@ -6,7 +6,7 @@ import Logo from '../assets/MsgLogo.svg';
 import loginIcon from '../assets/Login.png';
 import logoutIcon from '../assets/Logout.png';
 import profileIcon from '../assets/profile.png';
-import { logout } from '../api/LogoutApi';
+import logout from '../api/LogoutApi';
 import Modal2 from './Modal2';
 
 const Header = () => {
@@ -21,8 +21,8 @@ const Header = () => {
       setIsLoggedIn(!!token);
     };
 
-    checkLoginStatus(); // 최초 확인
-    const interval = setInterval(checkLoginStatus, 1000); // 1초마다 체크
+    checkLoginStatus();
+    const interval = setInterval(checkLoginStatus, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -37,16 +37,22 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await logout();
-      console.log(response.message);
+      const accessToken = Cookies.get('accessToken');
+      if (!accessToken) {
+        console.warn('로그아웃 상태입니다.');
+        return;
+      }
+
+      await logout();
 
       Cookies.remove('accessToken');
       Cookies.remove('refreshToken');
       setIsLoggedIn(false);
 
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('로그아웃 오류:', error);
+      alert('로그아웃 실패. 다시 시도해주세요.');
     }
   };
 

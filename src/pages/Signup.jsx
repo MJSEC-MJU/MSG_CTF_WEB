@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { signUp, checkId, checkEmail } from '../api/SignupApi';
+import {
+  signUp,
+  checkId,
+  checkEmail,
+  sendEmailCode,
+  verifyEmailCode,
+} from '../api/SignupApi';
 import { signupSchema } from '../hook/validationYup';
 import Modal from '../components/Modal2';
 
@@ -10,12 +16,19 @@ const SignupPage = () => {
   const [univ, setUniv] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailCode, setEmailCode] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isCodeSent, setIsCodeSent] = useState(false);
 
   const [signupMessage, setSignupMessage] = useState('');
   const [isSignupError, setIsSignupError] = useState(false);
-
   const [idCheckMessage, setIdCheckMessage] = useState('');
   const [emailCheckMessage, setEmailCheckMessage] = useState('');
+  const [emailVerificationMessage, setEmailVerificationMessage] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const navigate = useNavigate();
 
   const [fieldErrors, setFieldErrors] = useState({
     loginId: '',
@@ -23,11 +36,6 @@ const SignupPage = () => {
     email: '',
     password: '',
   });
-
-  // 모달 표시 여부 상태
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const navigate = useNavigate();
 
   const handleIdCheck = async () => {
     try {
@@ -42,8 +50,32 @@ const SignupPage = () => {
     try {
       const data = await checkEmail(email);
       setEmailCheckMessage(data.message);
+      setIsEmailValid(true);
     } catch (error) {
       setEmailCheckMessage(error.message || '이메일 중복 확인 실패');
+      setIsEmailValid(false);
+    }
+  };
+
+  const handleSendEmailCode = async () => {
+    try {
+      const data = await sendEmailCode(email);
+      setEmailVerificationMessage(data.message);
+      setIsCodeSent(true);
+    } catch (error) {
+      setEmailVerificationMessage(
+        error.message || '이메일 인증 코드 전송 실패'
+      );
+    }
+  };
+
+  const handleVerifyEmailCode = async () => {
+    try {
+      const data = await verifyEmailCode(email, emailCode);
+      setEmailVerificationMessage(data.message);
+      setIsEmailVerified(true);
+    } catch (error) {
+      setEmailVerificationMessage(error.message || '이메일 인증 실패');
     }
   };
 
@@ -52,6 +84,12 @@ const SignupPage = () => {
 
     setFieldErrors({ loginId: '', univ: '', email: '', password: '' });
     setSignupMessage('');
+
+    if (!isEmailVerified) {
+      setSignupMessage('이메일 인증을 완료해주세요.');
+      setIsSignupError(true);
+      return;
+    }
 
     try {
       await signupSchema.validate(
@@ -70,9 +108,6 @@ const SignupPage = () => {
         err.inner.forEach((error) => {
           if (error.path === 'loginId') {
             errorsObj.loginId = error.message;
-          }
-          if (error.path === 'univ') {
-            errorsObj.univ = error.message;
           }
           if (error.path === 'email') {
             errorsObj.email = error.message;
@@ -117,11 +152,34 @@ const SignupPage = () => {
             </CheckButton>
           </InputRow>
           {emailCheckMessage && (
-            <Message error={emailCheckMessage.includes('사용 중인 아이디')}>
+            <Message error={emailCheckMessage.includes('사용 중인 이메일')}>
               {emailCheckMessage}
             </Message>
           )}
           {fieldErrors.email && <FieldError>{fieldErrors.email}</FieldError>}
+
+          {isEmailValid && (
+            <InputRow>
+              <Input
+                type='text'
+                placeholder='인증 코드 입력'
+                value={emailCode}
+                onChange={(e) => setEmailCode(e.target.value)}
+              />
+              <CheckButton
+                type='button'
+                onClick={
+                  isCodeSent ? handleVerifyEmailCode : handleSendEmailCode
+                }
+              >
+                {isCodeSent ? '확인' : '요청'}
+              </CheckButton>
+            </InputRow>
+          )}
+          {emailVerificationMessage && (
+            <Message>{emailVerificationMessage}</Message>
+          )}
+          {isEmailVerified && <Message>이메일 인증 완료</Message>}
 
           <InputRow>
             <Select

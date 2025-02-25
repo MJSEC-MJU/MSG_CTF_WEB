@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 export const logout = async () => {
   try {
     const token = Cookies.get('accessToken');
-    const response = await Axios.post('users/logout', null, {
+    const response = await Axios.post('/api/users/logout', null, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -16,4 +16,4 @@ export const logout = async () => {
   }
 };
 
-export default { logout };
+export default logout;

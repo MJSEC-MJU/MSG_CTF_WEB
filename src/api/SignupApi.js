@@ -2,7 +2,6 @@ import { Axios } from './Axios';
 
 export const signUp = async (userData) => {
   try {
-    // 👇 "header", "body" 없이, 최상위에 필드들을 넣음
     const payload = {
       loginId: userData.loginId,
       univ: userData.univ,
@@ -41,4 +40,28 @@ export const checkEmail = async (email) => {
   }
 };
 
-export default { signUp, checkId, checkEmail };
+// 이메일 인증 코드 발송 API
+export const sendEmailCode = async (email) => {
+  try {
+    const response = await Axios.post('users/send-code', null, {
+      params: { email },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
+// 이메일 인증 코드 확인 API
+export const verifyEmailCode = async (email, code) => {
+  try {
+    const response = await Axios.post('users/verify-code', null, {
+      params: { email, code },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
+export default { signUp, checkId, checkEmail, sendEmailCode, verifyEmailCode };
