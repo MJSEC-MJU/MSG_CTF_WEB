@@ -29,16 +29,6 @@ function App() {
     setIsLoggedIn(loginStatus);
   }, []);
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem('isLoggedIn');
-  };
-
   return (
     <Router>
       <Header />
