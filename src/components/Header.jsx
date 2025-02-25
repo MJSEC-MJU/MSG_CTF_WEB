@@ -43,16 +43,15 @@ const Header = () => {
         return;
       }
 
-      await logout();
+      const result = await logout(); // 로그아웃 호출
 
-      Cookies.remove('accessToken');
-      Cookies.remove('refreshToken');
-      setIsLoggedIn(false);
-
-      navigate('/');
+      if (result.message === '로그아웃 성공!') {
+        setIsLoggedIn(false);
+        navigate('/');
+      } else {
+      }
     } catch (error) {
       console.error('로그아웃 오류:', error);
-      alert('로그아웃 실패. 다시 시도해주세요.');
     }
   };
 
