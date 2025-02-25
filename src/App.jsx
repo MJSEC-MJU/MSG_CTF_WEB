@@ -17,6 +17,7 @@ import AdminLogin from './pages/AdminLogin';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import NotFound from './pages/NotFound';
+import  Admin from './pages/Admin'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,6 +52,10 @@ function App() {
         <Route path='/adminLogin' element={<AdminLogin />} />
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
+        <Route
+          path='/admin'
+          element={ <Admin />}
+        />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </Router>
