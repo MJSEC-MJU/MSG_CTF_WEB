@@ -18,7 +18,7 @@ const fetchProblems = async () => {
 const Admin = () => {
   const [users, setUsers] = useState([]);
   const [problems, setProblems] = useState([]);
-  const [showUsers, setShowUsers] = useState(true);
+  const [showUsers, setShowUsers] = useState(false);
   const [showProblems, setShowProblems] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
 
@@ -80,49 +80,40 @@ const Admin = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('폼 제출됨', formData);
     // 실제 저장 로직을 구현해야 합니다.
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: 'white',
-        minHeight: '100vh',
-        padding: '20px',
-        backgroundImage: 'url("your-image-url.jpg")', // 실제 이미지 URL로 교체
-        backgroundSize: 'cover', // 화면을 꽉 채우도록 설정
-        backgroundPosition: 'center', // 배경이 화면 중앙에 위치하도록 설정
-        backgroundRepeat: 'no-repeat', // 배경 이미지 반복 방지
-        position: 'relative',
-      }}
-    >
-      <h1>Admin Page</h1>
+    <div>
+      <h1 style={{color:'white'}}>Admin Page</h1>
 
       <button onClick={toggleUsers}>User List</button>
       <button onClick={toggleProblems}>Problem List</button>
 
       {showUsers && (
         <section>
-          <h2>Users</h2>
+          <h2 style={{color:'white'}}>Users</h2>
           <button>Add User</button>
-          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse' }}>
+          <input style={{ padding: '5px',  marginLeft: '30px',marginRight: '10px', marginBottom: '10px' }}/>
+          <button>찾기</button>
+          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid white'}}>
             <thead>
               <tr>
-                <th style={{ padding: '10px', textAlign: 'center' }}>ID</th>
-                <th style={{ padding: '10px', textAlign: 'center' }}>Name</th>
-                <th style={{ padding: '10px', textAlign: 'center' }}>Email</th>
-                <th style={{ padding: '10px', textAlign: 'center' }}>Action</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>ID</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Name</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Email</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {users.map(user => (
                 <tr key={user.id}>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>{user.id}</td>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>{user.name}</td>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>{user.email}</td>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>
-                    <button>Change</button>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white',border: '1px solid white' }}>{user.id}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.name}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.email}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
+                    <button style={{margin:'5px'}}>Delete</button>
+                    <button style={{margin:'5px'}}>Change</button>
                   </td>
                 </tr>
               ))}
@@ -133,16 +124,17 @@ const Admin = () => {
 
       {showProblems && (
         <section>
-          <h2>Problems</h2>
+          <h2 style={{color:'white'}}>Problems</h2>
           <button onClick={toggleAddProblemForm}>
             {showAddProblemForm ? 'Close Add Problem' : 'Add Problem'}
           </button>
-          
+          <input style={{ padding: '5px',  marginLeft: '30px',marginRight: '10px', marginBottom: '10px' }}/>
+          <button>찾기</button>
           {/* Add Problem 폼 */}
           {showAddProblemForm && (
             <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
               <div>
-                <label>Title</label>
+                <label style={{color:'white'}}>Title</label>
                 <input
                   type="text"
                   name="title"
@@ -154,7 +146,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label>Description</label>
+                <label style={{color:'white'}}>Description</label>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -170,7 +162,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label>Flag</label>
+                <label style={{color:'white'}}>Flag</label>
                 <input
                   type="text"
                   name="flag"
@@ -182,7 +174,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label>Points</label>
+                <label style={{color:'white'}}>Points</label>
                 <input
                   type="number"
                   name="points"
@@ -194,7 +186,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label>Min Points</label>
+                <label style={{color:'white'}}>Min Points</label>
                 <input
                   type="number"
                   name="minPoints"
@@ -206,7 +198,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label>Date</label>
+                <label style={{color:'white'}}>Date</label>
                 <input
                   type="date"
                   name="date"
@@ -218,7 +210,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label>Time</label>
+                <label style={{color:'white'}}>Time</label>
                 <input
                   type="time"
                   name="time"
@@ -230,18 +222,18 @@ const Admin = () => {
               </div>
 
               <div>
-                <label>File Upload</label>
+                <label style={{color:'white'}}>File Upload</label>
                 <input
                   type="file"
                   name="file"
                   onChange={handleFileChange}
                   required
-                  style={{ marginBottom: '10px' }}
+                  style={{ marginBottom: '10px', color:'white' }}
                 />
               </div>
 
               <div>
-                <label>URL</label>
+                <label style={{color:'white'}}>URL</label>
                 <input
                   type="url"
                   name="url"
@@ -255,30 +247,31 @@ const Admin = () => {
               {/* 버튼들 */}
               <div style={{ marginTop: '20px' }}>
                 <button type="submit" style={{ marginRight: '10px' }}>
-                  Save
+                  저장
                 </button>
                 <button type="button" style={{ marginRight: '10px' }}>
-                  Save As Different Name
+                  다른이름으로 저장
                 </button>
-                <button type="button">Save & Continue Editing</button>
+                <button type="button">저장 및 계속</button>
               </div>
             </form>
           )}
-          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid white' }}>
             <thead>
               <tr>
-                <th style={{ padding: '10px', textAlign: 'center' }}>ID</th>
-                <th style={{ padding: '10px', textAlign: 'center' }}>Title</th>
-                <th style={{ padding: '10px', textAlign: 'center' }}>Action</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>ID</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Title</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {problems.map(problem => (
                 <tr key={problem.id}>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>{problem.id}</td>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>{problem.title}</td>
-                  <td style={{ padding: '10px', textAlign: 'center' }}>
-                    <button>Change</button>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.id}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.title}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
+                    <button style={{margin:'5px'}}>Delete</button>
+                    <button style={{margin:'5px'}}>Change</button>
                   </td>
                 </tr>
               ))}
