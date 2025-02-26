@@ -65,8 +65,9 @@ const Ranking = () => {
     );
     const rows = slicedScores.map((score, index) => {
       const rank = pagesVisited + index + 1;
-      const userId = score.user_id
-        ? score.user_id.replace(/.(?=.{3})/g, '*')
+
+      const userId = score.userid
+        ? score.userid.replace(/.(?=.{3})/g, '*')
         : '알 수 없음';
       return (
         <tr key={score.id || rank}>
@@ -79,12 +80,12 @@ const Ranking = () => {
             />
           </td>
           <td>{userId}</td>
-          <td>{score.total_point}</td>
+          <td>{score.totalPoint}</td>
         </tr>
       );
     });
 
-    // 데이터가 부족한 경우 빈 행 추가
+    // 페이지에 부족한 데이터가 있을 경우 빈 행 추가
     for (let i = rows.length; i < scoresPerPage; i++) {
       rows.push(
         <tr key={`empty-${i}`}>
