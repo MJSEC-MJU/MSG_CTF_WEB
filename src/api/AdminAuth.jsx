@@ -26,8 +26,8 @@ const AdminAuth = ({ children }) => {
             "Authorization": `Bearer ${token}`, // Authorization 헤더에 JWT 토큰 추가
           },
         });
-
-        if (response.text === "admin") {
+        const text = await response.text();
+        if (text.trim() === "admin") {
           console.log("인증성공")
           // 인증 성공 시, 페이지 이동
           setLoading(false); // 정상적으로 로딩을 끝내고, 자식 컴포넌트 렌더링
