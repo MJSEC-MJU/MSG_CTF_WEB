@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 // 예시 데이터와 API 호출 함수
 const fetchUsers = async () => {
   return [
-    { id: 1, name: 'User 1', email: 'user1@example.com' },
-    { id: 2, name: 'User 2', email: 'user2@example.com' }
+    { id: 1, name: 'User 1', email: 'user1@example.com',univ:'mju', roles:'user', loginId:'abc123',password:'1q2w3e4r'},
+    { id: 2, name: 'User 2', email: 'user2@example.com', univ:'ssg', roles:'user', loginId:'dfe123',password:'4q3w2e1r'}
   ];
 };
 
@@ -21,6 +21,7 @@ const Admin = () => {
   const [showUsers, setShowUsers] = useState(false);
   const [showProblems, setShowProblems] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -57,6 +58,19 @@ const Admin = () => {
   const toggleProblems = () => {
     setShowUsers(false);
     setShowProblems(true);
+  };
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+  };
+
+  const handleChangeInput = (e) => {
+    const { name, value } = e.target;
+    setEditingUser({ ...editingUser, [name]: value });
+  };
+
+  const handleSaveUser = () => {
+    setUsers(users.map(user => (user.id === editingUser.id ? editingUser : user)));
+    setEditingUser(null);
   };
 
   const toggleAddProblemForm = () => {
@@ -96,12 +110,31 @@ const Admin = () => {
           <button>Add User</button>
           <input style={{ padding: '5px',  marginLeft: '30px',marginRight: '10px', marginBottom: '10px' }}/>
           <button>찾기</button>
+          {editingUser && (
+            <div style={{color:'white'}}>
+              <h3>Edit User</h3>
+              <label>Email:</label>
+              <input type="email" name="email" value={editingUser.email} onChange={handleChangeInput} />
+              <label>University:</label>
+              <input type="text" name="univ" value={editingUser.univ} onChange={handleChangeInput} />
+              <label>Login ID:</label>
+              <input type="text" name="loginId" value={editingUser.loginId} onChange={handleChangeInput} />
+              <label>Password:</label>
+              <input type="text" name="password" value={editingUser.password} onChange={handleChangeInput} />
+              <button onClick={handleSaveUser}>Save</button>
+              <button onClick={() => setEditingUser(null)}>Cancel</button>
+            </div>
+          )}
           <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid white'}}>
             <thead>
               <tr>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>ID</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Name</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Email</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Univ</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Roles</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>LoginId</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Password</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Action</th>
               </tr>
             </thead>
@@ -111,9 +144,13 @@ const Admin = () => {
                   <td style={{ padding: '10px', textAlign: 'center', color:'white',border: '1px solid white' }}>{user.id}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.name}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.email}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.univ}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.roles}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.loginId}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.password}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
                     <button style={{margin:'5px'}}>Delete</button>
-                    <button style={{margin:'5px'}}>Change</button>
+                    <button style={{margin:'5px'}} onClick={() => handleEditUser(user)}>Change</button>
                   </td>
                 </tr>
               ))}
