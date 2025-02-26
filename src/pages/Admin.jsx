@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createProblem } from '../api/CreateProblemAPI'; 
 
 // 예시 데이터와 API 호출 함수
 const fetchUsers = async () => {
@@ -92,9 +93,14 @@ const Admin = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    // 실제 저장 로직을 구현해야 합니다.
+    try {
+      const response = await createProblem(formData);
+      alert(response.message); // 성공 메시지 표시
+    } catch (error) {
+      alert('문제 생성 실패');
+    }
   };
 
   return (
@@ -260,7 +266,6 @@ const Admin = () => {
                   type="file"
                   name="file"
                   onChange={handleFileChange}
-                  required
                   style={{ marginBottom: '10px', color:'white' }}
                 />
               </div>
