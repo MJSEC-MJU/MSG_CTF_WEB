@@ -30,7 +30,7 @@ function Challenge() {
               <div className="button-wrapper">
                 <img src={`/assets/meat-raw.png`} alt={problem.title} />
                 <div className="button-title">{problem.title}</div>
-                <div className="button-score">{problem.points} 점</div>
+                <div className="button-score">{problem.points}</div>
               </div>
             </Link>
           ))
