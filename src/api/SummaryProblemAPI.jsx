@@ -40,7 +40,7 @@ export const fetchProblems = async () => {
 export const deleteProblem = async (challengeId) => {
   const token = Cookies.get("accessToken");
   try {
-    const response = await fetch(`${API_BASE_URL}/delete/challenge/${challengeId}`, {
+    const responseD = await fetch(`${API_BASE_URL}/delete/challenge/${challengeId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -48,7 +48,7 @@ export const deleteProblem = async (challengeId) => {
       },
     });
 
-    return await response.json();
+    return await responseD.json();
   } catch (error) {
     console.error("문제 삭제 오류:", error);
     return { code: "ERROR", message: "문제 삭제 실패" };

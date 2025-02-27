@@ -31,13 +31,13 @@ const Admin = () => {
     file: null,
     url: ''
   });
-  
+
   const handleDeleteProblem = async (challengeId) => {
     const isConfirmed = window.confirm("정말로 삭제하시겠습니까?");
     if (!isConfirmed) return;
 
-    const response = await deleteProblem(challengeId);
-    if (response.code === "SUCCESS") {
+    const responseD = await deleteProblem(challengeId);
+    if (responseD.code === "SUCCESS") {
       alert("문제가 삭제되었습니다.");
       setProblems(problems.filter((p) => p.challengeId !== challengeId)); // 삭제 후 목록 갱신
     } else {
