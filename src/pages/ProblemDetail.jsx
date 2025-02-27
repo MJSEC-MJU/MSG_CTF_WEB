@@ -43,6 +43,9 @@ const ProblemDetail = () => {
               <span className="link-btn-text">LINK</span>
             </a>
           </div>
+          {/* <a href={problem.file} download> */}
+            <button className="download-btn"><b>FILE</b></button>
+          {/* </a> */}
         </div>
 
         {/* Flag 제출 */}
