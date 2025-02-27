@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createProblem } from '../api/CreateProblemAPI'; 
-import { fetchProblems } from "../api/SummaryProblemAPI";
+import { fetchProblems, deleteProblem } from "../api/SummaryProblemAPI";
 
 // 예시 데이터와 API 호출 함수
 const fetchUsers = async () => {
@@ -31,6 +31,19 @@ const Admin = () => {
     file: null,
     url: ''
   });
+  
+  const handleDeleteProblem = async (challengeId) => {
+    const isConfirmed = window.confirm("정말로 삭제하시겠습니까?");
+    if (!isConfirmed) return;
+
+    const response = await deleteProblem(challengeId);
+    if (response.code === "SUCCESS") {
+      alert("문제가 삭제되었습니다.");
+      setProblems(problems.filter((p) => p.challengeId !== challengeId)); // 삭제 후 목록 갱신
+    } else {
+      alert("문제 삭제에 실패했습니다.");
+    }
+  };
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -306,7 +319,7 @@ const Admin = () => {
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.title}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.points}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
-                    <button style={{margin:'5px'}}>Delete</button>
+                    <button onClick={() => handleDeleteProblem(problem.challengeId)} style={{margin:'5px'}}>Delete</button>
                     <button style={{margin:'5px'}}>Change</button>
                   </td>
                 </tr>
