@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createProblem } from '../api/CreateProblemAPI'; 
+import { fetchProblems } from "../api/SummaryProblemAPI";
 
 // 예시 데이터와 API 호출 함수
 const fetchUsers = async () => {
@@ -9,12 +10,7 @@ const fetchUsers = async () => {
   ];
 };
 
-const fetchProblems = async () => {
-  return [
-    { id: 1, title: 'Problem 1' },
-    { id: 2, title: 'Problem 2' }
-  ];
-};
+
 
 const Admin = () => {
   const [users, setUsers] = useState([]);
@@ -299,14 +295,16 @@ const Admin = () => {
               <tr>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>ID</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Title</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Points</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {problems.map(problem => (
                 <tr key={problem.id}>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.id}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.challengeId}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.title}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.points}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
                     <button style={{margin:'5px'}}>Delete</button>
                     <button style={{margin:'5px'}}>Change</button>
