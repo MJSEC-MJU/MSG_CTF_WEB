@@ -41,11 +41,11 @@ function Challenge() {
 
       {/* 페이지네이션 버튼 */}
       <div className="pagination">
-        <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))} disabled={currentPage === 0}>
+        <button style={{height:"5vh",margin:"10px"}} onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))} disabled={currentPage === 0}>
           이전
         </button>
         <span>{currentPage + 1} / {totalPages}</span>
-        <button onClick={() => setCurrentPage((prev) => prev + 1)} disabled={currentPage + 1 >= totalPages}>
+        <button style={{height:"5vh",margin:"10px"}} onClick={() => setCurrentPage((prev) => prev + 1)} disabled={currentPage + 1 >= totalPages}>
           다음
         </button>
       </div>
