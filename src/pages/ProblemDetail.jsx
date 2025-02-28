@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { fetchProblemDetail } from "../api/ProblemDetailAPI"; 
-import "./ProblemDetail.css";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { fetchProblemDetail } from '../api/ProblemDetailAPI';
+import './ProblemDetail.css';
 
 const ProblemDetail = () => {
   const { id } = useParams(); // URL에서 문제 ID 가져오기
@@ -29,33 +29,42 @@ const ProblemDetail = () => {
   if (error) return <h1>{error}</h1>;
 
   return (
-    <div className="problem-detail-container">
-      <div className="problem-content">
-        <h1 className="problem-title">{problem.title}</h1>
-        <p className="problem-description">{problem.description}</p>
-        <p className="solved-count">{problem.solvers}명이 해결함</p>
+    <div className='problem-detail-container'>
+      <div className='problem-content'>
+        <h1 className='problem-title'>{problem.title}</h1>
+        <p className='problem-description'>{problem.description}</p>
+        <p className='solved-count'>{problem.solvers}명이 해결함</p>
 
         {/* 버튼 그룹 */}
-        <div className="button-group">
-          <div className="link-btn-wrapper">
-            <a href={problem.url} target="_blank" rel="noopener noreferrer" className="link-btn">
-              <img src="/assets/link-btn1.png" alt="LINK" />
-              <span className="link-btn-text">LINK</span>
+        <div className='button-group'>
+          <div className='link-btn-wrapper'>
+            <a
+              href={problem.url}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='link-btn'
+            >
+              <img src='/assets/link-btn1.png' alt='LINK' />
+              <span className='link-btn-text'>LINK</span>
             </a>
           </div>
           {/* <a href={problem.file} download> */}
-            <button className="download-btn"><b>FILE</b></button>
+          <button className='download-btn'>
+            <b>FILE</b>
+          </button>
           {/* </a> */}
         </div>
 
         {/* Flag 제출 */}
-        <div className="flag-submit">
-          <input type="text" placeholder="FLAG 입력" />
-          <button className="submit-btn"><b>제출</b></button>
+        <div className='flag-submit'>
+          <input type='text' placeholder='FLAG 입력' />
+          <button className='submit-btn'>
+            <b>제출</b>
+          </button>
         </div>
 
         {/* 뒤로 가기 버튼 */}
-        <button className="back-btn" onClick={() => navigate(-1)}>
+        <button className='back-btn' onClick={() => navigate(-1)}>
           <b>뒤로 가기</b>
         </button>
       </div>
