@@ -26,11 +26,11 @@ ChartJS.register(
 );
 
 const ContentBlock = ({ dataset }) => {
-  const { title, data, labels } = dataset; // labels 추가
+  const { title, data, labels } = dataset;
 
   const chartData = useMemo(
     () => ({
-      labels, //동적으로 받은 labels 사용
+      labels, // 동적으로 받은 labels 사용
       datasets: data.map(({ id, scores, color }) => ({
         label: id,
         data: scores,
@@ -41,7 +41,7 @@ const ContentBlock = ({ dataset }) => {
         pointHoverRadius: 8,
       })),
     }),
-    [data, labels] // labels도 의존성 추가
+    [data, labels]
   );
 
   return (
@@ -58,7 +58,7 @@ const ContentBlock = ({ dataset }) => {
 ContentBlock.propTypes = {
   dataset: PropTypes.shape({
     title: PropTypes.string.isRequired,
-    labels: PropTypes.arrayOf(PropTypes.string).isRequired, //labels prop 추가
+    labels: PropTypes.arrayOf(PropTypes.string).isRequired,
     data: PropTypes.arrayOf(
       PropTypes.shape({
         id: PropTypes.string.isRequired,

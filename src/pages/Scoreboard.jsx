@@ -1,19 +1,27 @@
+// src/pages/Scoreboard.jsx
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { fetchLeaderboardData } from '../components/Scoreboard/dataConfig';
-import ContentBlock from '../components/Scoreboard/ContentBlock';
 import Loading from '../components/Loading';
+import ContentBlock from '../components/Scoreboard/ContentBlock';
+import { fetchLeaderboardData } from '../api/ScoreboardApi';
 
 const Scoreboard = () => {
   const [datasetsConfig, setDatasetsConfig] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // fetchLeaderboardData가 콜백 형태로 데이터를 반환한다고 가정
-    fetchLeaderboardData((data) => {
-      setDatasetsConfig(data);
-      setLoading(false);
-    });
+    const getData = async () => {
+      try {
+        const data = await fetchLeaderboardData();
+        setDatasetsConfig(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getData();
   }, []);
 
   if (loading) {
