@@ -41,18 +41,16 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
 
-  color: #8cff66;
-  padding: 20px;
   width: 100%;
 `;
 
 const GlitchText = styled.h1`
-  font-size: 3rem;
-  font-weight: bold;
-  text-transform: uppercase;
   color: #8cff66;
-  text-shadow: 0 0 10px #ffffff;
   margin-bottom: 20px;
+  text-shadow: 0 0 40px rgba(0, 255, 0, 0.8);
+  font-size: 3.5rem;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: uppercase;
 `;
 
 const NoDataText = styled.p`

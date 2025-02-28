@@ -155,7 +155,6 @@ const RankingWrapper = styled.div`
   align-items: center;
 
   width: 100%;
-  padding: 20px;
 `;
 
 const Title = styled.h2`
