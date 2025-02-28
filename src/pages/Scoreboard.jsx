@@ -1,29 +1,42 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { fetchLeaderboardData } from '../components/Scoreboard/dataConfig';
-import ContentBlock from '../components/Scoreboard/ContentBlock';
 import Loading from '../components/Loading';
+import ContentBlock from '../components/Scoreboard/ContentBlock';
+import { fetchLeaderboardData } from '../api/ScoreboardApi';
 
 const Scoreboard = () => {
   const [datasetsConfig, setDatasetsConfig] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // fetchLeaderboardData가 콜백 형태로 데이터를 반환한다고 가정
-    fetchLeaderboardData((data) => {
-      setDatasetsConfig(data);
-      setLoading(false);
-    });
+    const getData = async () => {
+      try {
+        const data = await fetchLeaderboardData();
+        setDatasetsConfig(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getData();
   }, []);
+
+  if (loading) {
+    return (
+      <Wrapper>
+        <LoadingWrapper>
+          <Loading />
+        </LoadingWrapper>
+      </Wrapper>
+    );
+  }
 
   return (
     <Wrapper>
       <GlitchText>HACKER SCOREBOARD</GlitchText>
-      {loading ? (
-        <LoadingWrapper>
-          <Loading />
-        </LoadingWrapper>
-      ) : datasetsConfig.length > 0 ? (
+      {datasetsConfig.length > 0 ? (
         datasetsConfig.map((dataset) => (
           <ContentBlock key={dataset.title} dataset={dataset} />
         ))
@@ -40,19 +53,17 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  color: #8cff66;
-  padding: 20px;
   width: 100%;
 `;
 
 const GlitchText = styled.h1`
-  font-size: 3rem;
-  font-weight: bold;
-  text-transform: uppercase;
+  margin-top: 80px;
   color: #8cff66;
-  text-shadow: 0 0 10px #ffffff;
   margin-bottom: 20px;
+  text-shadow: 0 0 40px rgba(0, 255, 0, 0.8);
+  font-size: 3.5rem;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: uppercase;
 `;
 
 const NoDataText = styled.p`
