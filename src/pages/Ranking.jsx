@@ -8,10 +8,12 @@ import GoldIcon from '../assets/Ranking/GoldIcon.svg';
 import PlatinumIcon from '../assets/Ranking/PlatinumIcon.svg';
 import DiamondIcon from '../assets/Ranking/DiamondIcon.svg';
 import ChallengerIcon from '../assets/Ranking/ChallengerIcon.svg';
+import Loading from '../components/Loading';
 
 const Ranking = () => {
   const [scores, setScores] = useState([]);
   const [pageNumber, setPageNumber] = useState(0);
+  const [loading, setLoading] = useState(true);
   const scoresPerPage = 10;
   const pagesVisited = pageNumber * scoresPerPage;
   const pageCount = Math.ceil(scores.length / scoresPerPage);
@@ -39,6 +41,9 @@ const Ranking = () => {
         }
 
         setScores(dataArray);
+        if (loading) {
+          setLoading(false);
+        }
       } catch (error) {
         console.error('❌ 데이터 파싱 오류:', error.message);
       }
@@ -47,7 +52,7 @@ const Ranking = () => {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [loading]);
 
   const getIconForRank = (rank) => {
     if (rank >= 1 && rank <= 3) return ChallengerIcon;
@@ -97,9 +102,19 @@ const Ranking = () => {
       );
     }
     return rows;
-  }, [pageNumber, scores, pagesVisited]);
+  }, [pageNumber, scores, pagesVisited, scoresPerPage]);
 
   const changePage = ({ selected }) => setPageNumber(selected);
+
+  if (loading) {
+    return (
+      <RankingWrapper>
+        <LoadingWrapper>
+          <Loading />
+        </LoadingWrapper>
+      </RankingWrapper>
+    );
+  }
 
   return (
     <RankingWrapper>
@@ -138,8 +153,7 @@ const RankingWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #0d0d0d;
-  min-height: 100vh;
+
   width: 100%;
   padding: 20px;
 `;
@@ -209,4 +223,13 @@ const Pagination = styled.div`
     cursor: not-allowed;
     color: #666;
   }
+`;
+
+const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
 `;

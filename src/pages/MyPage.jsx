@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProfile } from '../api/ProfileAPI';
+import Loading from '../components/Loading';
 import './MyPage.css';
 
 const MyPage = () => {
@@ -52,7 +53,7 @@ const MyPage = () => {
   if (!profile) {
     return (
       <div className='mypage-container message-container'>
-        <p className='loading-message'>로딩 중...</p>
+        <Loading />
       </div>
     );
   }
