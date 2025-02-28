@@ -16,14 +16,20 @@ const Scoreboard = () => {
     });
   }, []);
 
-  return (
-    <Wrapper>
-      <GlitchText>HACKER SCOREBOARD</GlitchText>
-      {loading ? (
+  if (loading) {
+    return (
+      <Wrapper>
         <LoadingWrapper>
           <Loading />
         </LoadingWrapper>
-      ) : datasetsConfig.length > 0 ? (
+      </Wrapper>
+    );
+  }
+
+  return (
+    <Wrapper>
+      <GlitchText>HACKER SCOREBOARD</GlitchText>
+      {datasetsConfig.length > 0 ? (
         datasetsConfig.map((dataset) => (
           <ContentBlock key={dataset.title} dataset={dataset} />
         ))
@@ -40,11 +46,11 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-
   width: 100%;
 `;
 
 const GlitchText = styled.h1`
+  margin-top: 80px;
   color: #8cff66;
   margin-bottom: 20px;
   text-shadow: 0 0 40px rgba(0, 255, 0, 0.8);
