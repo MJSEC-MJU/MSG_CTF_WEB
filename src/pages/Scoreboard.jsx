@@ -1,4 +1,3 @@
-// src/pages/Scoreboard.jsx
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Loading from '../components/Loading';
