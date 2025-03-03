@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 const API_BASE_URL = "/api/challenges/all";
 
-export const fetchProblems = async (page = 0, size = 12) => {
+export const fetchProblems = async (page = 0, size = 20) => {
   try {
      const token = Cookies.get("accessToken"); 
     if (!token) {
