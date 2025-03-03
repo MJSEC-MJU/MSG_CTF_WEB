@@ -11,8 +11,9 @@ function Challenge() {
   useEffect(() => {
     const loadProblems = async () => {
       try {
-        const problemData = await fetchProblems(currentPage);
-        setProblems(problemData);
+        const {problems,totalPages} = await fetchProblems(currentPage);
+        setProblems(problems);
+        setTotalPages(totalPages)
       } catch (error) {
         console.error("문제 데이터를 불러오는 중 오류 발생:", error);
       }
