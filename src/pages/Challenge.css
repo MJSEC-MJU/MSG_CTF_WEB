@@ -17,7 +17,7 @@
   max-width: 2000px; 
   height: 500px;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   justify-content: center;
   align-items: center;
   background: url("/assets/grill.png") no-repeat center center;
@@ -40,8 +40,8 @@
 }
 
 .button-wrapper img {
-  width: 150px; 
-  height: 92px;
+  width: 200px; 
+  height: 142px;
 }
 
 .button-wrapper:hover {
