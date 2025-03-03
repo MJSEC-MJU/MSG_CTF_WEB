@@ -25,9 +25,12 @@ export const fetchProblems = async (page = 0, size = 12) => {
       throw new Error("문제 데이터를 가져오는 데 실패했습니다.");
     }
 
-    return response.data.data.content; // 문제 리스트 반환
+    return {
+      problems:response.data.data.content,// 문제 리스트 반환
+      totalPages: response.data.data.totalPages, // 총 페이지 수 추가
+      }
   } catch (error) {
     console.error("문제 조회 API 호출 중 오류 발생:", error);
-    return [];
+    return{ problems: [], totalPages: 1 };
   }
 };
