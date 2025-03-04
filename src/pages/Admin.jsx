@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createProblem } from '../api/CreateProblemAPI'; 
 import { fetchProblems, deleteProblem } from "../api/SummaryProblemAPI";
+import { fetchAdminMembers } from "../api/adminApi";
 
-// 예시 데이터와 API 호출 함수
-const fetchUsers = async () => {
-  return [
-    { id: 1, name: 'User 1', email: 'user1@example.com',univ:'mju', roles:'user', loginId:'abc123'},
-    { id: 2, name: 'User 2', email: 'user2@example.com', univ:'ssg', roles:'user', loginId:'dfe123'}
-  ];
-};
 
 
 
@@ -47,7 +41,7 @@ const Admin = () => {
 
   useEffect(() => {
     const loadUsers = async () => {
-      const userData = await fetchUsers();
+      const userData = await fetchAdminMembers();
       setUsers(userData);
     };
 
@@ -142,23 +136,27 @@ const Admin = () => {
             <thead>
               <tr>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>ID</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Name</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Email</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Univ</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Roles</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>LoginId</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Roles</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Point</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Univ</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Created</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Updated</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {users.map(user => (
-                <tr key={user.id}>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white',border: '1px solid white' }}>{user.id}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.name}</td>
+                <tr key={user.userId}>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white',border: '1px solid white' }}>{user.userId}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.email}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.univ}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.roles}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.loginId}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.roles}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.totalPoint}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.univ}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.createdAt.slice(0, -6)}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.updatedAt.slice(0, -6)}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
                     <button style={{margin:'5px'}}>Delete</button>
                     <button style={{margin:'5px'}} onClick={() => handleEditUser(user)}>Change</button>
