@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createProblem } from '../api/CreateProblemAPI'; 
 import { fetchProblems, deleteProblem } from "../api/SummaryProblemAPI";
 import { fetchAdminMembers } from "../api/AdminUser";
+import deleteUser from "../api/DeleteUser";
 
 
 
@@ -36,6 +37,15 @@ const Admin = () => {
       setProblems(problems.filter((p) => p.challengeId !== challengeId)); // 삭제 후 목록 갱신
     } else {
       alert("문제 삭제에 실패했습니다.");
+    }
+  };
+  const handleDeleteUser = async (userId) => {
+    const confirmed = window.confirm("정말 삭제하시겠습니까?");
+    if (!confirmed) return;
+  
+    const success = await deleteUser(userId);
+    if (success) {
+      setUsers(users.filter((user) => user.userId !== userId)); // 삭제된 사용자 제거
     }
   };
 
@@ -158,7 +168,7 @@ const Admin = () => {
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.createdAt.slice(0, 19)}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.updatedAt.slice(0, 19)}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
-                    <button style={{margin:'5px'}}>Delete</button>
+                    <button style={{margin:'5px'}} onClick={() => handleDeleteUser(user.userId)}>Delete</button>
                     <button style={{margin:'5px'}} onClick={() => handleEditUser(user)}>Change</button>
                   </td>
                 </tr>
