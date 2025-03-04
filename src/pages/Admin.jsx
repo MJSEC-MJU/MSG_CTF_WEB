@@ -155,8 +155,8 @@ const Admin = () => {
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.roles}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.totalPoint}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.univ}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.createdAt.slice(0, -6)}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.updatedAt.slice(0, -6)}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.createdAt.slice(0, 19)}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.updatedAt.slice(0, 19)}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
                     <button style={{margin:'5px'}}>Delete</button>
                     <button style={{margin:'5px'}} onClick={() => handleEditUser(user)}>Change</button>
