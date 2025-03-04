@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createProblem } from '../api/CreateProblemAPI'; 
 import { fetchProblems, deleteProblem } from "../api/SummaryProblemAPI";
-import { fetchAdminMembers } from "../api/adminApi";
+import { fetchAdminMembers } from "../api/AdminUser";
 
 
 
