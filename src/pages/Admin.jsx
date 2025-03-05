@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { createProblem } from '../api/CreateProblemAPI'; 
 import { fetchProblems, deleteProblem } from "../api/SummaryProblemAPI";
 import { fetchAdminMembers } from "../api/AdminUser";
-import deleteUser from "../api/DeleteUser";
-
+import { deleteUser }from "../api/DeleteUser";
+import { updateUser } from "../api/UserChangeAPI";
 
 
 
@@ -64,6 +64,8 @@ const Admin = () => {
     loadProblems();
   }, []);
 
+  
+
   const toggleUsers = () => {
     setShowUsers(true);
     setShowProblems(false);
@@ -82,9 +84,26 @@ const Admin = () => {
     setEditingUser({ ...editingUser, [name]: value });
   };
 
-  const handleSaveUser = () => {
-    setUsers(users.map(user => (user.id === editingUser.id ? editingUser : user)));
-    setEditingUser(null);
+  const handleSaveUser = async() => {
+    if (!editingUser) return alert("수정할 사용자를 선택하세요.");
+
+    const updatedData = {
+      email: editingUser.email,
+      univ: editingUser.univ,
+      loginId: editingUser.loginId,
+      roles: editingUser.roles,
+    };
+
+    try {
+      const updatedUser = await updateUser(editingUser.userId, updatedData);
+      alert("사용자 정보가 수정되었습니다.");
+
+      // UI 업데이트
+      setUsers(users.map((user) => (user.userId === updatedUser.userId ? updatedUser : user)));
+      setEditingUser(null);
+    } catch (error) {
+      alert("수정에 실패했습니다.");
+    }
   };
 
   const toggleAddProblemForm = () => {
@@ -138,6 +157,8 @@ const Admin = () => {
               <input type="text" name="univ" value={editingUser.univ} onChange={handleChangeInput} />
               <label>Login ID:</label>
               <input type="text" name="loginId" value={editingUser.loginId} onChange={handleChangeInput} />
+              <label>Roles:</label>
+              <input type="text" name="roles" value={editingUser.roles} onChange={handleChangeInput} />
               <button onClick={handleSaveUser}>Save</button>
               <button onClick={() => setEditingUser(null)}>Cancel</button>
             </div>
