@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createProblem } from '../api/CreateProblemAPI'; 
 import { fetchProblems, deleteProblem } from "../api/SummaryProblemAPI";
 import { fetchAdminMembers } from "../api/AdminUser";
-import { deleteUser }from "../api/DeleteUser";
+import deleteUser from "../api/DeleteUser";
 import { updateUser } from "../api/UserChangeAPI";
 
 
