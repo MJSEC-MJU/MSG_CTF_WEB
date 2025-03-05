@@ -44,6 +44,14 @@
   height: 142px;
 }
 
+.category-icon {
+  width: 80px; 
+  height: 30px;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
 .button-wrapper:hover {
   transform: scale(1.1);
 }
