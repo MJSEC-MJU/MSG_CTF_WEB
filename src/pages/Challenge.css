@@ -45,14 +45,14 @@
 }
 
 .category-icon {
-  width: 80px;  /* 적절한 크기로 조정 */
+  width: 90px;  /* 적절한 크기로 조정 */
   height: auto; /* 비율 유지 */
-  max-width: 35%; /* 버튼 크기 대비 제한 */
-  max-height: 30%;
+  max-width: 40%; /* 버튼 크기 대비 제한 */
+  max-height: 35%;
   
   position: absolute;
   top: 0;
-  left: 0;
+  left: 5%;
   margin: 5px; /* 버튼 테두리와 살짝 띄우기 */
   z-index: 1; /* 다른 요소보다 위에 오도록 설정 */
 }
