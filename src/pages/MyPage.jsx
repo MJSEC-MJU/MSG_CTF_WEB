@@ -27,7 +27,7 @@ const MyPage = () => {
   useEffect(() => {
     getProfile()
       .then((data) => {
-        const user = data.data.user;
+        const user = data.data;
         setProfile({
           name: user.email,
           rank: 1,
