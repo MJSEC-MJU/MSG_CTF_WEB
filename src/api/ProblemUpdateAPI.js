@@ -11,6 +11,7 @@ export const updateProblem = async (challengeId, formData) => {
     const response = await fetch(`/api/admin/update/challenge/${challengeId}`, {
       method: "PUT",
       headers: {
+        "Content-Type" : "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: formData, // form-data 전송 
