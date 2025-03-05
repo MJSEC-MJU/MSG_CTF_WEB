@@ -283,6 +283,7 @@ const Admin = () => {
                   type="file"
                   name="file"
                   onChange={handleFileChange}
+                  required
                   style={{ marginBottom: '10px', color:'white' }}
                 />
               </div>
@@ -293,6 +294,18 @@ const Admin = () => {
                   type="url"
                   name="url"
                   value={formData.url}
+                  onChange={handleInputChange}
+                  required
+                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+                />
+              </div>
+
+              <div>
+                <label style={{color:'white'}}>CATEGORY</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={formData.category}
                   onChange={handleInputChange}
                   required
                   style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
@@ -317,15 +330,17 @@ const Admin = () => {
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>ID</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Title</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Points</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Category</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {problems.map(problem => (
-                <tr key={problem.id}>
+                <tr key={problem.challengeId}>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.challengeId}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.title}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.points}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.category}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
                     <button onClick={() => handleDeleteProblem(problem.challengeId)} style={{margin:'5px'}}>Delete</button>
                     <button style={{margin:'5px'}}>Change</button>
