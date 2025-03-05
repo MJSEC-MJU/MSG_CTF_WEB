@@ -7,6 +7,15 @@ function Challenge() {
   const [problems, setProblems] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const categoryImages = {
+    FORENSICS: "/assets/forensics.svg",
+    CRYPTO: "/assets/crypto.svg",
+    PWN: "/assets/pwn.svg",
+    ANDROID: "/assets/android.svg",
+    REV: "/assets/rev.svg",
+    MISC: "/assets/misc.svg",
+    WEB: "/assets/web.svg",
+  };
 
   useEffect(() => {
     const loadProblems = async () => {
@@ -30,6 +39,11 @@ function Challenge() {
             <Link key={problem.challengeId} to={`/problem/${problem.challengeId}`} className="problem-button">
               <div className="button-wrapper">
                 <img src={`/assets/meat-raw.png`} alt={problem.title} />
+                <img 
+                src={categoryImages[problem.category] || categoryImages.default} 
+                alt={problem.category} 
+                className="category-icon"
+              />
                 <div className="button-title">{problem.title}</div>
                 <div className="button-score">{problem.points}</div>
               </div>
