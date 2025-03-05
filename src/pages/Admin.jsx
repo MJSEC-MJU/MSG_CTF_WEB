@@ -27,7 +27,8 @@ const Admin = () => {
     date: '',
     time: '',
     file: null,
-    url: ''
+    url: '',
+    category: ''
   });
   //문제 삭제
   const handleDeleteProblem = async (challengeId) => {
@@ -269,7 +270,8 @@ const Admin = () => {
                 <input type="text" name="url" value={formData.url} onChange={handleInputChange} />
                 <label>File:</label>
                 <input type="file" name="file" onChange={handleFileChange} />
-
+                <label>Category:</label>
+                <input type="text" name="category" value={formData.category} onChange={handleInputChange} />
                 <button type="button" onClick={handleSaveProblem}>Save</button>
                 <button type="button" onClick={() => setShowEditProblemForm(false)}>Cancel</button>
               </form>
