@@ -4,6 +4,7 @@ import { fetchProblems, deleteProblem } from "../api/SummaryProblemAPI";
 import { fetchAdminMembers } from "../api/AdminUser";
 import deleteUser from "../api/DeleteUser";
 import { updateUser } from "../api/UserChangeAPI";
+import { updateProblem } from "../api/ProblemUpdateAPI"
 
 
 
@@ -14,6 +15,8 @@ const Admin = () => {
   const [showProblems, setShowProblems] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [editingProblem, setEditingProblem] = useState(null);
+  const [showEditProblemForm, setShowEditProblemForm] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -26,7 +29,7 @@ const Admin = () => {
     file: null,
     url: ''
   });
-
+  //문제 삭제
   const handleDeleteProblem = async (challengeId) => {
     const isConfirmed = window.confirm("정말로 삭제하시겠습니까?");
     if (!isConfirmed) return;
@@ -39,6 +42,7 @@ const Admin = () => {
       alert("문제 삭제에 실패했습니다.");
     }
   };
+  //유저삭제
   const handleDeleteUser = async (userId) => {
     const confirmed = window.confirm("정말 삭제하시겠습니까?");
     if (!confirmed) return;
@@ -78,7 +82,7 @@ const Admin = () => {
   const handleEditUser = (user) => {
     setEditingUser(user);
   };
-
+  //유저 수정
   const handleChangeInput = (e) => {
     const { name, value } = e.target;
     setEditingUser({ ...editingUser, [name]: value });
@@ -93,6 +97,7 @@ const Admin = () => {
       loginId: editingUser.loginId,
       roles: editingUser.roles,
     };
+    
 
     try {
       const updatedUser = await updateUser(editingUser.userId, updatedData);
@@ -105,6 +110,38 @@ const Admin = () => {
       alert("수정에 실패했습니다.");
     }
   };
+  //문제 수정
+  const handleEditProblem = (problem) => {
+    setEditingProblem(problem);
+    setShowEditProblemForm((prev) => !prev); // 토글
+  };
+  const handleSaveProblem = async () => {
+    if (!editingProblem) return alert("수정할 문제를 선택하세요.");
+  
+    const formDataToSend = new FormData();
+    formDataToSend.append(
+      "challenge",
+      new Blob([JSON.stringify(formData)], { type: "application/json" })
+    );
+  
+    if (formData.file) {
+      formDataToSend.append("file", formData.file);
+    }
+  
+    try {
+      const response = await updateProblem(editingProblem.challengeId, formDataToSend);
+      alert(response.message);
+  
+      setProblems(
+        problems.map((p) => (p.challengeId === editingProblem.challengeId ? { ...p, ...formData } : p))
+      );
+      setEditingProblem(null);
+      setShowEditProblemForm(false);
+    } catch (error) {
+      alert("문제 수정 실패");
+    }
+  };
+  
 
   const toggleAddProblemForm = () => {
     setShowAddProblemForm(!showAddProblemForm);
@@ -207,6 +244,37 @@ const Admin = () => {
           </button>
           <input style={{ padding: '5px',  marginLeft: '30px',marginRight: '10px', marginBottom: '10px' }}/>
           <button>찾기</button>
+          {/* change Problem 폼 */}
+          {showEditProblemForm && editingProblem && (
+            <div style={{ color: "white", padding: "10px", border: "1px solid white", marginTop: "10px" }}>
+              <h3>Edit Problem</h3>
+              <form>
+                <label>Title:</label>
+                <input type="text" name="title" value={formData.title} onChange={handleInputChange} />
+                <label>Description:</label>
+                <textarea name="description" value={formData.description} onChange={handleInputChange}></textarea>
+                <label>Flag:</label>
+                <input type="text" name="flag" value={formData.flag} onChange={handleInputChange} />
+                <label>Points:</label>
+                <input type="number" name="points" value={formData.points} onChange={handleInputChange} />
+                <label>Min Points:</label>
+                <input type="number" name="minPoints" value={formData.minPoints} onChange={handleInputChange} />
+                <label>Initial Points:</label>
+                <input type="number" name="initialPoints" value={formData.initialPoints} onChange={handleInputChange} />
+                <label>Start Time:</label>
+                <input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleInputChange} />
+                <label>End Time:</label>
+                <input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleInputChange} />
+                <label>URL:</label>
+                <input type="text" name="url" value={formData.url} onChange={handleInputChange} />
+                <label>File:</label>
+                <input type="file" name="file" onChange={handleFileChange} />
+
+                <button type="button" onClick={handleSaveProblem}>Save</button>
+                <button type="button" onClick={() => setShowEditProblemForm(false)}>Cancel</button>
+              </form>
+            </div>
+          )}
           {/* Add Problem 폼 */}
           {showAddProblemForm && (
             <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
@@ -364,7 +432,7 @@ const Admin = () => {
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.category}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
                     <button onClick={() => handleDeleteProblem(problem.challengeId)} style={{margin:'5px'}}>Delete</button>
-                    <button style={{margin:'5px'}}>Change</button>
+                    <button style={{margin:'5px'}} onClick={() => handleEditProblem(problem)}>Change</button>
                   </td>
                 </tr>
               ))}
