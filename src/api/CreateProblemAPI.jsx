@@ -19,6 +19,7 @@ export const createProblem = async (formData) => {
       startTime: `${formData.date} ${formData.time}:00`,
       endTime: `${formData.date} ${formData.time}:00`,
       url: formData.url,
+      category: formData.category,
     };
     
     const challengeBlob = new Blob([JSON.stringify(challengeData)], { type: 'application/json' });
