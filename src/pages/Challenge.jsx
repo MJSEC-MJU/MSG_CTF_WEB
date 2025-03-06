@@ -38,7 +38,7 @@ function Challenge() {
           problems.map((problem) => (
             <Link key={problem.challengeId} to={`/problem/${problem.challengeId}`} className="problem-button">
               <div className="button-wrapper">
-                <img src={`/assets/meat-raw.png`} alt={problem.title} />
+                <img src={`/assets/meat-raw.svg`} alt={problem.title} />
                 <img 
                 src={categoryImages[problem.category] || categoryImages.default} 
                 alt={problem.category} 
