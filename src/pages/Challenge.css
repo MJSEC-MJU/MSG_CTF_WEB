@@ -1,6 +1,6 @@
 .challenge-container {
   text-align: center;
-  background: url("/assets/background.png") no-repeat center center;
+  background: url("/assets/background.svg") no-repeat center center;
   background-size: cover;
   width: 1200px;
   height: auto;
@@ -20,7 +20,7 @@
   grid-template-columns: repeat(4, 1fr);
   justify-content: center;
   align-items: center;
-  background: url("/assets/grill.png") no-repeat center center;
+  background: url("/assets/grill.svg") no-repeat center center;
   background-size: contain;
   padding: 50px;
 
