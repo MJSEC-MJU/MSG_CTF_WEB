@@ -29,8 +29,12 @@ const ProblemDetail = () => {
 
   const handleSubmit = async () => {
     const result = await submitFlag(id, flag);
-    if (result.message) {
-      alert(result.message);
+    if (result.message === "Correct") {
+      alert("정답입니다!");
+    } else if (result.message === "wrong") {
+      alert("오답입니다. 다시 시도해보세요!");
+    } else if (result.message === "Already submitted") {
+      alert("이미 정답을 제출했습니다!");
     } else if (result.error) {
       alert(result.error);
     }
