@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { signIn } from '../api/SigninApi';
@@ -8,17 +8,23 @@ import Modal2 from '../components/Modal2';
 const Login = ({ setIsLoggedIn }) => {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState(
+    () => localStorage.getItem('errorMessage') || ''
+  );
   const [isError, setIsError] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({ loginId: '', password: '' });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    localStorage.setItem('errorMessage', errorMessage);
+  }, [errorMessage]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
-
     setFieldErrors({ loginId: '', password: '' });
-    setMessage('');
+    setIsError(false);
+
     try {
       await loginSchema.validate(
         { ID: loginId, password },
@@ -29,10 +35,8 @@ const Login = ({ setIsLoggedIn }) => {
 
       localStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
-
       setIsModalVisible(true);
-      setIsError(false);
-
+      setErrorMessage('');
       navigate('/');
     } catch (err) {
       if (err.inner) {
@@ -47,7 +51,7 @@ const Login = ({ setIsLoggedIn }) => {
         });
         setFieldErrors(errorsObj);
       } else {
-        setMessage(err.message || '로그인 실패');
+        setErrorMessage(err.message || '로그인 실패');
       }
       setIsError(true);
     }
@@ -69,7 +73,7 @@ const Login = ({ setIsLoggedIn }) => {
         <form onSubmit={handleLogin}>
           <Input
             type='text'
-            placeholder='로그인 아이디'
+            placeholder='아이디'
             value={loginId}
             onChange={(e) => setLoginId(e.target.value)}
             required
@@ -90,7 +94,7 @@ const Login = ({ setIsLoggedIn }) => {
           <Button type='submit'>로그인</Button>
         </form>
 
-        {message && <Message error={isError}>{message}</Message>}
+        {errorMessage && <Message error={isError}>{errorMessage}</Message>}
         <ToggleButton onClick={handleToggle}>회원가입 하러가기</ToggleButton>
       </FormContainer>
 

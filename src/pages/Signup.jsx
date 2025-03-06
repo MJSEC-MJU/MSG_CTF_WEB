@@ -20,6 +20,7 @@ const SignupPage = () => {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
+  const [isIdValid, setIsIdValid] = useState(false);
 
   const [signupMessage, setSignupMessage] = useState('');
   const [isSignupError, setIsSignupError] = useState(false);
@@ -41,8 +42,10 @@ const SignupPage = () => {
     try {
       const data = await checkId(loginId);
       setIdCheckMessage(data.message);
+      setIsIdValid(true);
     } catch (error) {
       setIdCheckMessage(error.message || '아이디 중복 확인 실패');
+      setIsIdValid(false);
     }
   };
 
@@ -145,14 +148,22 @@ const SignupPage = () => {
               placeholder='이메일'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              isValid={isEmailValid}
               required
             />
-            <CheckButton type='button' onClick={handleEmailCheck}>
+            <CheckButton
+              type='button'
+              onClick={handleEmailCheck}
+              isValid={isEmailValid}
+            >
               확인
             </CheckButton>
           </InputRow>
           {emailCheckMessage && (
-            <Message error={emailCheckMessage.includes('사용 중인 이메일')}>
+            <Message
+              error={emailCheckMessage.includes('사용 중인 이메일')}
+              isValid={isEmailValid}
+            >
               {emailCheckMessage}
             </Message>
           )}
@@ -165,12 +176,15 @@ const SignupPage = () => {
                 placeholder='인증 코드 입력'
                 value={emailCode}
                 onChange={(e) => setEmailCode(e.target.value)}
+                isVerified={isEmailVerified}
               />
               <CheckButton
                 type='button'
                 onClick={
                   isCodeSent ? handleVerifyEmailCode : handleSendEmailCode
                 }
+                isVerified={isEmailVerified}
+                disabled={isEmailVerified}
               >
                 {isCodeSent ? '확인' : '요청'}
               </CheckButton>
@@ -179,12 +193,15 @@ const SignupPage = () => {
           {emailVerificationMessage && (
             <Message>{emailVerificationMessage}</Message>
           )}
-          {isEmailVerified && <Message>이메일 인증 완료</Message>}
+          {isEmailVerified && (
+            <Message isVerified={true}>이메일 인증 완료</Message>
+          )}
 
           <InputRow>
             <Select
               value={univ}
               onChange={(e) => setUniv(e.target.value)}
+              isSelected={!!univ}
               required
             >
               <Option value=''>학교를 선택하세요</Option>
@@ -198,17 +215,25 @@ const SignupPage = () => {
           <InputRow>
             <Input
               type='text'
-              placeholder='로그인 아이디'
+              placeholder='아이디'
               value={loginId}
-              onChange={(e) => setLoginId(e.target.value)}
+              onChange={(e) => {
+                setLoginId(e.target.value);
+                setIsIdValid(false);
+              }}
+              isValid={isIdValid}
               required
             />
-            <CheckButton type='button' onClick={handleIdCheck}>
+            <CheckButton
+              type='button'
+              onClick={handleIdCheck}
+              isValid={isIdValid}
+            >
               확인
             </CheckButton>
           </InputRow>
           {idCheckMessage && (
-            <Message error={idCheckMessage.includes('사용할 수 없는 아이디')}>
+            <Message error={!isIdValid} isValid={isIdValid}>
               {idCheckMessage}
             </Message>
           )}
@@ -236,7 +261,7 @@ const SignupPage = () => {
           <Message error={isSignupError}>{signupMessage}</Message>
         )}
 
-        <ToggleButton onClick={handleToggle}>로그인 하러 가기</ToggleButton>
+        <ToggleButton onClick={handleToggle}>로그인하러 가기</ToggleButton>
       </FormContainer>
 
       {/* 모달 표시 */}
@@ -290,14 +315,18 @@ const Input = styled.input`
   flex: 1;
   padding: 0.75rem;
   background-color: #222;
-  border: 1px solid #cc0033;
-  color: #cc0033;
+  border: 1px solid
+    ${({ isValid, isVerified }) =>
+      isVerified ? '#00cc00' : isValid ? '#00cc00' : '#cc0033'};
+  color: ${({ isValid, isVerified }) =>
+    isVerified ? '#00cc00' : isValid ? '#00cc00' : '#cc0033'};
   font-size: 1rem;
   border-radius: 5px;
   box-sizing: border-box;
   &:focus {
     outline: none;
-    border-color: #ff3366;
+    border-color: ${({ isValid, isVerified }) =>
+      isVerified ? '#00ff00' : isValid ? '#00ff00' : '#ff3366'};
   }
 `;
 
@@ -305,15 +334,15 @@ const Select = styled.select`
   flex: 1;
   padding: 0.75rem;
   background-color: #222;
-  border: 1px solid #cc0033;
-  color: #cc0033;
+  border: 1px solid ${({ isSelected }) => (isSelected ? '#00cc00' : '#cc0033')};
+  color: ${({ isSelected }) => (isSelected ? '#00cc00' : '#cc0033')};
   font-size: 1rem;
   border-radius: 5px;
   box-sizing: border-box;
   cursor: pointer;
   &:focus {
     outline: none;
-    border-color: #ff3366;
+    border-color: #00cc00;
   }
 `;
 
@@ -332,7 +361,8 @@ const CheckButton = styled.button`
   text-decoration: none;
   margin-left: 0.5rem;
   padding: 0.75rem;
-  background-color: #cc0033;
+  background-color: ${({ isValid, isVerified }) =>
+    isVerified ? '#00cc00' : isValid ? '#00cc00' : '#cc0033'};
   border: none;
   border-radius: 5px;
   color: #000;
@@ -340,7 +370,8 @@ const CheckButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s;
   &:hover {
-    background-color: #ff3366;
+    background-color: ${({ isValid, isVerified }) =>
+      isVerified ? '#00ff00' : isValid ? '#00ff00' : '#ff3366'};
   }
 `;
 
@@ -375,7 +406,8 @@ const ToggleButton = styled.button`
 
 const Message = styled.p`
   margin-top: 1rem;
-  color: ${({ error }) => (error ? '#f00' : '#cc0033')};
+  color: ${({ error, isValid, isVerified }) =>
+    isVerified ? '#00cc00' : isValid ? '#00cc00' : error ? '#f00' : '#cc0033'};
 `;
 
 const FieldError = styled.p`
