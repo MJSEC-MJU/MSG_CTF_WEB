@@ -11,7 +11,7 @@
   position: relative;
   width: 550px; /* 식빵 크기에 맞게 조절 */
   height: 550px;
-  background: url("/assets/bread.png") no-repeat center center;
+  background: url("/assets/bread.svg") no-repeat center center;
   background-size: contain;
   display: flex;
   flex-direction: column;
