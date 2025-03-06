@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -19,8 +19,11 @@ const SignupPage = () => {
   const [emailCode, setEmailCode] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
-  const [isCodeSent, setIsCodeSent] = useState(false);
   const [isIdValid, setIsIdValid] = useState(false);
+
+  const [timer, setTimer] = useState(300);
+  const [isTimerExpired, setIsTimerExpired] = useState(false);
+  const [isCodeSent, setIsCodeSent] = useState(false);
 
   const [signupMessage, setSignupMessage] = useState('');
   const [isSignupError, setIsSignupError] = useState(false);
@@ -71,6 +74,20 @@ const SignupPage = () => {
       );
     }
   };
+
+  useEffect(() => {
+    let interval;
+    if (isCodeSent && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
+    } else if (timer === 0) {
+      setIsTimerExpired(true);
+      setIsCodeSent(false);
+    }
+
+    return () => clearInterval(interval);
+  }, [isCodeSent, timer]);
 
   const handleVerifyEmailCode = async () => {
     try {
@@ -189,6 +206,18 @@ const SignupPage = () => {
                 {isCodeSent ? '확인' : '요청'}
               </CheckButton>
             </InputRow>
+          )}
+          {isCodeSent && !isTimerExpired && (
+            <Message>
+              남은 시간: {Math.floor(timer / 60)}:
+              {String(timer % 60).padStart(2, '0')}
+            </Message>
+          )}
+
+          {isTimerExpired && (
+            <Message error>
+              인증 코드가 만료되었습니다. 다시 요청해주세요.
+            </Message>
           )}
           {emailVerificationMessage && (
             <Message>{emailVerificationMessage}</Message>

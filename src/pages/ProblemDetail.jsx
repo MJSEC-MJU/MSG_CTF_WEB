@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchProblemDetail } from '../api/ProblemDetailAPI';
 import { submitFlag } from '../api/SubmitAPI';
+import { downloadProblemFile } from '../api/ProblemDownloadAPI';
 import './ProblemDetail.css';
 
 const ProblemDetail = () => {
@@ -29,13 +30,13 @@ const ProblemDetail = () => {
 
   const handleSubmit = async () => {
     const result = await submitFlag(id, flag);
-    console.log("API 응답:", result); // 응답 확인용 로그
-    if (result.data === "Correct") {
-      alert("정답입니다!");
-    } else if (result.data === "Wrong") {
-      alert("오답입니다. 다시 시도해보세요!");
-    } else if (result.data === "Already submitted") {
-      alert("이미 정답을 제출했습니다!");
+    console.log('API 응답:', result); // 응답 확인용 로그
+    if (result.data === 'Correct') {
+      alert('정답입니다!');
+    } else if (result.data === 'Wrong') {
+      alert('오답입니다. 다시 시도해보세요!');
+    } else if (result.data === 'Already submitted') {
+      alert('이미 정답을 제출했습니다!');
     } else if (result.error) {
       alert(result.error);
     }
@@ -65,7 +66,10 @@ const ProblemDetail = () => {
             </a>
           </div>
           {/* <a href={problem.file} download> */}
-          <button className='download-btn'>
+          <button
+            className='download-btn'
+            onClick={() => downloadProblemFile(id)}
+          >
             <b>FILE</b>
           </button>
           {/* </a> */}
@@ -73,8 +77,12 @@ const ProblemDetail = () => {
 
         {/* Flag 제출 */}
         <div className='flag-submit'>
-          <input type='text' placeholder='FLAG 입력' value={flag}
-            onChange={(e) => setFlag(e.target.value)}/>
+          <input
+            type='text'
+            placeholder='FLAG 입력'
+            value={flag}
+            onChange={(e) => setFlag(e.target.value)}
+          />
           <button className='submit-btn' onClick={handleSubmit}>
             <b>제출</b>
           </button>

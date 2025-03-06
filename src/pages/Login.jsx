@@ -5,6 +5,8 @@ import { signIn } from '../api/SigninApi';
 import { loginSchema } from '../hook/validationYup';
 import Modal2 from '../components/Modal2';
 
+const SESSION_TIMEOUT = 3600;
+
 const Login = ({ setIsLoggedIn }) => {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +17,37 @@ const Login = ({ setIsLoggedIn }) => {
   const [fieldErrors, setFieldErrors] = useState({ loginId: '', password: '' });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const navigate = useNavigate();
+
+  const setLoginTime = () => {
+    localStorage.setItem('loginTime', Date.now());
+  };
+
+  const checkSessionTimeout = () => {
+    const loginTime = localStorage.getItem('loginTime');
+    if (!loginTime) return;
+
+    const currentTime = Date.now();
+    const elapsedTime = (currentTime - loginTime) / 1000;
+
+    if (elapsedTime > SESSION_TIMEOUT) {
+      localStorage.removeItem('loginTime');
+      localStorage.removeItem('isLoggedIn');
+      setIsLoggedIn(false);
+      navigate('/login');
+    }
+  };
+
+  useEffect(() => {
+    if (!localStorage.getItem('isLoggedIn')) {
+      navigate('/login');
+    }
+
+    const interval = setInterval(() => {
+      checkSessionTimeout();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [navigate, setIsLoggedIn]);
 
   useEffect(() => {
     localStorage.setItem('errorMessage', errorMessage);
@@ -35,6 +68,7 @@ const Login = ({ setIsLoggedIn }) => {
 
       localStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
+      setLoginTime();
       setIsModalVisible(true);
       setErrorMessage('');
       navigate('/');
