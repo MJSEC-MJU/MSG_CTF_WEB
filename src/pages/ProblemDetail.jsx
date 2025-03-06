@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchProblemDetail } from '../api/ProblemDetailAPI';
+import { submitFlag } from '../api/SubmitAPI';
 import './ProblemDetail.css';
 
 const ProblemDetail = () => {
@@ -9,6 +10,7 @@ const ProblemDetail = () => {
   const [problem, setProblem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [flag, setFlag] = useState('');
 
   useEffect(() => {
     const loadProblem = async () => {
@@ -24,6 +26,15 @@ const ProblemDetail = () => {
 
     loadProblem();
   }, [id]);
+
+  const handleSubmit = async () => {
+    const result = await submitFlag(id, flag);
+    if (result.message) {
+      alert(result.message);
+    } else if (result.error) {
+      alert(result.error);
+    }
+  };
 
   if (loading) return <h1>로딩 중...</h1>;
   if (error) return <h1>{error}</h1>;
@@ -57,8 +68,9 @@ const ProblemDetail = () => {
 
         {/* Flag 제출 */}
         <div className='flag-submit'>
-          <input type='text' placeholder='FLAG 입력' />
-          <button className='submit-btn'>
+          <input type='text' placeholder='FLAG 입력' value={flag}
+            onChange={(e) => setFlag(e.target.value)}/>
+          <button className='submit-btn' onClick={handleSubmit}>
             <b>제출</b>
           </button>
         </div>
