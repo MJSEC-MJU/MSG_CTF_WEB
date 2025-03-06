@@ -1,48 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "./Challenge.css"; 
-
-const problems = [
-  { id: 1, title: "문제 1", score: 100},
-  { id: 2, title: "문제 2", score: 100 },
-  { id: 3, title: "문제 3", score: 100 },
-  { id: 4, title: "문제 4", score: 100 },
-  { id: 5, title: "문제 5", score: 100 },
-  { id: 6, title: "문제 6", score: 100 },
-  { id: 7, title: "문제 7", score: 100 },
-  { id: 8, title: "문제 8", score: 100 },
-  { id: 9, title: "문제 9", score: 100 },
-  { id: 10, title: "문제 10", score: 100 },
-  { id: 11, title: "문제 11", score: 100 },
-  { id: 12, title: "문제 12", score: 100 },
-  { id: 13, title: "문제 13", score: 100 },
-  { id: 14, title: "문제 14", score: 100 },
-  { id: 15, title: "문제 15", score: 100 },
-  { id: 16, title: "문제 16", score: 100 },
-  { id: 17, title: "문제 17", score: 100 },
-  { id: 18, title: "문제 18", score: 100 },
-  { id: 19, title: "문제 19", score: 100 },
-  { id: 20, title: "문제 20", score: 100 },
-  { id: 21, title: "문제 21", score: 100 },
-  { id: 22, title: "문제 22", score: 100 },
-  { id: 23, title: "문제 23", score: 100 },
-  { id: 24, title: "문제 24", score: 100 },
-  { id: 25, title: "문제 25", score: 100 },
-];
+import { fetchProblems } from "../api/ChallengeAllAPI"; // API 함수 import
+import "./Challenge.css";
 
 function Challenge() {
+  const [problems, setProblems] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const categoryImages = {
+    FORENSICS: "/assets/forensics.svg",
+    CRYPTO: "/assets/crypto.svg",
+    PWN: "/assets/pwn.svg",
+    ANDROID: "/assets/android.svg",
+    REV: "/assets/rev.svg",
+    MISC: "/assets/misc.svg",
+    WEB: "/assets/web.svg",
+  };
+
+  useEffect(() => {
+    const loadProblems = async () => {
+      try {
+        const {problems,totalPages} = await fetchProblems(currentPage);
+        setProblems(problems);
+        setTotalPages(totalPages)
+      } catch (error) {
+        console.error("문제 데이터를 불러오는 중 오류 발생:", error);
+      }
+    };
+
+    loadProblems();
+  }, [currentPage]);
+
   return (
     <div className="challenge-container">
       <div className="problem-grid">
-        {problems.map((problem) => (
-          <Link key={problem.id} to={`/problem/${problem.id}`} className="problem-button">
-            <div className="button-wrapper">
-              <img src={`/assets/meat-raw.png`} alt={problem.title} />
-              <div className="button-title">{problem.title}</div> 
-              <div className="button-score">{problem.score}</div>
-            </div>
-          </Link>
-        ))}
+        {problems.length > 0 ? (
+          problems.map((problem) => (
+            <Link key={problem.challengeId} to={`/problem/${problem.challengeId}`} className="problem-button">
+              <div className="button-wrapper">
+                <img src={`/assets/meat-raw.png`} alt={problem.title} />
+                <img 
+                src={categoryImages[problem.category] || categoryImages.default} 
+                alt={problem.category} 
+                className="category-icon"
+              />
+                <div className="button-title">{problem.title}</div>
+                <div className="button-score">{problem.points}</div>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <p style={{ color: "white", textAlign: "center", marginTop: "20px" }}>문제 목록을 불러오는 중...</p>
+        )}
+      </div>
+
+      {/* 페이지네이션 버튼 */}
+      <div className="pagination">
+        <button style={{height:"5vh",margin:"10px"}} onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))} disabled={currentPage === 0}>
+          이전
+        </button>
+        <span>{currentPage + 1} / {totalPages}</span>
+        <button style={{height:"5vh",margin:"10px"}} onClick={() => setCurrentPage((prev) => prev + 1)} disabled={currentPage + 1 >= totalPages}>
+          다음
+        </button>
       </div>
     </div>
   );

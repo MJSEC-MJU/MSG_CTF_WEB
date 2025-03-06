@@ -3,7 +3,8 @@
   background: url("/assets/background.png") no-repeat center center;
   background-size: cover;
   width: 1200px;
-  height: 100vh; 
+  height: auto;
+  min-height: 100vh; 
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,15 +15,15 @@
   position: relative;
   width: 90%; 
   max-width: 2000px; 
-  height: 700px;
+  height: 500px;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   justify-content: center;
   align-items: center;
   background: url("/assets/grill.png") no-repeat center center;
   background-size: contain;
   padding: 50px;
-  margin: 80px;
+
 }
 
 .problem-button {
@@ -39,8 +40,21 @@
 }
 
 .button-wrapper img {
-  width: 150px; 
-  height: 92px;
+  width: 212px; 
+  height: 142px;
+}
+
+.category-icon {
+  width: 90px;  /* 적절한 크기로 조정 */
+  height: auto; /* 비율 유지 */
+  max-width: 40%; /* 버튼 크기 대비 제한 */
+  max-height: 35%;
+  
+  position: absolute;
+  top: 0;
+  left: 5%;
+  margin: 5px; /* 버튼 테두리와 살짝 띄우기 */
+  z-index: 1; /* 다른 요소보다 위에 오도록 설정 */
 }
 
 .button-wrapper:hover {
@@ -53,13 +67,18 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -70%);
-  font-size: 25px;
-  font-family: "Do Hyeon","Bebas Neue", "Impact", sans-serif;
+  font-size: clamp(12px, 2vw, 25px); /* 최소 12px, 최대 25px */
+  font-family: "Do Hyeon", "Bebas Neue", "Impact", sans-serif;
   font-weight: 1000;
   color: white;
   pointer-events: none;
   z-index: 0;
   text-shadow: 2.5px 2.5px 0px black, -2.5px -2.5px 0px black, 2.5px -2.5px 0px black, -2.5px 2.5px 0px black;
+  text-align: center;
+  white-space: nowrap;
+  max-width: 90%; /* 버튼 크기 안에서만 유지 */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 

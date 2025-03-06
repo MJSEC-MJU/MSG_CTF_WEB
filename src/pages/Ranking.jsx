@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import ReactPaginate from 'react-paginate';
 
@@ -8,35 +8,58 @@ import GoldIcon from '../assets/Ranking/GoldIcon.svg';
 import PlatinumIcon from '../assets/Ranking/PlatinumIcon.svg';
 import DiamondIcon from '../assets/Ranking/DiamondIcon.svg';
 import ChallengerIcon from '../assets/Ranking/ChallengerIcon.svg';
+import Loading from '../components/Loading';
 
-function Ranking() {
-  const scores = useMemo(
-    () =>
-      [
-        { id: 'aaaaa1234', score: 1500 },
-        { id: 'aaaaa5678', score: 750 },
-        { id: 'aaaaa4949', score: 1200 },
-        { id: 'aaaaa2121', score: 500 },
-        { id: 'aaaaa6789', score: 1700 },
-        { id: 'aaaaa1111', score: 900 },
-        { id: 'aaaaa2222', score: 1300 },
-        { id: 'aaaaa3333', score: 1400 },
-        { id: 'aaaaa4444', score: 1100 },
-      ].sort((a, b) => b.score - a.score),
-    []
-  );
-
-  const scoresPerPage = 10;
+const Ranking = () => {
+  const [scores, setScores] = useState([]);
   const [pageNumber, setPageNumber] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const scoresPerPage = 10;
   const pagesVisited = pageNumber * scoresPerPage;
   const pageCount = Math.ceil(scores.length / scoresPerPage);
 
+  useEffect(() => {
+    const eventSource = new EventSource(
+      'https://msg.mjsec.kr/api/leaderboard/stream'
+    );
+
+    eventSource.onopen = () => {
+      console.log('✅ SSE 연결이 열렸습니다.');
+    };
+
+    eventSource.onmessage = (event) => {
+      try {
+        console.log('📩 수신된 데이터:', event.data);
+        const parsedData = JSON.parse(event.data);
+        let dataArray = [];
+        if (Array.isArray(parsedData)) {
+          dataArray = parsedData;
+        } else if (parsedData && Array.isArray(parsedData.data)) {
+          dataArray = parsedData.data;
+        } else {
+          throw new Error('응답 데이터 형식이 올바르지 않습니다.');
+        }
+
+        setScores(dataArray);
+        if (loading) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('❌ 데이터 파싱 오류:', error.message);
+      }
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [loading]);
+
   const getIconForRank = (rank) => {
-    if (rank === 1) return ChallengerIcon;
-    if (rank >= 2 && rank <= 3) return DiamondIcon;
-    if (rank >= 4 && rank <= 7) return PlatinumIcon;
-    if (rank >= 8 && rank <= 10) return GoldIcon;
-    if (rank >= 11 && rank <= 15) return SilverIcon;
+    if (rank >= 1 && rank <= 3) return ChallengerIcon;
+    if (rank >= 4 && rank <= 8) return DiamondIcon;
+    if (rank >= 9 && rank <= 14) return PlatinumIcon;
+    if (rank >= 15 && rank <= 30) return GoldIcon;
+    if (rank >= 31 && rank <= 60) return SilverIcon;
     return BronzeIcon;
   };
 
@@ -47,8 +70,12 @@ function Ranking() {
     );
     const rows = slicedScores.map((score, index) => {
       const rank = pagesVisited + index + 1;
+
+      const userId = score.userid
+        ? score.userid.replace(/.(?=.{3})/g, '*')
+        : '알 수 없음';
       return (
-        <tr key={score.id}>
+        <tr key={score.id || rank}>
           <td>{rank}</td>
           <td>
             <img
@@ -57,12 +84,13 @@ function Ranking() {
               style={{ width: '30px', height: '30px' }}
             />
           </td>
-          <td>{score.id.replace(/.(?=.{3})/g, '*')}</td>
-          <td>{score.score}</td>
+          <td>{userId}</td>
+          <td>{score.totalPoint}</td>
         </tr>
       );
     });
 
+    // 페이지에 부족한 데이터가 있을 경우 빈 행 추가
     for (let i = rows.length; i < scoresPerPage; i++) {
       rows.push(
         <tr key={`empty-${i}`}>
@@ -73,11 +101,20 @@ function Ranking() {
         </tr>
       );
     }
-
     return rows;
-  }, [pageNumber, scores]);
+  }, [pageNumber, scores, pagesVisited, scoresPerPage]);
 
   const changePage = ({ selected }) => setPageNumber(selected);
+
+  if (loading) {
+    return (
+      <RankingWrapper>
+        <LoadingWrapper>
+          <Loading />
+        </LoadingWrapper>
+      </RankingWrapper>
+    );
+  }
 
   return (
     <RankingWrapper>
@@ -108,7 +145,7 @@ function Ranking() {
       </Pagination>
     </RankingWrapper>
   );
-}
+};
 
 export default Ranking;
 
@@ -116,10 +153,8 @@ const RankingWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #0d0d0d;
-  min-height: 100vh;
+
   width: 100%;
-  padding: 20px;
 `;
 
 const Title = styled.h2`
@@ -167,7 +202,6 @@ const Pagination = styled.div`
     padding: 0;
     gap: 8px;
     font-size: 16px;
-
     cursor: pointer;
   }
 
@@ -188,4 +222,13 @@ const Pagination = styled.div`
     cursor: not-allowed;
     color: #666;
   }
+`;
+
+const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
 `;
