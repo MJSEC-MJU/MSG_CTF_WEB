@@ -65,14 +65,13 @@ const ProblemDetail = () => {
               <span className='link-btn-text'>LINK</span>
             </a>
           </div>
-          {/* <a href={problem.file} download> */}
+          {/* 파일 다운로드 버튼 */}
           <button
             className='download-btn'
-            onClick={() => downloadProblemFile(id)}
+            onClick={() => downloadProblemFile(id, problem.title)}
           >
             <b>FILE</b>
           </button>
-          {/* </a> */}
         </div>
 
         {/* Flag 제출 */}

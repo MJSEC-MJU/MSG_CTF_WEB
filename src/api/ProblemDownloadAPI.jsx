@@ -1,14 +1,19 @@
-// ProblemDownloadAPI.jsx
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
-const BASE_URL = 'https://msg.mjsec.kr';
+export const downloadProblemFile = async (challengeId, challengeTitle) => {
+  const token = Cookies.get('accessToken');
+  if (!token) {
+    alert('로그인이 필요합니다.');
+    return { error: '로그인이 필요합니다.' };
+  }
 
-export const downloadProblemFile = async (challengeId) => {
   try {
     const response = await axios.get(
-      `${BASE_URL}/api/challenges/${challengeId}/download-file`,
+      `/api/admin/challenges/${challengeId}/download-file`,
       {
         responseType: 'blob',
+        withCredentials: true,
       }
     );
 
@@ -16,12 +21,18 @@ export const downloadProblemFile = async (challengeId) => {
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `challenge_${challengeId}`);
+    link.setAttribute('download', `${challengeTitle}.zip`);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.parentNode.removeChild(link);
+
+    console.log('파일 다운로드 성공');
   } catch (error) {
+    if (error.response && error.response.status === 400) {
+      alert('파일이 존재하지 않습니다.');
+    } else {
+      alert('파일 다운로드에 실패했습니다.');
+    }
     console.error('파일 다운로드 오류:', error);
-    alert('파일 다운로드에 실패했습니다.');
   }
 };
