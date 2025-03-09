@@ -68,7 +68,7 @@ const ProblemDetail = () => {
           {/* 파일 다운로드 버튼 */}
           <button
             className='download-btn'
-            onClick={() => downloadProblemFile(id, problem.title)}
+            onClick={() => downloadProblemFile(id)}
           >
             <b>FILE</b>
           </button>
