@@ -17,8 +17,9 @@ export const downloadProblemFile = async (challengeId, challengeTitle) => {
       }
     );
 
-    let filename = 'downloaded_file.zip';
+    let filename = `challenge-${challengeId}.zip`;
     const disposition = response.headers['content-disposition'];
+
     if (disposition && disposition.includes('filename=')) {
       const matches = disposition.match(/filename="?(.*?)"?$/);
       if (matches && matches[1]) {
