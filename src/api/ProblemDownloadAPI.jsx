@@ -3,7 +3,7 @@ import axios from 'axios';
 export const downloadProblemFile = async (challengeId) => {
   try {
     const response = await axios.get(
-      `/api/challenges/${challengeId}/download-file`,
+      `challenges/${challengeId}/download-file`,
       {
         responseType: 'blob',
         withCredentials: true,
@@ -19,7 +19,6 @@ export const downloadProblemFile = async (challengeId) => {
       }
     }
 
-    // response.data는 이미 Blob 객체입니다.
     const url = window.URL.createObjectURL(response.data);
     const link = document.createElement('a');
     link.href = url;
