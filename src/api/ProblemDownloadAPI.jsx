@@ -10,7 +10,7 @@ export const downloadProblemFile = async (challengeId, challengeTitle) => {
 
   try {
     const response = await axios.get(
-      `/api/admin/challenges/${challengeId}/download-file`,
+      `/api/challenges/${challengeId}/download-file`,
       {
         responseType: 'blob',
         withCredentials: true,
