@@ -17,11 +17,20 @@ export const downloadProblemFile = async (challengeId, challengeTitle) => {
       }
     );
 
+    let filename = 'downloaded_file.zip';
+    const disposition = response.headers['content-disposition'];
+    if (disposition && disposition.includes('filename=')) {
+      const matches = disposition.match(/filename="?(.*?)"?$/);
+      if (matches && matches[1]) {
+        filename = matches[1];
+      }
+    }
+
     // 파일 다운로드 처리
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `${challengeTitle}.zip`);
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
     link.parentNode.removeChild(link);
