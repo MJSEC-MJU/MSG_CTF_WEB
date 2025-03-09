@@ -1,13 +1,6 @@
 import axios from 'axios';
-import Cookies from 'js-cookie';
 
-export const downloadProblemFile = async (challengeId, challengeTitle) => {
-  const token = Cookies.get('accessToken');
-  if (!token) {
-    alert('로그인이 필요합니다.');
-    return { error: '로그인이 필요합니다.' };
-  }
-
+export const downloadProblemFile = async (challengeId) => {
   try {
     const response = await axios.get(
       `/api/challenges/${challengeId}/download-file`,
@@ -19,7 +12,6 @@ export const downloadProblemFile = async (challengeId, challengeTitle) => {
 
     let filename = `challenge-${challengeId}.zip`;
     const disposition = response.headers['content-disposition'];
-
     if (disposition && disposition.includes('filename=')) {
       const matches = disposition.match(/filename="?(.*?)"?$/);
       if (matches && matches[1]) {
@@ -27,14 +19,15 @@ export const downloadProblemFile = async (challengeId, challengeTitle) => {
       }
     }
 
-    // 파일 다운로드 처리
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    // response.data는 이미 Blob 객체입니다.
+    const url = window.URL.createObjectURL(response.data);
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
     link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(url);
 
     console.log('파일 다운로드 성공');
   } catch (error) {
