@@ -11,9 +11,9 @@ export const createProblem = async (formData) => {
     if (formData.file) {
       data.append('file', formData.file); // 사용자가 업로드한 파일 추가
     } else {
-      const defaultFileResponse = await fetch('/assets/You don\'t need to download.zip');
-      const defaultFileBlob = await defaultFileResponse.blob();
-      data.append('file', defaultFileBlob, "You don't need to download.zip");
+      // 기본 파일
+      const defaultFile = new File([""], "You don't need to download.zip", { type: "application/zip" });
+      data.append('file', defaultFile);
     }
 
     const challengeData = {
