@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchProblems } from "../api/ChallengeAllAPI"; // API 함수 import
-import { fetchSolvedChallenges } from "../api/UserChallengesAPI";
+import { fetchSolvedChallenges } from "../api/UserChallengeAPI";
 import "./Challenge.css";
 
 function Challenge() {
