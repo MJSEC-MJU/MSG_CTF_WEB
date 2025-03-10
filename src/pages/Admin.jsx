@@ -374,7 +374,6 @@ const Admin = () => {
                   type="file"
                   name="file"
                   onChange={handleFileChange}
-                  required
                   style={{ marginBottom: '10px', color:'white' }}
                 />
               </div>
