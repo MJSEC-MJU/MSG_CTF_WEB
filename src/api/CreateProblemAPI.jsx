@@ -7,7 +7,14 @@ const token = Cookies.get("accessToken");
 export const createProblem = async (formData) => {
   try {
     const data = new FormData();
-    data.append('file', formData.file); // 파일 추가
+
+    if (formData.file) {
+      data.append('file', formData.file); // 사용자가 업로드한 파일 추가
+    } else {
+      const defaultFileResponse = await fetch('/assets/You don\'t need to download.zip');
+      const defaultFileBlob = await defaultFileResponse.blob();
+      data.append('file', defaultFileBlob, "You don't need to download.zip");
+    }
 
     const challengeData = {
       title: formData.title,
@@ -15,13 +22,13 @@ export const createProblem = async (formData) => {
       flag: formData.flag,
       points: formData.points,
       minPoints: formData.minPoints,
-      initialPoints: formData.points, // API 예시에서 기본값으로 설정됨
+      initialPoints: formData.points,
       startTime: `${formData.date} ${formData.time}:00`,
       endTime: `${formData.date} ${formData.time}:00`,
       url: formData.url,
       category: formData.category,
     };
-    
+
     const challengeBlob = new Blob([JSON.stringify(challengeData)], { type: 'application/json' });
     data.append('challenge', challengeBlob);
 
