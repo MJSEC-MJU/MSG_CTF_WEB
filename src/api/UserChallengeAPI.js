@@ -11,6 +11,7 @@ export const fetchSolvedChallenges = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log("푼 문제 API 응답:", response.data); // 응답 데이터 확인
     
     if (response.data.code === "SUCCESS") {
       return response.data.data;
