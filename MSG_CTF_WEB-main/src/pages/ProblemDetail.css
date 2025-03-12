@@ -1,0 +1,156 @@
+/*전체 컨테이너 */
+.problem-detail-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/*문제 내용을 감싸는 박스 (식빵 이미지 배경) */
+.problem-content {
+  position: relative;
+  width: 550px; /* 식빵 크기에 맞게 조절 */
+  height: 550px;
+  background: url("/assets/bread.svg") no-repeat center center;
+  background-size: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/*문제 제목 */
+.problem-title {
+  font-size: 40px;
+  font-weight: bold;
+  font-family: "Jua",sans-serif;
+  color: #784A2C;
+  margin-bottom: -20px;
+}
+
+/*문제 설명 */
+.problem-description {
+  font-size: 20px;
+  font-family: "Jua",sans-serif;
+  color: #8C5733;
+  text-align: center;
+  margin-bottom: 0px;
+}
+/* 문제를 푼 사람 수 표시 */
+.solved-count {
+  font-size: 20px;
+  font-family: "Jua",sans-serif;
+  font-weight: bold;
+  color: #8C5733; 
+  margin-bottom: 15px;
+}
+
+/*버튼 그룹 */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/*공통 버튼 스타일 */
+.download-btn, .back-btn {
+  width: 180px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 20px;
+  font-family: "Jua",sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  text-align: center;
+}
+
+.link-btn-wrapper{
+  position: relative;
+  width: 130px; 
+  height: 100px;
+  background: url("/assets/link-btn2.png") no-repeat center center;
+  background-size: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/*링크버튼*/
+.link-btn img {
+  width: 120px;  /* 이미지 크기 조정 */
+  height: auto;  /* 비율 유지 */
+  transition: 0.2s;
+}
+/* 링크버튼 텍스트 */
+.link-btn-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-52%, -60%);
+  font-size: 30px;
+  font-weight: bold;
+  color: #8C5733;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%; 
+}
+
+/* 마우스 호버 효과 */
+.link-btn-wrapper:hover {
+  transform: scale(1.1); 
+}
+
+/*제출버튼*/
+.submit-btn{
+  width: 70px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-family: "Jua",sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  text-align: center;
+}
+
+/* 버튼별 색상 */
+
+.download-btn {
+  background-color: #FFAB62;
+}
+
+.submit-btn {
+  background-color: #7FD088;
+}
+
+.back-btn {
+  background-color: #E98383;
+}
+
+/* 버튼 호버 효과 */
+button:hover {
+  opacity: 0.8;
+}
+
+/* Flag 제출 영역 */
+.flag-submit {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.flag-submit input {
+  width: 200px;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
