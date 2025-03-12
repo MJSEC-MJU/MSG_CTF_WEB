@@ -38,14 +38,14 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
   
       console.log('파싱된 데이터:', parsedData);
 
-      const timeLabels = [...new Set(parsedData.map(item => item.solvedTime))].sort();
+      const timeLabels = [...new Set(parsedData.map(item => item.solvedTime.slice(0, 19)))].sort();
       const individualRanking = {};
       const universityTotalScores = {};
 
       parsedData.forEach((item) => {
         const userId = item.userId;
         const university = item.univ || 'Individual Ranking';
-        const timeIndex = timeLabels.indexOf(item.solvedTime);
+        const timeIndex = timeLabels.indexOf(item.solvedTime.slice(0, 19));
 
         if (!individualRanking[userId]) {
           individualRanking[userId] = {
