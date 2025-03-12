@@ -1,11 +1,18 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
-export const downloadProblemFile = async (challengeId) => {
+export const downloadFile = async (challengeId) => {
+  const token = Cookies.get("accessToken"); 
+    if (!token) {
+      return { error: '로그인이 필요합니다.' };
+    }
+
   try {
     const response = await axios.get(
-      `challenges/${challengeId}/download-file`, {
+      `/api/challenges/${challengeId}/download-file`, {
         responseType: 'blob',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });

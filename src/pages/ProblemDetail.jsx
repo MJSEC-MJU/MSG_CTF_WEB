@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchProblemDetail } from '../api/ProblemDetailAPI';
 import { submitFlag } from '../api/SubmitAPI';
-import { downloadProblemFile } from '../api/ProblemDownloadAPI';
+import { downloadFile } from '../api/ProblemDownloadAPI';
 import './ProblemDetail.css';
 
 const ProblemDetail = () => {
@@ -68,7 +68,7 @@ const ProblemDetail = () => {
           {/* 파일 다운로드 버튼 */}
           <button
             className='download-btn'
-            onClick={() => downloadProblemFile(id)}
+            onClick={() => downloadFile(id)}
           >
             <b>FILE</b>
           </button>
