@@ -69,7 +69,7 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
           universityTotalScores[university].scores[timeIndex] += item.currentScore;
         }
       });
-
+      //개인별합산
       Object.values(individualRanking).forEach((user) => {
         for (let i = 1; i < timeLabels.length; i++) {
           if (user.scores[i] === 0) {
@@ -79,7 +79,7 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
           }
         }
       });
-
+      //대학별 합산
       Object.values(universityTotalScores).forEach((univ) => {
         for (let i = 1; i < timeLabels.length; i++) {
           if (univ.scores[i] === 0) {
@@ -94,6 +94,11 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
         .sort((a, b) => b.scores[b.scores.length - 1] - a.scores[a.scores.length - 1])
         .slice(0, 3);
 
+      // 상위 3명에게만 개별 색상 지정
+      topIndividuals.forEach((user, index) => {
+        user.color = individualColors[index]; // 0, 1, 2 순으로 배정
+      });
+      
       const finalData = [
         { title: 'Individual Ranking', data: topIndividuals, labels: timeLabels },
         { title: 'University Ranking', data: Object.values(universityTotalScores), labels: timeLabels }
