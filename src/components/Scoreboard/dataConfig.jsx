@@ -22,7 +22,7 @@ export const options = {
 const individualColors = ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(99, 255, 182,1)'];
 const universityColors = ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)', 'rgba(255, 88, 116,1)'];
 
-export const fetchLeaderboardData = (setDatasetsConfig) => {
+export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
   const eventSource = new EventSource('https://msg.mjsec.kr/api/leaderboard/graph');
 
   eventSource.onopen = () => {
@@ -98,6 +98,7 @@ export const fetchLeaderboardData = (setDatasetsConfig) => {
       ];
 
       setDatasetsConfig(finalData);
+      setLoading(false);  // 데이터를 받은 후 로딩 상태 해제
       console.log(' 업데이트된 datasetsConfig:', finalData);
     } catch (err) {
       console.error('데이터 처리 중 오류 발생:', err.message);
