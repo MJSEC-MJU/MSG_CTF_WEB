@@ -3,11 +3,12 @@ import axios from 'axios';
 export const downloadProblemFile = async (challengeId) => {
   try {
     const response = await axios.get(
-      `/api/challenges/${challengeId}/download-file`,
-      {
+      `/api/challenges/${challengeId}/download-file`, {
         responseType: 'blob',
-      }
-    );
+        headers: {
+          Authorization: `Bearer ${token}`, // 헤더에 토큰 추가
+        },
+      });
 
     const disposition = response.headers['content-disposition'];
     let filename = `challenge-${challengeId}.zip`;
