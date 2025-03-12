@@ -59,7 +59,7 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
 
          // 점수 배열을 누적 합산하도록 처리
          for (let i = 1; i < timeLabels.length; i++) {
-          individualRanking[userId].scores[i] += individualRanking[userId].scores[i - 1] ?? 0;
+          individualRanking[userId].scores[i] = individualRanking[userId].scores[i - 1] ?? 0;
         }
         
         //대학별 랭킹
