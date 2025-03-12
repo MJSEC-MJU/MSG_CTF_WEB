@@ -9,10 +9,7 @@ const Scoreboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLeaderboardData((data) => {
-      setDatasetsConfig(data);
-      setLoading(false); // 데이터를 받은 후 로딩 종료
-    });
+    fetchLeaderboardData(setDatasetsConfig, setLoading);
   }, []);
 
   if (loading) {
