@@ -55,18 +55,8 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
             color: individualColors[Object.keys(individualRanking).length % individualColors.length],
           };
         }
-        // 이전 점수 유지하면서 현재 점수 반영
-        for (let i = 0; i <= timeIndex; i++) {
-          if (i === 0) {
-            individualRanking[userId].scores[i] = item.currentScore;
-          } else {
-            individualRanking[userId].scores[i] = individualRanking[userId].scores[i - 1];
-          }
-        }
         individualRanking[userId].scores[timeIndex] += item.currentScore;
 
-
-        
         //대학별 랭킹
         if (university !== 'Individual Ranking') {
           if (!universityTotalScores[university]) {
@@ -77,6 +67,16 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
             };
           }
           universityTotalScores[university].scores[timeIndex] += item.currentScore;
+        }
+      });
+
+      Object.values(individualRanking).forEach((user) => {
+        for (let i = 1; i < timeLabels.length; i++) {
+          if (user.scores[i] === 0) {
+            user.scores[i] = user.scores[i - 1] ?? 0;
+          } else {
+            user.scores[i] += user.scores[i - 1] ?? 0;
+          }
         }
       });
 
