@@ -32,10 +32,15 @@ export const fetchLeaderboardData = (setDatasetsConfig) => {
   eventSource.onmessage = (event) => {
     try {
       console.log('수신된 데이터:', event.data);
-      const parsedData = JSON.parse(event.data);
-      if (!Array.isArray(parsedData)) {
-        throw new Error('응답 데이터 형식이 잘못되었습니다.');
-      }
+
+      // "event:update data:[{...}]" 같은 형식에서 "data:" 이후의 내용만 추출
+      const dataMatch = event.data.match(/data:(.*)/s);
+      if (!dataMatch) throw new Error('SSE 데이터 형식이 올바르지 않습니다.');
+
+      const parsedData = JSON.parse(dataMatch[1]); // JSON 변환
+      if (!Array.isArray(parsedData)) throw new Error('응답 데이터 형식이 잘못되었습니다.');
+
+      console.log('파싱된 데이터:', parsedData);
 
       const timeLabels = [...new Set(parsedData.map(item => item.solvedTime))].sort();
       const individualRanking = {};
