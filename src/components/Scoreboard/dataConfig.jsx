@@ -29,7 +29,7 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
     console.log('SSE 연결이 열렸습니다.');
   };
 
-  eventSource.onmessage = (event) => {
+  eventSource.addEventListener("update", (event) => {
     try {
       console.log('수신된 데이터:', event.data);
 
@@ -103,7 +103,7 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
     } catch (err) {
       console.error('데이터 처리 중 오류 발생:', err.message);
     }
-  };
+  });
 
   eventSource.onerror = (error) => {
     console.error(' SSE 오류 발생:', error);
