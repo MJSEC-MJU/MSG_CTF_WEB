@@ -59,7 +59,7 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
        if (timeIndex > 0) {
         individualRanking[userId].scores[timeIndex] = individualRanking[userId].scores[timeIndex - 1] + item.currentScore;
       } else {
-        individualRanking[userId].scores[timeIndex] = item.currentScore;
+        individualRanking[userId].scores[timeIndex] = individualRanking[userId].scores[timeIndex - 1]
       }
 
         
