@@ -46,22 +46,27 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
         const userId = item.userId;
         const university = item.univ || 'Individual Ranking';
         const timeIndex = timeLabels.indexOf(item.solvedTime.slice(0, 19));
-
+        
+        //개인랭킹
         if (!individualRanking[userId]) {
           individualRanking[userId] = {
             id: userId,
-            scores: Array(timeLabels.length).fill(null),
+            scores: Array(timeLabels.length).fill(0),
             color: individualColors[Object.keys(individualRanking).length % individualColors.length],
           };
         }
-        individualRanking[userId].scores[timeIndex] = item.currentScore;
+        individualRanking[userId].scores[timeIndex] += item.currentScore;
 
+         // 점수 배열을 누적 합산하도록 처리
         for (let i = 1; i < timeLabels.length; i++) {
-          if (individualRanking[userId].scores[i] === null) {
+          if (individualRanking[userId].scores[i] === 0) {
             individualRanking[userId].scores[i] = individualRanking[userId].scores[i - 1] ?? 0;
+          } else {
+            individualRanking[userId].scores[i] += individualRanking[userId].scores[i - 1] ?? 0;
           }
         }
-
+        
+        //대학별 랭킹
         if (university !== 'Individual Ranking') {
           if (!universityTotalScores[university]) {
             universityTotalScores[university] = {
