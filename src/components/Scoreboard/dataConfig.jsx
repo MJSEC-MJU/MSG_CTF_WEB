@@ -55,7 +55,12 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
             color: individualColors[Object.keys(individualRanking).length % individualColors.length],
           };
         }
-        individualRanking[userId].scores[timeIndex] += item.currentScore;
+       // currentScore로 점수 갱신 + 누적
+       if (timeIndex > 0) {
+        individualRanking[userId].scores[timeIndex] = individualRanking[userId].scores[timeIndex - 1] + item.currentScore;
+      } else {
+        individualRanking[userId].scores[timeIndex] = item.currentScore;
+      }
 
         
         //대학별 랭킹
