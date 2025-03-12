@@ -58,12 +58,8 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
         individualRanking[userId].scores[timeIndex] += item.currentScore;
 
          // 점수 배열을 누적 합산하도록 처리
-        for (let i = 1; i < timeLabels.length; i++) {
-          if (individualRanking[userId].scores[i] === 0) {
-            individualRanking[userId].scores[i] = individualRanking[userId].scores[i - 1] ?? 0;
-          } else {
-            individualRanking[userId].scores[i] += individualRanking[userId].scores[i - 1] ?? 0;
-          }
+         for (let i = 1; i < timeLabels.length; i++) {
+          individualRanking[userId].scores[i] += individualRanking[userId].scores[i - 1] ?? 0;
         }
         
         //대학별 랭킹
