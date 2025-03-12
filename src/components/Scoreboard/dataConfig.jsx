@@ -55,13 +55,16 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
             color: individualColors[Object.keys(individualRanking).length % individualColors.length],
           };
         }
-        // currentScore로 점수 갱신 + 누적
-        if (timeIndex > 0) {
-          individualRanking[userId].scores[timeIndex] = individualRanking[userId].scores[timeIndex - 1] + item.currentScore;
-        } else {
-          // timeIndex가 0일 때도 이전 점수를 유지
-          individualRanking[userId].scores[timeIndex] = (individualRanking[userId].scores[timeIndex - 1] ?? 0) + item.currentScore;
+        // 이전 점수 유지하면서 현재 점수 반영
+        for (let i = 0; i <= timeIndex; i++) {
+          if (i === 0) {
+            individualRanking[userId].scores[i] = item.currentScore;
+          } else {
+            individualRanking[userId].scores[i] = individualRanking[userId].scores[i - 1];
+          }
         }
+        individualRanking[userId].scores[timeIndex] += item.currentScore;
+
 
         
         //대학별 랭킹
