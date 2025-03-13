@@ -77,7 +77,7 @@ const MyPage = () => {
           console.error("리더보드 데이터 형식이 올바르지 않습니다:", leaderboard);
           return;
         }
-        const rankIndex = leaderboard.findIndex(item => item.userid === profile.loginId);
+        const rankIndex = leaderboard.findIndex(item => item.userId === profile.loginId);
         if (rankIndex !== -1) {
           setProfile(prev => ({ ...prev, rank: rankIndex + 1 }));
         }
