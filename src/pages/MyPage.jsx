@@ -68,7 +68,7 @@ const MyPage = () => {
           return;
         }
         
-        const rankIndex = leaderboard.findIndex(item => item.userid === profile.loginId);
+        const rankIndex = leaderboard.findIndex(item => item.userId === profile.loginId);
         if (rankIndex !== -1) {
           setProfile(prev => ({ ...prev, rank: rankIndex + 1 }));
         }
