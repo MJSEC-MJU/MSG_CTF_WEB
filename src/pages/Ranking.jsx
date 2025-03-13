@@ -71,8 +71,8 @@ const Ranking = () => {
     const rows = slicedScores.map((score, index) => {
       const rank = pagesVisited + index + 1;
 
-      const userId = score.userid
-        ? score.userid.replace(/.(?=.{3})/g, '*')
+      const userId = score.userId
+        ? score.userId.replace(/.(?=.{3})/g, '*')
         : '알 수 없음';
       return (
         <tr key={score.id || rank}>
