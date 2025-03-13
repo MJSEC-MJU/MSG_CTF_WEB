@@ -32,7 +32,7 @@ function Challenge() {
     const loadSolvedChallenges = async () => {
       try {
         const solvedData = await fetchSolvedChallenges();
-        setSolvedChallenges(new Set(solvedData.map((solved) => solved.challengeId)));
+        setSolvedChallenges(new Set(solvedData.map((solved) => String(solved.challengeId))));
       } catch (error) {
         console.error("푼 문제 데이터를 불러오는 중 오류 발생:", error);
       }
@@ -47,7 +47,7 @@ function Challenge() {
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
-            const isSolved = solvedChallenges.has(problem.challengeId);
+            const isSolved = solvedChallenges.has(String(problem.challengeId));
             return (
               <Link 
                 key={problem.challengeId} 
