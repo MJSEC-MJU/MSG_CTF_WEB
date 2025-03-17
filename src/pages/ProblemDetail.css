@@ -18,7 +18,8 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  margin-top: 10vh; /* 네비게이션 바에 안 가려지도록 조정 */
+  padding-top: 15vh; /* 배경을 유지하면서 내리기 */
+  box-sizing: border-box; /* padding이 height에 포함되도록 설정 *
 }
 
 /*문제 제목 */
