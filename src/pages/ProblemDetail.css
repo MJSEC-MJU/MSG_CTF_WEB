@@ -17,9 +17,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  padding-top: 15vh; /* 배경을 유지하면서 내리기 */
-  box-sizing: border-box; /* padding이 height에 포함되도록 설정 */
+  padding: 30px;
 }
 
 /*문제 제목 */
