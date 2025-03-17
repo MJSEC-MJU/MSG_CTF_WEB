@@ -398,15 +398,29 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{color:'white'}}>CATEGORY</label>
-                <input
-                  type="text"
+                <label style={{ color: "white" }}>CATEGORY</label>
+                <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
                   required
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                />
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    marginBottom: "10px",
+                    backgroundColor: "white",
+                    color: "black",
+                  }}
+                >
+                  <option value="">카테고리 선택</option>
+                  <option value="MISC">MISC</option>
+                  <option value="REV">REV</option>
+                  <option value="ANDROID">ANDROID</option>
+                  <option value="FORENSICS">FORENSICS</option>
+                  <option value="PWN">PWN</option>
+                  <option value="WEB">WEB</option>
+                  <option value="CRYPTO">CRYPTO</option>
+                </select>
               </div>
 
               {/* 버튼들 */}
