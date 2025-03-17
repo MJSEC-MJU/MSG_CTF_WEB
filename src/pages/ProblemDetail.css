@@ -8,11 +8,19 @@
 
 /*문제 내용을 감싸는 박스 (식빵 이미지 배경) */
 .problem-content {
-  position: relative;
-  width: 750px; /* 식빵 크기에 맞게 조절 */
-  height: 750px;
+  position: absolute;
+  top: 10vh; /* 네비게이션 바와 겹치지 않게 조정 */
+  left: 50%;
+  transform: translate(-50%, 0); /* 가로 중앙 정렬 */
+
+  width: 60vw; /* 화면 너비의 60% */
+  height: 60vw; /* 화면 높이의 60% (비율 유지) */
+  max-width: 750px; /* 최대 크기 제한 */
+  max-height: 750px;
+
   background: url("/assets/bread.svg") no-repeat center center;
   background-size: contain;
+
   display: flex;
   flex-direction: column;
   align-items: center;
