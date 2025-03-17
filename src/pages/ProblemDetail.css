@@ -8,15 +8,13 @@
 
 /*문제 내용을 감싸는 박스 (식빵 이미지 배경) */
 .problem-content {
-  position: absolute;
-  top: 10vh; /* 네비게이션 바와 겹치지 않게 조정 */
-  left: 50%;
-  transform: translate(-50%, 0); /* 가로 중앙 정렬 */
+  position: relative; /* wrapper 내부에 유지 */
+  margin-top: 10vh; /* 네비게이션 바와 겹치지 않도록 조정 */
 
   width: 60vw; /* 화면 너비의 60% */
   height: 60vw; /* 화면 높이의 60% (비율 유지) */
   max-width: 750px; /* 최대 크기 제한 */
-  max-height: 750px;
+  max-height: 750px; /* 최대 높이 제한 */
 
   background: url("/assets/bread.svg") no-repeat center center;
   background-size: contain;
@@ -26,6 +24,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow: hidden; /* 내부 요소가 넘치지 않도록 설정 */
 }
 
 /*문제 제목 */
