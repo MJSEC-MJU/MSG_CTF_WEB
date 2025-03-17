@@ -293,19 +293,26 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{color:'white'}}>Description</label>
+                <label style={{ color: "white" }}>Description</label>
                 <textarea
                   name="description"
                   value={formData.description}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 300) {
+                      handleInputChange(e);
+                    }
+                  }}
                   required
                   style={{
-                    width: '100%',
-                    padding: '10px',
-                    marginBottom: '10px',
-                    height: '100px',
+                    width: "100%",
+                    padding: "10px",
+                    marginBottom: "10px",
+                    height: "100px",
                   }}
                 />
+                <p style={{ color: "white", fontSize: "12px", textAlign: "right" }}>
+                  {formData.description.length} / 300
+                </p>
               </div>
 
               <div>
