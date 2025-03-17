@@ -13,8 +13,8 @@
 
   width: 50vw; 
   height: 50vw; 
-  max-width: 720px; /* 최대 크기 제한 */
-  max-height: 720px; /* 최대 높이 제한 */
+  max-width: 750px; /* 최대 크기 제한 */
+  max-height: 700px; /* 최대 높이 제한 */
 
   background: url("/assets/bread.svg") no-repeat center center;
   background-size: contain;
