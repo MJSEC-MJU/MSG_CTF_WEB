@@ -11,8 +11,8 @@
   position: relative; /* wrapper 내부에 유지 */
   margin-top: 10vh; /* 네비게이션 바와 겹치지 않도록 조정 */
 
-  width: 55vw; 
-  height: 55vw; 
+  width: 50vw; 
+  height: 50vw; 
   max-width: 750px; /* 최대 크기 제한 */
   max-height: 750px; /* 최대 높이 제한 */
 
