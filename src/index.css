@@ -27,7 +27,6 @@ body {
   display: flex;
   place-items: center;
   position: relative;
-  overflow: hidden;
   min-width: 320px;
   min-height: 100vh;
   /* background-color: #fff; */
