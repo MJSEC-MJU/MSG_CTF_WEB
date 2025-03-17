@@ -9,8 +9,8 @@
 /*문제 내용을 감싸는 박스 (식빵 이미지 배경) */
 .problem-content {
   position: relative;
-  width: 550px; /* 식빵 크기에 맞게 조절 */
-  height: 550px;
+  width: 750px; /* 식빵 크기에 맞게 조절 */
+  height: 750px;
   background: url("/assets/bread.svg") no-repeat center center;
   background-size: contain;
   display: flex;
