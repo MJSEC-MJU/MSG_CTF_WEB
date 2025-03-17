@@ -35,8 +35,10 @@ const ProblemDetail = () => {
       alert('정답입니다!');
     } else if (result.data === 'Wrong') {
       alert('오답입니다. 다시 시도해보세요!');
-    } else if (result.data === 'Already submitted') {
+    } else if (result.data === 'Submitted') {
       alert('이미 정답을 제출했습니다!');
+    } else if (result.data === 'Wait') {
+      alert('30초동안 제출할 수 없습니다!');
     } else if (result.error) {
       alert(result.error);
     }
