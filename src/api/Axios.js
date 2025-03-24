@@ -10,6 +10,20 @@ const Axios = axios.create({
   },
 });
 
+Axios.interceptors.response.use(
+  (response) => {
+    if (response.data.accessToken) {
+      console.log("새 액세스 토큰 반영:", response.data.accessToken);
+      Cookies.set("accessToken", response.data.accessToken, { secure: true, sameSite: "Lax" });
+      Axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.accessToken;
+    }
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Axios 응답 인터셉터: 401 에러 발생 시 토큰 재발급 시도
 // Axios.interceptors.response.use(
 //   (response) => response,
