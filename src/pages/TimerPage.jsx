@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
-const CONTEST_START_TIME = new Date('2025-03-25T20:35:00').getTime();
+const CONTEST_START_TIME = new Date('2025-03-25T20:38:00').getTime();
 
 function TimerPage() {
   const [timeLeft, setTimeLeft] = useState(CONTEST_START_TIME - Date.now());
