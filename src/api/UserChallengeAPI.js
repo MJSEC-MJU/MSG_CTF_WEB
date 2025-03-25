@@ -1,4 +1,4 @@
-import axios from "axios";
+import { Axios } from './Axios';
 import Cookies from 'js-cookie';
 
 const API_URL = "/api/users/challenges";
@@ -6,7 +6,7 @@ const API_URL = "/api/users/challenges";
 export const fetchSolvedChallenges = async () => {
   try {
     const token = Cookies.get("accessToken");  // 토큰 가져오기
-    const response = await axios.get(API_URL, {
+    const response = await Axios.get(API_URL, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
