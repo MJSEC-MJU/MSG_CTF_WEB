@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { Axios } from './Axios';
 import Cookies from "js-cookie";
 
 const API_URL = '/api/admin/create/challenge'; 
@@ -32,7 +32,7 @@ export const createProblem = async (formData) => {
     const challengeBlob = new Blob([JSON.stringify(challengeData)], { type: 'application/json' });
     data.append('challenge', challengeBlob);
 
-    const response = await axios.post(API_URL, data, {
+    const response = await Axios.post(API_URL, data, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
