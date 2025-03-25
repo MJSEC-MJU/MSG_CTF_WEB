@@ -23,7 +23,7 @@ import AdminAuth from './api/AdminAuth';
 import Loading from './components/Loading';
 import TimerPage from './pages/TimerPage';
 
-const CONTEST_START_TIME = new Date('2025-03-25T10:25:00').getTime(); // 대회 시작 시간 설정
+const CONTEST_START_TIME = new Date('2025-03-25T10:35:00').getTime(); // 대회 시작 시간 설정
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -110,7 +110,7 @@ function App() {
             path="/adminPage"
             element={
               <AdminAuth>
-                <PrivateRoute element={<Admin />} />
+                <Admin />
               </AdminAuth>
             }
           />
