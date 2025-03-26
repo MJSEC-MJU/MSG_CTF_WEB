@@ -23,7 +23,7 @@ import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-26T13:54:00Z").getTime(); // UTC 기준 → 한국 시간은 +9시간
+const CONTEST_START_TIME = new Date("2025-03-26T14:03:00Z").getTime(); // UTC 기준 → 한국 시간은 +9시간
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -48,7 +48,7 @@ function App() {
     };
 
     fetchServerTime();
-    const interval = setInterval(fetchServerTime, 1000); // 1초마다 동기화
+    const interval = setInterval(fetchServerTime, 3600000); // 1초마다 동기화
 
     return () => clearInterval(interval);
   }, []);

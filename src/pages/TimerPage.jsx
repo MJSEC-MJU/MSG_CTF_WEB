@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
-const CONTEST_START_TIME = new Date("2025-03-26T13:54:00Z").getTime(); // UTC 기준 변환
+const CONTEST_START_TIME = new Date("2025-03-26T14:03:00Z").getTime(); // UTC 기준 변환
 
 function TimerPage() {
   const [timeLeft, setTimeLeft] = useState(CONTEST_START_TIME - Date.now());
@@ -32,7 +32,7 @@ function TimerPage() {
 
     fetchTime(); // 최초 실행
 
-    syncInterval = setInterval(fetchTime, 1000); // 1초마다 서버 시간 동기화
+    syncInterval = setInterval(fetchTime, 3600000); // 1시간마다 서버 시간 동기화
 
     countdownInterval = setInterval(() => {
       setTimeLeft((prev) => {
