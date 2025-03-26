@@ -18,12 +18,33 @@ import AdminLogin from "./pages/AdminLogin";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import "./App.css";
+import { useState, useEffect, Suspense } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import Header from "./components/Header";
+import Home from "./pages/Home";
+import Ranking from "./pages/Ranking";
+import Scoreboard from "./pages/Scoreboard";
+import Challenge from "./pages/Challenge";
+import ProblemDetail from "./pages/ProblemDetail";
+import MyPage from "./pages/MyPage";
+import AdminLogin from "./pages/AdminLogin";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-26T14:21:00Z").getTime(); // UTC 기준
+const CONTEST_START_TIME = new Date("2025-03-26T14:28:00Z").getTime(); // UTC 기준
+const CONTEST_END_TIME = new Date("2025-03-26T14:29:00Z").getTime(); // 대회 종료 시간
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -32,6 +53,7 @@ function App() {
   });
 
   const [isContestStarted, setIsContestStarted] = useState(null);
+  const [isContestEnded, setIsContestEnded] = useState(false);
   const [alertShown, setAlertShown] = useState(false); // alert 중복 방지
 
   useEffect(() => {
@@ -46,15 +68,18 @@ function App() {
         const data = await response.json();
         const serverNow = new Date(data.datetime).getTime();
         setIsContestStarted(serverNow >= CONTEST_START_TIME);
+        setIsContestEnded(serverNow >= CONTEST_END_TIME);
 
-        if (serverNow < CONTEST_START_TIME) {
-          retryDelay = 10000; // 대회 시작 전에는 10초마다 요청
+        if (serverNow < CONTEST_START_TIME || serverNow < CONTEST_END_TIME) {
+          retryDelay = 10000; // 대회 시작 전 or 진행 중이면 10초마다 요청
         } else {
-          clearInterval(syncInterval); // 대회 시작 후 중단
+          clearInterval(syncInterval); // 대회 종료 후 중단
         }
       } catch (error) {
         console.error("시간 동기화 실패:", error);
-        setIsContestStarted(Date.now() >= CONTEST_START_TIME);
+        const now = Date.now();
+        setIsContestStarted(now >= CONTEST_START_TIME);
+        setIsContestEnded(now >= CONTEST_END_TIME);
       }
     };
 
@@ -64,12 +89,21 @@ function App() {
     return () => clearInterval(syncInterval);
   }, []);
 
-  // Private Route: 대회 시작 전에는 타이머 페이지로 이동
+  // Private Route: 대회 시작 전에는 타이머 페이지로 이동, 종료 후 홈으로 이동 (adminPage 제외)
   const PrivateRoute = ({ element }) => {
     const location = useLocation();
+    const isAdminPage = location.pathname.startsWith("/adminPage");
 
     if (isContestStarted === null) {
       return <Loading />;
+    }
+
+    if (isContestEnded && !isAdminPage) {
+      if (!alertShown) {
+        alert("대회가 종료되었습니다!");
+        setAlertShown(true);
+      }
+      return <Navigate to="/" replace />;
     }
 
     if (!isContestStarted) {
