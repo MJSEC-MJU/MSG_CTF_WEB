@@ -1,6 +1,6 @@
 import { Axios } from './Axios';
 import Cookies from "js-cookie";
-const API_BASE_URL = "/api/challenges/all";
+const API_BASE_URL = "/challenges/all";
 
 export const fetchProblems = async (page = 0, size = 12) => {
   try {
