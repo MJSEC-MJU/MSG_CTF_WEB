@@ -1,7 +1,7 @@
 import { Axios } from './Axios';
 import Cookies from "js-cookie";
 
-const API_URL = '/api/admin/create/challenge'; 
+const API_URL = '/admin/create/challenge'; 
 const token = Cookies.get("accessToken");
 
 export const createProblem = async (formData) => {
