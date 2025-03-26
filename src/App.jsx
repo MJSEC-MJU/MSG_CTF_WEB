@@ -23,7 +23,7 @@ import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-26T14:03:00Z").getTime(); // UTC 기준 → 한국 시간은 +9시간
+const CONTEST_START_TIME = new Date("2025-03-26T14:17:00Z").getTime(); // UTC 기준
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -32,25 +32,36 @@ function App() {
   });
 
   const [isContestStarted, setIsContestStarted] = useState(null);
+  const [alertShown, setAlertShown] = useState(false); // alert 중복 방지
 
-  // 외부 NTP 서버에서 현재 한국 시간 가져오기
   useEffect(() => {
+    let syncInterval;
+    let retryDelay = 1000; // 초기에 1초마다 요청
+
     const fetchServerTime = async () => {
       try {
         const response = await fetch("https://worldtimeapi.org/api/timezone/Asia/Seoul");
+        if (!response.ok) throw new Error("시간 서버 응답 오류");
+
         const data = await response.json();
-        const serverNow = new Date(data.datetime).getTime(); // 서버가 제공하는 한국 시간 사용
+        const serverNow = new Date(data.datetime).getTime();
         setIsContestStarted(serverNow >= CONTEST_START_TIME);
+
+        if (serverNow < CONTEST_START_TIME) {
+          retryDelay = 10000; // 대회 시작 전에는 10초마다 요청
+        } else {
+          clearInterval(syncInterval); // 대회 시작 후 중단
+        }
       } catch (error) {
         console.error("시간 동기화 실패:", error);
-        setIsContestStarted(Date.now() >= CONTEST_START_TIME); // 실패 시 로컬 시간 사용
+        setIsContestStarted(Date.now() >= CONTEST_START_TIME);
       }
     };
 
     fetchServerTime();
-    const interval = setInterval(fetchServerTime, 3600000); // 1초마다 동기화
+    syncInterval = setInterval(fetchServerTime, retryDelay);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(syncInterval);
   }, []);
 
   // Private Route: 대회 시작 전에는 타이머 페이지로 이동
@@ -58,13 +69,17 @@ function App() {
     const location = useLocation();
 
     if (isContestStarted === null) {
-      return <Loading />; // 시간 동기화가 끝날 때까지 로딩 화면 표시
+      return <Loading />;
     }
 
     if (!isContestStarted) {
-      alert("대회 시간이 아닙니다!"); // 페이지를 누를 때마다 alert가 떠야 하므로 여기에 위치
+      if (!alertShown) {
+        alert("대회 시간이 아닙니다!");
+        setAlertShown(true);
+      }
       return <Navigate to="/timer" state={{ from: location.pathname }} />;
     }
+
     return element;
   };
 
@@ -77,45 +92,23 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route
             path="/ranking"
-            element={
-              <PrivateRoute
-                element={isLoggedIn ? <Ranking /> : <Navigate to="/login" />}
-              />
-            }
+            element={<PrivateRoute element={isLoggedIn ? <Ranking /> : <Navigate to="/login" />} />}
           />
           <Route
             path="/scoreboard"
-            element={
-              <PrivateRoute
-                element={isLoggedIn ? <Scoreboard /> : <Navigate to="/login" />}
-              />
-            }
+            element={<PrivateRoute element={isLoggedIn ? <Scoreboard /> : <Navigate to="/login" />} />}
           />
           <Route
             path="/challenge"
-            element={
-              <PrivateRoute
-                element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />}
-              />
-            }
+            element={<PrivateRoute element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
           />
-          <Route
-            path="/problem/:id"
-            element={<PrivateRoute element={<ProblemDetail />} />}
-          />
+          <Route path="/problem/:id" element={<PrivateRoute element={<ProblemDetail />} />} />
           <Route
             path="/myPage"
-            element={
-              <PrivateRoute
-                element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />}
-              />
-            }
+            element={<PrivateRoute element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />} />}
           />
           <Route path="/adminLogin" element={<AdminLogin />} />
-          <Route
-            path="/login"
-            element={<Login setIsLoggedIn={setIsLoggedIn} />}
-          />
+          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/signup" element={<Signup />} />
           <Route
             path="/adminPage"
