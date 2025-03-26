@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
-const CONTEST_START_TIME = new Date("2025-03-26T22:13:00").getTime()+ 9 * 60 * 60 * 1000; // 한국 시간 기준
+const CONTEST_START_TIME = new Date("2025-03-27T13:33:00Z").getTime(); // UTC 기준 변환
 
 function TimerPage() {
   const [timeLeft, setTimeLeft] = useState(CONTEST_START_TIME - Date.now());
@@ -9,28 +9,39 @@ function TimerPage() {
   const location = useLocation(); // 현재 위치 가져오기
 
   useEffect(() => {
+    let countdownInterval;
+    let syncInterval;
+
     const fetchTime = async () => {
       try {
         const response = await fetch("https://worldtimeapi.org/api/timezone/Asia/Seoul");
         const data = await response.json();
-        const serverNow = new Date(data.utc_datetime).getTime() + 9 * 60 * 60 * 1000; // UTC → KST 변환
-        setTimeLeft(CONTEST_START_TIME - serverNow);
+        const serverNow = new Date(data.datetime).getTime(); // 한국 시간 그대로 사용
+        const remainingTime = CONTEST_START_TIME - serverNow;
+        setTimeLeft(remainingTime);
+        if (remainingTime <= 0) {
+          setIsStarted(true);
+          clearInterval(countdownInterval);
+          clearInterval(syncInterval);
+        }
       } catch (error) {
-        //console.error("시간 동기화 실패:", error);
+        console.error("시간 동기화 실패:", error);
         setTimeLeft(CONTEST_START_TIME - Date.now()); // 실패 시 로컬 시간 사용
       }
     };
 
     fetchTime(); // 최초 실행
-    const syncInterval = setInterval(fetchTime, 30000); // 30초마다 서버 시간 동기화
 
-    const countdownInterval = setInterval(() => {
+    syncInterval = setInterval(fetchTime, 30000); // 30초마다 서버 시간 동기화
+
+    countdownInterval = setInterval(() => {
       setTimeLeft((prev) => {
         const newTimeLeft = prev - 1000;
         if (newTimeLeft <= 0) {
           setIsStarted(true);
           clearInterval(countdownInterval);
           clearInterval(syncInterval);
+          return 0;
         }
         return newTimeLeft;
       });
