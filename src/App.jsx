@@ -31,7 +31,7 @@ function App() {
     return savedLoginStatus === "true";
   });
 
-  const [isContestStarted, setIsContestStarted] = useState(false);
+  const [isContestStarted, setIsContestStarted] = useState(null);
 
   // 외부 NTP 서버에서 현재 한국 시간 가져오기
   useEffect(() => {
@@ -56,6 +56,10 @@ function App() {
   // Private Route: 대회 시작 전에는 타이머 페이지로 이동
   const PrivateRoute = ({ element }) => {
     const location = useLocation();
+    
+    if (isContestStarted === null) {
+      return <Loading />; // 시간 동기화가 끝날 때까지 로딩 화면 표시
+    }
 
     if (!isContestStarted) {
       alert("대회 시간이 아닙니다!");
