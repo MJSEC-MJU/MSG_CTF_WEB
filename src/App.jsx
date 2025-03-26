@@ -23,7 +23,7 @@ import AdminAuth from './api/AdminAuth';
 import Loading from './components/Loading';
 import TimerPage from './pages/TimerPage';
 
-const CONTEST_START_TIME = new Date('2025-03-25T20:38:00').getTime(); // 대회 시작 시간 설정
+const CONTEST_START_TIME = new Date('2025-03-26T17:35:00').getTime(); // 대회 시작 시간 설정
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
