@@ -18,7 +18,7 @@ Axios.interceptors.response.use(
       Axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.accessToken;
     }
     if (response.data?.refreshToken) {
-      console.log("새 리프레쉬 토큰 반영:", response.data.accessToken);
+      console.log("새 리프레쉬 토큰 반영:", response.data.refreshToken);
       Cookies.set("refreshToken", response.data.refreshToken, { secure: true, sameSite: "Lax" });
     }
     return response;
