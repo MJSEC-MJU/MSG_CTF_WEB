@@ -23,8 +23,8 @@ import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-26T20:00:00+09:00").getTime(); // 대회 시작 시간
-const CONTEST_END_TIME = new Date("2025-03-26T20:10:00+09:00").getTime(); // 대회 종료 시간
+const CONTEST_START_TIME = new Date("2025-03-26T20:18:00+09:00").getTime(); // 대회 시작 시간
+const CONTEST_END_TIME = new Date("2025-03-26T20:25:00+09:00").getTime(); // 대회 종료 시간
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -42,13 +42,38 @@ function App() {
         const data = await response.json();
         const serverNow = new Date(data.utc_datetime).getTime() + 9 * 60 * 60 * 1000; // UTC → KST 변환
 
-        setIsContestStarted(serverNow >= CONTEST_START_TIME);
-        setIsContestEnded(serverNow >= CONTEST_END_TIME);
+        console.log("서버 시간:", new Date(serverNow).toISOString());
+        console.log("대회 시작 시간:", new Date(CONTEST_START_TIME).toISOString());
+        console.log("대회 종료 시간:", new Date(CONTEST_END_TIME).toISOString());
+
+        if (serverNow >= CONTEST_START_TIME) {
+          setIsContestStarted(true);
+
+          if (serverNow >= CONTEST_END_TIME) {
+            setIsContestEnded(true);
+          } else {
+            setIsContestEnded(false);
+          }
+        } else {
+          setIsContestStarted(false);
+          setIsContestEnded(false);
+        }
       } catch (error) {
-        //console.error("시간 동기화 실패:", error);
+        console.error("시간 동기화 실패:", error);
         const now = Date.now();
-        setIsContestStarted(now >= CONTEST_START_TIME);
-        setIsContestEnded(now >= CONTEST_END_TIME);
+
+        if (now >= CONTEST_START_TIME) {
+          setIsContestStarted(true);
+
+          if (now >= CONTEST_END_TIME) {
+            setIsContestEnded(true);
+          } else {
+            setIsContestEnded(false);
+          }
+        } else {
+          setIsContestStarted(false);
+          setIsContestEnded(false);
+        }
       }
     };
 
