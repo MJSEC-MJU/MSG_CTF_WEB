@@ -1,7 +1,7 @@
 import { Axios } from './Axios';
 import Cookies from 'js-cookie';
 
-const API_URL = "/api/users/challenges";
+const API_URL = "/users/challenges";
 
 export const fetchSolvedChallenges = async () => {
   try {
