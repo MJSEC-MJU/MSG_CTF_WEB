@@ -11,7 +11,7 @@ function TimerPage() {
   useEffect(() => {
     const fetchTime = async () => {
       try {
-        const response = await fetch("http://worldtimeapi.org/api/timezone/Asia/Seoul");
+        const response = await fetch("https://worldtimeapi.org/api/timezone/Asia/Seoul");
         const data = await response.json();
         const serverNow = new Date(data.utc_datetime).getTime() + 9 * 60 * 60 * 1000; // UTC → KST 변환
         setTimeLeft(CONTEST_START_TIME - serverNow);
