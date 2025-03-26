@@ -23,7 +23,7 @@ import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-26T21:20:00+09:00").getTime(); // 한국 시간 기준
+const CONTEST_START_TIME = new Date("2025-03-26T21:35:00+09:00").getTime(); // 한국 시간 기준
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -33,7 +33,6 @@ function App() {
 
   const [isContestStarted, setIsContestStarted] = useState(null);
 
-  // 외부 NTP 서버에서 현재 한국 시간 가져오기
   useEffect(() => {
     const fetchServerTime = async () => {
       try {
@@ -42,13 +41,12 @@ function App() {
         const serverNow = new Date(data.utc_datetime).getTime() + 9 * 60 * 60 * 1000; // UTC → KST 변환
         setIsContestStarted(serverNow >= CONTEST_START_TIME);
       } catch (error) {
-        //console.error("시간 동기화 실패:", error);
         setIsContestStarted(Date.now() >= CONTEST_START_TIME); // 실패 시 로컬 시간 사용
       }
     };
 
     fetchServerTime();
-    const interval = setInterval(fetchServerTime, 100000); // 100초마다 동기화
+    const interval = setInterval(fetchServerTime, 100000);
 
     return () => clearInterval(interval);
   }, []);
@@ -56,15 +54,17 @@ function App() {
   // Private Route: 대회 시작 전에는 타이머 페이지로 이동
   const PrivateRoute = ({ element }) => {
     const location = useLocation();
-    
+
+    // 서버 시간 동기화 중이면 로딩 화면 표시 (✅ 수정)
     if (isContestStarted === null) {
-      return <Loading />; // 시간 동기화가 끝날 때까지 로딩 화면 표시
+      return <Loading />;
     }
 
-    if (!isContestStarted) {
-      alert("대회 시간이 아닙니다!");
-      return <Navigate to="/timer" state={{ from: location.pathname }} />;
+    // 대회 시작 전이면 `/timer`로 이동 (✅ `/timer` 페이지에서는 예외 처리)
+    if (!isContestStarted && location.pathname !== "/timer") {
+      return <Navigate to="/timer" state={{ from: location.pathname }} replace />;
     }
+
     return element;
   };
 
@@ -74,57 +74,18 @@ function App() {
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/timer" element={<TimerPage />} />
+          
           <Route path="/" element={<Home />} />
-          <Route
-            path="/ranking"
-            element={
-              <PrivateRoute
-                element={isLoggedIn ? <Ranking /> : <Navigate to="/login" />}
-              />
-            }
-          />
-          <Route
-            path="/scoreboard"
-            element={
-              <PrivateRoute
-                element={isLoggedIn ? <Scoreboard /> : <Navigate to="/login" />}
-              />
-            }
-          />
-          <Route
-            path="/challenge"
-            element={
-              <PrivateRoute
-                element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />}
-              />
-            }
-          />
-          <Route
-            path="/problem/:id"
-            element={<PrivateRoute element={<ProblemDetail />} />}
-          />
-          <Route
-            path="/myPage"
-            element={
-              <PrivateRoute
-                element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />}
-              />
-            }
-          />
+          <Route path="/ranking" element={<PrivateRoute element={isLoggedIn ? <Ranking /> : <Navigate to="/login" />} />} />
+          <Route path="/scoreboard" element={<PrivateRoute element={isLoggedIn ? <Scoreboard /> : <Navigate to="/login" />} />} />
+          <Route path="/challenge" element={<PrivateRoute element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />} />
+          <Route path="/problem/:id" element={<PrivateRoute element={<ProblemDetail />} />} />
+          <Route path="/myPage" element={<PrivateRoute element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />} />} />
+          
           <Route path="/adminLogin" element={<AdminLogin />} />
-          <Route
-            path="/login"
-            element={<Login setIsLoggedIn={setIsLoggedIn} />}
-          />
+          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/signup" element={<Signup />} />
-          <Route
-            path="/adminPage"
-            element={
-              <AdminAuth>
-                <Admin />
-              </AdminAuth>
-            }
-          />
+          <Route path="/adminPage" element={<AdminAuth><Admin /></AdminAuth>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
