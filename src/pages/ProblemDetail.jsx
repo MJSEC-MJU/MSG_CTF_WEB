@@ -28,6 +28,12 @@ const ProblemDetail = () => {
     };
 
     loadProblem();
+
+    // localStorage에서 정답 여부 확인
+    const storedCorrect = localStorage.getItem(`isCorrect-${id}`);
+    if (storedCorrect === 'true') {
+      setIsCorrect(true);
+    }
   }, [id]);
 
   const handleSubmit = async () => {
@@ -42,11 +48,13 @@ const ProblemDetail = () => {
     if (result.data === 'Correct') {
       alert('정답입니다!');
       setIsCorrect(true);
+      localStorage.setItem(`isCorrect-${id}`, 'true'); // 정답 상태 저장
     } else if (result.data === 'Wrong') {
       alert('오답입니다. 다시 시도해보세요!');
     } else if (result.data === 'Submitted') {
       alert('이미 정답을 제출했습니다!');
       setIsCorrect(true);
+      localStorage.setItem(`isCorrect-${id}`, 'true'); // 정답 상태 저장
     } else if (result.data === 'Wait') {
       alert('30초 동안 제출할 수 없습니다!');
     } else if (result.error) {
