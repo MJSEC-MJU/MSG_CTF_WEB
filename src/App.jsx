@@ -12,6 +12,20 @@ import Home from "./pages/Home";
 import Ranking from "./pages/Ranking";
 import Scoreboard from "./pages/Scoreboard";
 import Challenge from "./pages/Challenge";
+import "./App.css";
+import { useState, useEffect, Suspense } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import Header from "./components/Header";
+import Home from "./pages/Home";
+import Ranking from "./pages/Ranking";
+import Scoreboard from "./pages/Scoreboard";
+import Challenge from "./pages/Challenge";
 import ProblemDetail from "./pages/ProblemDetail";
 import MyPage from "./pages/MyPage";
 import AdminLogin from "./pages/AdminLogin";
@@ -23,7 +37,7 @@ import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-26T21:10:00+09:00").getTime(); // 한국 시간 기준
+const CONTEST_START_TIME = new Date("2025-03-26T21:17:00+09:00").getTime(); // 한국 시간 기준
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -48,7 +62,7 @@ function App() {
     };
 
     fetchServerTime();
-    const interval = setInterval(fetchServerTime, 10000); // 10초마다 동기화
+    const interval = setInterval(fetchServerTime, 100000); // 100초마다 동기화
 
     return () => clearInterval(interval);
   }, []);
@@ -56,17 +70,16 @@ function App() {
   // Private Route: 대회 시작 전에는 타이머 페이지로 이동
   const PrivateRoute = ({ element }) => {
     const location = useLocation();
-
+    
     if (isContestStarted === null) {
       return <Loading />; // 시간 동기화가 끝날 때까지 로딩 화면 표시
     }
 
     if (!isContestStarted) {
-      alert("대회 시간이 아닙니다!"); // 클릭할 때마다 alert 실행
+      alert("대회 시간이 아닙니다!");
       return <Navigate to="/timer" state={{ from: location.pathname }} />;
     }
-
-    return element; // 대회가 시작되었으면 바로 페이지 이동 (alert 없음)
+    return element;
   };
 
   return (
