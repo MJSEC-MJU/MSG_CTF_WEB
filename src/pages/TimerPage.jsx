@@ -16,8 +16,8 @@ function TimerPage() {
         const serverNow = new Date(data.utc_datetime).getTime() + 9 * 60 * 60 * 1000; // UTC → KST 변환
         setTimeLeft(CONTEST_START_TIME - serverNow);
       } catch (error) {
-        console.error("시간 동기화 실패:", error);
-        setTimeLeft(CONTEST_START_TIME - Date.now()); // 실패 시 로컬 시간 사용
+        //console.error("시간 동기화 실패:", error);
+       // setTimeLeft(CONTEST_START_TIME - Date.now()); // 실패 시 로컬 시간 사용
       }
     };
 
