@@ -23,8 +23,8 @@ import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-26T20:18:00+09:00").getTime(); // 대회 시작 시간
-const CONTEST_END_TIME = new Date("2025-03-26T20:25:00+09:00").getTime(); // 대회 종료 시간
+const CONTEST_START_TIME = new Date("2025-03-26T20:37:00+09:00").getTime()// 대회 시작 시간
+const CONTEST_END_TIME = new Date("2025-03-26T20:40:00+09:00").getTime()// 대회 종료 시간
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
