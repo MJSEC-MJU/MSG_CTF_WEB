@@ -23,7 +23,7 @@ import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-27T21:55:00").getTime(); // 한국 시간 기준
+const CONTEST_START_TIME = new Date("2025-03-27T21:55:00").getTime()+ 9 * 60 * 60 * 1000; // 한국 시간 기준
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
