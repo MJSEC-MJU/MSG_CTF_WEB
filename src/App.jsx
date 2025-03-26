@@ -18,33 +18,13 @@ import AdminLogin from "./pages/AdminLogin";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
-import "./App.css";
-import { useState, useEffect, Suspense } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
-import Header from "./components/Header";
-import Home from "./pages/Home";
-import Ranking from "./pages/Ranking";
-import Scoreboard from "./pages/Scoreboard";
-import Challenge from "./pages/Challenge";
-import ProblemDetail from "./pages/ProblemDetail";
-import MyPage from "./pages/MyPage";
-import AdminLogin from "./pages/AdminLogin";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
-const CONTEST_START_TIME = new Date("2025-03-26T14:28:00Z").getTime(); // UTC 기준
-const CONTEST_END_TIME = new Date("2025-03-26T14:29:00Z").getTime(); // 대회 종료 시간
+const CONTEST_START_TIME = new Date("2025-03-26T14:32:00Z").getTime(); // UTC 기준
+const CONTEST_END_TIME = new Date("2025-03-26T16:33:00Z").getTime(); // 대회 종료 시간
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -160,3 +140,4 @@ function App() {
 }
 
 export default App;
+
