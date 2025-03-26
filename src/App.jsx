@@ -48,7 +48,7 @@ function App() {
     };
 
     fetchServerTime();
-    const interval = setInterval(fetchServerTime, 1000); // 1초마다 동기화
+    const interval = setInterval(fetchServerTime, 10000); // 10초마다 동기화
 
     return () => clearInterval(interval);
   }, []);

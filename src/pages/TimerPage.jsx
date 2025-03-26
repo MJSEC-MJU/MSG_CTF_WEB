@@ -22,7 +22,7 @@ function TimerPage() {
     };
 
     fetchTime(); // 최초 실행
-    const syncInterval = setInterval(fetchTime, 1000); // 1초마다 서버 시간 동기화
+    const syncInterval = setInterval(fetchTime, 10000); // 10초마다 서버 시간 동기화
 
     const countdownInterval = setInterval(() => {
       setTimeLeft((prev) => {
