@@ -1,29 +1,31 @@
-import { useState, useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-const CONTEST_START_TIME = new Date('2025-03-26T17:35:00').getTime();
+const CONTEST_START_TIME = new Date('2025-03-26T18:00:00+09:00').getTime(); // 한국시간
 
 function TimerPage() {
-  const [timeLeft, setTimeLeft] = useState(CONTEST_START_TIME - Date.now());
-  const [isStarted, setIsStarted] = useState(timeLeft <= 0);
-  const location = useLocation(); // 현재 위치 가져오기
+  const [timeLeft, setTimeLeft] = useState(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const remaining = CONTEST_START_TIME - Date.now();
-      setTimeLeft(remaining);
-      if (remaining <= 0) {
-        setIsStarted(true);
-        clearInterval(interval);
+    const fetchTime = async () => {
+      try {
+        const response = await fetch("http://worldtimeapi.org/api/timezone/Etc/UTC");
+        const data = await response.json();
+        const serverNow = new Date(data.utc_datetime).getTime(); // NTP 기반 현재 시간
+        setTimeLeft(CONTEST_START_TIME - serverNow);
+      } catch (error) {
+        console.error("시간 동기화 실패:", error);
+        setTimeLeft(CONTEST_START_TIME - Date.now()); // 실패 시 fallback
       }
-    }, 1000);
+    };
+
+    fetchTime(); // 처음 API 호출해서 서버 시간 가져옴
+    const interval = setInterval(fetchTime, 10000); // 10초마다 동기화
 
     return () => clearInterval(interval);
   }, []);
 
-  if (isStarted) {
-    const redirectPath = location.state?.from || "/";
-    return <Navigate to={redirectPath} replace />;
+  if (timeLeft === null) {
+    return <div>시간을 불러오는 중...</div>;
   }
 
   const formatTime = (ms) => {
