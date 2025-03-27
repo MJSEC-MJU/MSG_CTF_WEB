@@ -24,7 +24,7 @@ import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 
 const CONTEST_START_TIME = new Date("2025-03-26T14:38:00Z").getTime(); // UTC 기준
-const CONTEST_END_TIME = new Date("2025-03-26T14:39:00Z").getTime(); // 대회 종료 시간
+const CONTEST_END_TIME = new Date("2025-03-27T13:00:00Z").getTime(); // 대회 종료 시간
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
