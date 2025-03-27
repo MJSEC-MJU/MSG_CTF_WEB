@@ -28,7 +28,7 @@ Axios.interceptors.response.use(
       console.log(`📌 에러 메시지:`, errorMessage);
 
       // 403 에러 발생 시 (토큰 만료)
-      if ((status === 403|| status ===400) && !originalRequest._retry) {
+      if (status === 403 && !originalRequest._retry) {
         originalRequest._retry = true;
 
         try {
