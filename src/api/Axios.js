@@ -15,41 +15,45 @@ Axios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
-    console.log(" Axios Error Response:", error.response); // 전체 에러 응답 로그
+
+    console.log("❌ Axios Error Response:", error.response);
 
     if (error.response) {
       const status = error.response.status;
       const errorMessage = error.response.data;
-      
-      console.log(` 에러 상태 코드: ${status}`);
-      console.log(` 에러 메시지:`, errorMessage);
 
-      // "Access token expired" 메시지 확인
+      console.log(`📌 에러 상태 코드: ${status}`);
+      console.log(`📌 에러 메시지:`, errorMessage);
+
+      // 403 에러 (토큰 만료) 처리
       if (status === 403 && !originalRequest._retry) {
+        originalRequest._retry = true; // 무한 루프 방지
+
         try {
-          console.log('리프레시 토큰으로 새 액세스 토큰 요청 중...');
+          console.log('🔄 리프레시 토큰으로 새 액세스 토큰 요청 중...');
           const newAccessToken = await handleTokenRefresh();
 
           if (newAccessToken) {
-            console.log('액세스 토큰 갱신 성공:', newAccessToken);
+            console.log('✅ 액세스 토큰 갱신 성공:', newAccessToken);
             Cookies.set('accessToken', newAccessToken, { secure: true });
 
-            // 원래 요청의 Authorization 헤더 업데이트
+            // Axios 기본 헤더 업데이트 (새로운 요청에서 사용됨)
+            Axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
             originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-            window.location.reload();
+
+            // **🚀 원래 요청을 재시도 (새로고침 X)**
             return Axios(originalRequest);
           }
         } catch (refreshError) {
-          console.error('리프레시 토큰 만료 - 로그아웃 처리', refreshError);
+          console.error('⛔ 리프레시 토큰 만료 - 로그아웃 처리', refreshError);
           Cookies.remove('accessToken');
           Cookies.remove('refreshToken');
-          //window.location.href = '/login'; // 강제 로그아웃 처리
+          window.location.href = '/login'; // 로그아웃 처리
           return Promise.reject(refreshError);
         }
       }
     } else {
-      console.error("서버 응답이 없음. 네트워크 문제");
+      console.error("⚠️ 서버 응답이 없음. 네트워크 문제");
     }
 
     return Promise.reject(error);
@@ -59,27 +63,27 @@ Axios.interceptors.response.use(
 // 토큰 재발급 함수
 async function handleTokenRefresh() {
   try {
-    console.log("토큰 재발급 요청...");
+    console.log("🔄 토큰 재발급 요청...");
     const response = await axios.post(
       'https://msg.mjsec.kr/api/reissue',
       {},
       { withCredentials: true } // 쿠키 포함 요청
     );
 
-    console.log("재발급 응답:", response);
+    console.log("🔄 재발급 응답:", response);
 
     const newAccessToken = response.headers['authorization']; // 예: "Bearer <newAccessToken>"
 
     if (newAccessToken) {
       const token = newAccessToken.replace('Bearer ', '');
       Cookies.set('accessToken', token, { secure: true });
-      console.log("새로운 액세스 토큰 저장 완료.");
+      console.log("✅ 새로운 액세스 토큰 저장 완료.");
       return token;
     } else {
-      throw new Error("Access token not found in response headers");
+      throw new Error("⚠️ Access token not found in response headers");
     }
   } catch (error) {
-    console.error("토큰 재발급 실패:", error);
+    console.error("⛔ 토큰 재발급 실패:", error);
     throw new Error("Failed to refresh token");
   }
 }
