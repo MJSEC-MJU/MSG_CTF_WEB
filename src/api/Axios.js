@@ -26,9 +26,7 @@ Axios.interceptors.response.use(
       console.log(` 에러 메시지:`, errorMessage);
 
       // "Access token expired" 메시지 확인
-      if (status === 403 && errorMessage === "Access token expired" && !originalRequest._retry) {
-        originalRequest._retry = true;
-
+      if (status === 403 && !originalRequest._retry) {
         try {
           console.log('리프레시 토큰으로 새 액세스 토큰 요청 중...');
           const newAccessToken = await handleTokenRefresh();
