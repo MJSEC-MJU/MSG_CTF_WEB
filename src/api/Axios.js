@@ -37,7 +37,7 @@ Axios.interceptors.response.use(
 
             // 원래 요청의 Authorization 헤더 업데이트
             originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-
+            window.location.reload();
             return Axios(originalRequest);
           }
         } catch (refreshError) {
