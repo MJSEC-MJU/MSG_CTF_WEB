@@ -26,7 +26,7 @@ Axios.interceptors.response.use(
       console.log(` 에러 메시지:`, errorMessage);
 
       // "Access token expired" 메시지 확인
-      if (status === 401 && errorMessage === "Access token expired" && !originalRequest._retry) {
+      if (status === 403 && errorMessage === "Access token expired" && !originalRequest._retry) {
         originalRequest._retry = true;
 
         try {
