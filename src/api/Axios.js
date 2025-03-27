@@ -44,7 +44,7 @@ Axios.interceptors.response.use(
           console.error('리프레시 토큰 만료 - 로그아웃 처리', refreshError);
           Cookies.remove('accessToken');
           Cookies.remove('refreshToken');
-          window.location.href = '/login'; // 강제 로그아웃 처리
+          //window.location.href = '/login'; // 강제 로그아웃 처리
           return Promise.reject(refreshError);
         }
       }
