@@ -34,12 +34,12 @@ const Ranking = () => {
       );
       
       eventSource.onopen = () => {
-        console.log('✅ SSE 연결이 열렸습니다.');
+        //console.log('✅ SSE 연결이 열렸습니다.');
       };
 
       eventSource.onmessage = (event) => {
         try {
-          console.log('📩 수신된 데이터:', event.data);
+          //console.log('📩 수신된 데이터:', event.data);
           const parsedData = JSON.parse(event.data);
           let dataArray = [];
           if (Array.isArray(parsedData)) {
@@ -54,12 +54,12 @@ const Ranking = () => {
             setLoading(false);
           }
         } catch (error) {
-          console.error('❌ 데이터 파싱 오류:', error.message);
+          //console.error('❌ 데이터 파싱 오류:', error.message);
         }
       };
 
       eventSource.onerror = (error) => {
-        console.error('❌ SSE 오류 발생:', error);
+        //console.error('❌ SSE 오류 발생:', error);
         eventSource.close();
       };
     };

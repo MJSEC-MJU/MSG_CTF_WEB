@@ -43,7 +43,7 @@ const ProblemDetail = () => {
     setTimeout(() => setIsSubmitting(false), 1000);
 
     const result = await submitFlag(id, flag);
-    console.log('API 응답:', result);
+    //console.log('API 응답:', result);
 
     if (result.data === 'Correct') {
       alert('정답입니다!');

@@ -34,7 +34,7 @@ const MyPage = () => {
         });
       })
       .catch((error) => {
-        console.error('프로필 불러오기 실패:', error);
+        //console.error('프로필 불러오기 실패:', error);
         setProfileError(true);
       });
   }, []);
@@ -51,7 +51,7 @@ const MyPage = () => {
         setUnsolvedProblems(unsolved);
       })
       .catch(error => {
-        console.error("문제 데이터를 불러오는 중 오류 발생:", error);
+        //console.error("문제 데이터를 불러오는 중 오류 발생:", error);
         setProblemsError(true);
       })
       .finally(() => {
@@ -74,7 +74,7 @@ const MyPage = () => {
         const payload = JSON.parse(jsonStr);
         const leaderboard = Array.isArray(payload) ? payload : payload.data;
         if (!Array.isArray(leaderboard)) {
-          console.error("리더보드 데이터 형식이 올바르지 않습니다:", leaderboard);
+          //console.error("리더보드 데이터 형식이 올바르지 않습니다:", leaderboard);
           return;
         }
         const rankIndex = leaderboard.findIndex(item => item.userId === profile.loginId);
@@ -82,12 +82,12 @@ const MyPage = () => {
           setProfile(prev => ({ ...prev, rank: rankIndex + 1 }));
         }
       } catch (err) {
-        console.error('SSE 데이터 파싱 에러:', err);
+        //console.error('SSE 데이터 파싱 에러:', err);
       }
     };
 
     eventSource.onerror = (err) => {
-      console.error('SSE 연결 에러:', err);
+      //console.error('SSE 연결 에러:', err);
       setLeaderboardError(true);
       eventSource.close();
     };

@@ -6,7 +6,7 @@ export const fetchProblems = async () => {
   const token = Cookies.get("accessToken"); // 내부에서 토큰 가져오기
 
   if (!token) {
-    console.error("토큰이 없습니다. 로그인이 필요합니다.");
+    //console.error("토큰이 없습니다. 로그인이 필요합니다.");
     return [];
   }
 
@@ -32,7 +32,7 @@ export const fetchProblems = async () => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Problem Fetch Error:", error);
+    //console.error("Problem Fetch Error:", error);
     return [];
   }
 };
@@ -50,7 +50,7 @@ export const deleteProblem = async (challengeId) => {
 
     return await responseD.json();
   } catch (error) {
-    console.error("문제 삭제 오류:", error);
+    //console.error("문제 삭제 오류:", error);
     return { code: "ERROR", message: "문제 삭제 실패" };
   }
 };
