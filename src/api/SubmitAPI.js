@@ -18,7 +18,7 @@ export const submitFlag = async (challengeId, flag) => {
         },
       }
     );
-    // console.log("API 응답 성공:", response.data);
+    console.log("API 응답 성공:", response.data);
     return response.data;
   } catch (error) {
     if (error.response) {

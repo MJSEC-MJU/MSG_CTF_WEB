@@ -23,7 +23,7 @@ export const updateProblem = async (challengeId, formData) => {
 
     return await response.json();
   } catch (error) {
-    // console.error("문제 수정 실패:", error);
+    console.error("문제 수정 실패:", error);
     throw error;
   }
 };

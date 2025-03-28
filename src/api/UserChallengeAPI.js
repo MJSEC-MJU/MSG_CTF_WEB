@@ -11,7 +11,7 @@ export const fetchSolvedChallenges = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    // console.log("푼 문제 API 응답:", response.data); // 응답 데이터 확인
+    console.log("푼 문제 API 응답:", response.data); // 응답 데이터 확인
     
     if (response.data.code === "SUCCESS") {
       return response.data.data;
@@ -19,7 +19,7 @@ export const fetchSolvedChallenges = async () => {
       throw new Error(response.data.message || "데이터를 불러오는 데 실패했습니다.");
     }
   } catch (error) {
-    // console.error("푼 문제 목록을 불러오는 중 오류 발생:", error);
+    console.error("푼 문제 목록을 불러오는 중 오류 발생:", error);
     return [];
   }
 };

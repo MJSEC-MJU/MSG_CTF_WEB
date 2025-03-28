@@ -18,7 +18,7 @@ export const updateUser = async (userId, updatedData) => {
 
     return await response.json(); // 업데이트된 유저 정보 반환
   } catch (error) {
-    // console.error("사용자 정보 업데이트 실패:", error);
+    console.error("사용자 정보 업데이트 실패:", error);
     throw error;
   }
 };

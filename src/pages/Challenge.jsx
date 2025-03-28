@@ -26,7 +26,7 @@ function Challenge() {
         setProblems(problems);
         setTotalPages(totalPages)
       } catch (error) {
-        // console.error("문제 데이터를 불러오는 중 오류 발생:", error);
+        console.error("문제 데이터를 불러오는 중 오류 발생:", error);
       }
     };
     const loadSolvedChallenges = async () => {
@@ -34,7 +34,7 @@ function Challenge() {
         const solvedData = await fetchSolvedChallenges();
         setSolvedChallenges(new Set(solvedData.map((solved) => String(solved.challengeId))));
       } catch (error) {
-        // console.error("푼 문제 데이터를 불러오는 중 오류 발생:", error);
+        console.error("푼 문제 데이터를 불러오는 중 오류 발생:", error);
       }
     };
 

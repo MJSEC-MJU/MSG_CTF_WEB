@@ -30,7 +30,7 @@ const ProblemDetail = () => {
 
   const handleSubmit = async () => {
     const result = await submitFlag(id, flag);
-    // console.log('API 응답:', result); // 응답 확인용 로그
+    console.log('API 응답:', result); // 응답 확인용 로그
     if (result.data === 'Correct') {
       alert('정답입니다!');
     } else if (result.data === 'Wrong') {
