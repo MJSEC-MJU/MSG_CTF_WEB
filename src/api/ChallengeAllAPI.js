@@ -1,6 +1,6 @@
-import axios from "axios";
+import { Axios } from './Axios';
 import Cookies from "js-cookie";
-const API_BASE_URL = "/api/challenges/all";
+const API_BASE_URL = "/challenges/all";
 
 export const fetchProblems = async (page = 0, size = 12) => {
   try {
@@ -9,7 +9,7 @@ export const fetchProblems = async (page = 0, size = 12) => {
       throw new Error("토큰이 없습니다. 로그인 후 시도하세요.");
     }
 
-    const response = await axios.get(API_BASE_URL, {
+    const response = await Axios.get(API_BASE_URL, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

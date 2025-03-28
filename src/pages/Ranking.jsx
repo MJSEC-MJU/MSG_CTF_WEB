@@ -19,38 +19,61 @@ const Ranking = () => {
   const pageCount = Math.ceil(scores.length / scoresPerPage);
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      'https://msg.mjsec.kr/api/leaderboard/stream'
-    );
+    let eventSource = null;
+    let reconnectInterval = null;
 
-    eventSource.onopen = () => {
-      console.log('✅ SSE 연결이 열렸습니다.');
-    };
-
-    eventSource.onmessage = (event) => {
-      try {
-        console.log('📩 수신된 데이터:', event.data);
-        const parsedData = JSON.parse(event.data);
-        let dataArray = [];
-        if (Array.isArray(parsedData)) {
-          dataArray = parsedData;
-        } else if (parsedData && Array.isArray(parsedData.data)) {
-          dataArray = parsedData.data;
-        } else {
-          throw new Error('응답 데이터 형식이 올바르지 않습니다.');
-        }
-
-        setScores(dataArray);
-        if (loading) {
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('❌ 데이터 파싱 오류:', error.message);
+    const connectSSE = () => {
+      // 기존 연결 종료
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
       }
+      
+      eventSource = new EventSource(
+        'https://msg.mjsec.kr/api/leaderboard/stream'
+      );
+      
+      eventSource.onopen = () => {
+        console.log('✅ SSE 연결이 열렸습니다.');
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          console.log('📩 수신된 데이터:', event.data);
+          const parsedData = JSON.parse(event.data);
+          let dataArray = [];
+          if (Array.isArray(parsedData)) {
+            dataArray = parsedData;
+          } else if (parsedData && Array.isArray(parsedData.data)) {
+            dataArray = parsedData.data;
+          } else {
+            throw new Error('응답 데이터 형식이 올바르지 않습니다.');
+          }
+          setScores(dataArray);
+          if (loading) {
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('❌ 데이터 파싱 오류:', error.message);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error('❌ SSE 오류 발생:', error);
+        eventSource.close();
+      };
     };
 
+    // 최초 SSE 연결
+    connectSSE();
+
+    // 1시간마다 재연결 (60분 * 60초 * 1000ms)
+    reconnectInterval = setInterval(connectSSE, 60 * 60 * 1000);
+
+    // 클린업: 컴포넌트 언마운트 시 SSE 연결과 인터벌 종료
     return () => {
-      eventSource.close();
+      if (eventSource) eventSource.close();
+      if (reconnectInterval) clearInterval(reconnectInterval);
     };
   }, [loading]);
 
@@ -153,7 +176,6 @@ const RankingWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-
   width: 100%;
 `;
 
