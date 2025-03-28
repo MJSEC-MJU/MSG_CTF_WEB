@@ -12,9 +12,9 @@ function Home() {
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleAdminLogin = () => {
-    navigate('/adminLogin');
-  };
+  // const handleAdminLogin = () => {
+  //   navigate('/adminLogin');
+  // };
 
   const rulesContent = (
     <>
@@ -38,7 +38,7 @@ function Home() {
   return (
     <HomeWrapper>
       <div className='WallWrapper'>
-        <img src={`/assets/wall.svg`} />
+        <img src={`/assets/wall.png`} />
         <div className='MainLogoWrapper'>
           <img src={`/assets/MainLogo.png`} />
         </div>
@@ -53,7 +53,7 @@ function Home() {
           <img src={`/assets/click.png`} />
         </div>
         {/* AdminLogin 클릭 영역 */}
-        <div className='AdminLogin' onClick={handleAdminLogin}></div>
+        {/* <div className='AdminLogin' onClick={handleAdminLogin}></div> */}
       </div>
     </HomeWrapper>
   );
