@@ -56,7 +56,7 @@ function App() {
           clearInterval(syncInterval); // 대회 종료 후 중단
         }
       } catch (error) {
-        console.error("시간 동기화 실패:", error);
+        //console.error("시간 동기화 실패:", error);
         const now = Date.now();
         setIsContestStarted(now >= CONTEST_START_TIME);
         setIsContestEnded(now >= CONTEST_END_TIME);

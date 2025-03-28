@@ -41,7 +41,7 @@ export const createProblem = async (formData) => {
 
     return response.data;
   } catch (error) {
-    console.error('Error creating problem:', error);
+    //console.error('Error creating problem:', error);
     throw error;
   }
 };

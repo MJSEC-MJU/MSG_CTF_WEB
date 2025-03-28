@@ -37,9 +37,9 @@ export const downloadFile = async (challengeId) => {
 
     window.URL.revokeObjectURL(url);
 
-    console.log('파일 다운로드 성공');
+    //console.log('파일 다운로드 성공');
   } catch (error) {
-    console.error('파일 다운로드 오류:', error);
+    //console.error('파일 다운로드 오류:', error);
     alert('파일 다운로드 중 오류가 발생했습니다.');
   }
 };
