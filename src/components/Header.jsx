@@ -39,7 +39,7 @@ const Header = () => {
     try {
       const accessToken = Cookies.get('accessToken');
       if (!accessToken) {
-        console.warn('로그아웃 상태입니다.');
+        // console.warn('로그아웃 상태입니다.');
         return;
       }
 
@@ -51,7 +51,7 @@ const Header = () => {
       } else {
       }
     } catch (error) {
-      console.error('로그아웃 오류:', error);
+      // console.error('로그아웃 오류:', error);
     }
   };
 

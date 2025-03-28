@@ -31,7 +31,7 @@ function TimerPage() {
           retryDelay = 10000; // 대회 시작 전에는 10초마다 동기화
         }
       } catch (error) {
-        console.error("시간 동기화 실패:", error);
+        // console.error("시간 동기화 실패:", error);
         setTimeLeft(CONTEST_START_TIME - Date.now());
       }
     };

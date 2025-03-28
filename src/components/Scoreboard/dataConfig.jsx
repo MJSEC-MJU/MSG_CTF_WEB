@@ -26,17 +26,17 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
   const eventSource = new EventSource('https://msg.mjsec.kr/api/leaderboard/graph');
 
   eventSource.onopen = () => {
-    console.log('SSE 연결이 열렸습니다.');
+    // console.log('SSE 연결이 열렸습니다.');
   };
 
   eventSource.addEventListener("update", (event) => {
     try {
-      console.log('수신된 데이터:', event.data);
+      // console.log('수신된 데이터:', event.data);
 
       const parsedData = JSON.parse(event.data); // data 부분을 따로 추출할 필요 없이 바로 파싱
       if (!Array.isArray(parsedData)) throw new Error('응답 데이터 형식이 잘못되었습니다.');
   
-      console.log('파싱된 데이터:', parsedData);
+      // console.log('파싱된 데이터:', parsedData);
 
       const timeLabels = [...new Set(parsedData.map(item => item.solvedTime.slice(0, 19)))].sort();
       const individualRanking = {};
@@ -106,14 +106,14 @@ export const fetchLeaderboardData = (setDatasetsConfig,setLoading) => {
 
       setDatasetsConfig(finalData);
       setLoading(false);  // 데이터를 받은 후 로딩 상태 해제
-      console.log(' 업데이트된 datasetsConfig:', finalData);
+      // console.log(' 업데이트된 datasetsConfig:', finalData);
     } catch (err) {
-      console.error('데이터 처리 중 오류 발생:', err.message);
+      // console.error('데이터 처리 중 오류 발생:', err.message);
     }
   });
 
   eventSource.onerror = (error) => {
-    console.error(' SSE 오류 발생:', error);
+    // console.error(' SSE 오류 발생:', error);
     eventSource.close();
   };
 };

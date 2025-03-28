@@ -13,7 +13,7 @@ const AdminAuth = ({ children }) => {
         const token = Cookies.get("accessToken"); // 쿠키에서 JWT 토큰 가져오기
 
         if (!token) {
-          console.log("토큰없음");
+          // console.log("토큰없음");
           setError("No token found");
           navigate("/login"); // 토큰이 없으면 로그인 페이지로 이동
           return;
@@ -28,7 +28,7 @@ const AdminAuth = ({ children }) => {
         });
         const text = await response.text();
         if (text.trim() === "admin") {
-          console.log("인증성공")
+          // console.log("인증성공")
           // 인증 성공 시, 페이지 이동
           setLoading(false); // 정상적으로 로딩을 끝내고, 자식 컴포넌트 렌더링
         } else {
@@ -38,7 +38,7 @@ const AdminAuth = ({ children }) => {
           navigate("/login");
         }
       } catch (err) {
-        console.log("네트워크 오류");
+        // console.log("네트워크 오류");
         setError("Network Error");
         navigate("/login");
       } finally {
