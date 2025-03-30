@@ -282,17 +282,17 @@ cd discord-bot
 |---------------|----------------|
 | <img width="1470" src="https://github.com/user-attachments/assets/b151d400-0beb-4741-bbcb-cc2ee466bd6c" /> | <img width="1470" src="https://github.com/user-attachments/assets/d849c353-0cb1-46f8-aedd-d52425363bb6" /> |
 
-| **회원가입 페이지** | **문제 목록 조회 페이지** |
-|-----------------|-------------------|
-| <img width="1470" src="https://github.com/user-attachments/assets/454f4ff1-dd1c-4b09-88c0-ca021d7fe709" /> | <img width="1470" src="https://github.com/user-attachments/assets/89f46fb7-626c-4d30-bc73-e016782ed0b4" /> |
+| **회원가입 페이지** | **문제 목록 조회 페이지**                                                                                            |
+|-----------------|-------------------------------------------------------------------------------------------------------------|
+| <img width="1470" src="https://github.com/user-attachments/assets/454f4ff1-dd1c-4b09-88c0-ca021d7fe709" /> | <img width="1470" alt="Image" src="https://github.com/user-attachments/assets/864c2f7d-5e47-4bce-90f4-333db3df869d" /> |
 
-| **문제 상세 조회 페이지** | **스코어보드 페이지 1** |
-|------------------|----------------|
-| <img width="1470" src="https://github.com/user-attachments/assets/651fe656-967f-4b81-8255-7111ddc2310d" /> | <img width="1470" src="https://github.com/user-attachments/assets/73983471-44cd-4530-a778-cc31d1e7c255" /> |
+| **문제 상세 조회 페이지**                                                                                           | **스코어보드 페이지 1** |
+|------------------------------------------------------------------------------------------------------------|----------------|
+| <img width="1470" alt="Image" src="https://github.com/user-attachments/assets/f0931dca-13a7-4b3a-ae67-e02e111ef122" />| <img width="1470" alt="Image" src="https://github.com/user-attachments/assets/f21666de-12ee-434e-a32a-bbeb6a32f80d" /> |
 
 | **스코어보드 페이지 2** | **랭킹 페이지** |
 |-----------------|-------------|
-| <img width="1470" src="https://github.com/user-attachments/assets/1bee8f4e-9408-48cc-8b62-76552bcacb49" /> | <img width="1470" src="https://github.com/user-attachments/assets/8d870145-d623-4e1d-a5cc-7871894b049a" /> |
+|  <img width="1470" alt="Image" src="https://github.com/user-attachments/assets/6d10397a-6b5b-4da7-80bf-db1142861e85" /> | <img width="1470" src="https://github.com/user-attachments/assets/8d870145-d623-4e1d-a5cc-7871894b049a" /> |
 
 | **유저 프로필 페이지** | **관리자 로그인 페이지** |
 |----------------|-----------------|
@@ -301,3 +301,24 @@ cd discord-bot
 | **회원 관리 페이지** | **문제 관리 페이지** |
 |----------------|--------------|
 | <img width="1470" src="https://github.com/user-attachments/assets/8aae8bb7-4eb6-4aab-b5a4-f1f373ca1490" /> | <img width="1470" src="https://github.com/user-attachments/assets/96f3abae-b99e-4691-9739-1d470050f134" /> |
+
+## 🤖 DISCORD BOT
+
+<table>
+  <tr>
+    <td align="center"><b>🎟️ Ticket BOT</b></td>
+    <td align="center"><b>🎭 Role BOT</b></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/602eb1c4-d33d-4f6f-88aa-cb525b1454b0" width="1470px"></td>
+    <td><img src="https://github.com/user-attachments/assets/f86d8c02-a617-48a5-8763-51ca60c97140" width="1470px"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>🩸 First-Blood BOT</b></td>
+    <td align="center"><b>🎵 DJ BOT</b></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/3b7c3e0b-7d91-45e3-a756-8bc891acc037" width="1470px"></td>
+    <td><img src="https://github.com/user-attachments/assets/de5e2942-082f-40ed-b91c-5344fa5513ad" width="1470px"></td>
+  </tr>
+</table>
