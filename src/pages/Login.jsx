@@ -101,41 +101,40 @@ const Login = ({ setIsLoggedIn }) => {
       <RightTrapezoidWrapper>
         <RightTrapezoid />
       </RightTrapezoidWrapper>
-        <Tag>SUPER<br/>Tasty</Tag>
-        <form onSubmit={handleLogin}>
-          <Input
-            type='text'
-            placeholder='아이디'
-            value={loginId}
-            onChange={(e) => setLoginId(e.target.value)}
-            required
-          />
-          {fieldErrors.loginId && (
-            <FieldError>{fieldErrors.loginId}</FieldError>
-          )}
-          <Input
-            type='password'
-            placeholder='비밀번호'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          {fieldErrors.password && (
-            <FieldError>{fieldErrors.password}</FieldError>
-          )}
-          <Button type='submit'>로그인</Button>
-        </form>
+
+      <ContentWrapper>
+        <Tag>
+          SUPER<br />
+          TASTY
+        </Tag>
+        <InputWrapper>
+        <Label>ID</Label>
+        <Input
+          type='text'
+          value={loginId}
+          onChange={(e) => setLoginId(e.target.value)}
+          required
+        />
+        {fieldErrors.loginId && <FieldError>{fieldErrors.loginId}</FieldError>}
+        <Label>Password</Label>
+        <Input
+          type='password'
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        {fieldErrors.password && <FieldError>{fieldErrors.password}</FieldError>}
+        <Button onClick={handleLogin}>Log In</Button>
+        </InputWrapper>
+      </ContentWrapper>
 
       {/* 로그인 성공 시 Modal2 표시 */}
-      {isModalVisible && (
-        <Modal2 onClose={handleModalClose} content='로그인 성공' />
-      )}
+      {isModalVisible && <Modal2 onClose={handleModalClose} content='로그인 성공' />}
     </PageContainer>
   );
 };
 
 export default Login;
-
 
 const PageContainer = styled.div`
   background-color: #fff;
@@ -156,18 +155,26 @@ const RightTrapezoidWrapper = styled.div`
   width: 100%;
   height: 300px;
   overflow: hidden;
-  z-index: 0; /* 이 부분이 핵심! 다른 요소보다 뒤로 보냅니다. */
+  z-index: 0;
 `;
 
 const RightTrapezoid = styled.div`
-  position: absolute; /* 주석 해제: 요소를 원하는 위치에 배치 */
+  position: absolute;
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  width: 100%; /* 100vw는 이미 창 크기에 맞춰 작동 */
-  height: 300px; 
+  width: 100%;
+  height: 300px;
   background: linear-gradient(90deg, #ff0000 77%, #ff8c00 100%);
-  clip-path: polygon(0 0, 95% 0, 100% 100%, 0 100%);
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+`;
+
+// Content wrapper
+const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
 `;
 
 const Tag = styled.h1`
@@ -175,24 +182,43 @@ const Tag = styled.h1`
   font-weight: bold;
   font-size: 100px;
   margin-bottom: 1.5rem;
-  position: absolute; /* 절대 위치를 사용하여 원하는 곳에 배치 */
-  top: 45%;
-  left: 5%; /* 왼쪽에서 5% 떨어진 위치 */
+  position: absolute;
+  top:43%;
+  left: 5%;
   transform: translateY(-50%);
-  z-index: 1; /* 사다리꼴 위에 나타나게 합니다 */
-  /* 추가적으로 텍스트를 정렬하려면 text-align을 사용할 수 있습니다. */
   @media (max-width: 480px) {
     font-size: 1.5rem;
   }
+`;
+
+// Input Wrapper
+const InputWrapper = styled.div`
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  max-width: 80%;
+  margin-bottom: 1rem;
+`;
+
+const Label = styled.label`
+  font-size: 1.2rem;
+  color: #B50202;
+  text-align: left;
+  margin-bottom: 0.25rem;
+  font-weight: bold;
 `;
 
 const Input = styled.input`
   width: 100%;
   padding: 0.75rem;
   margin: 0.5rem 0;
-  background-color: #222;
-  border: 1px solid #cc0033;
-  color: #cc0033;
+  background-color: #fff;
+  border: 2px solid #B50202;
+  color: #000;
   font-size: 1rem;
   border-radius: 5px;
   box-sizing: border-box;
@@ -215,11 +241,12 @@ const Button = styled.button`
   width: 100%;
   padding: 0.75rem;
   margin-top: 1rem;
-  background-color: #cc0033;
+  background: linear-gradient(90deg, #F00000 0%, #F9D905 100%);
   border: none;
   border-radius: 5px;
-  color: #000;
+  color: #fff;
   font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s;
   &:hover {
@@ -247,7 +274,7 @@ const ToggleButton = styled.button`
 const FieldError = styled.p`
   margin: 0rem;
   font-size: 0.8rem;
-  color: #00ff00;
+  color: #FF0000;
   text-align: left;
 `;
 
