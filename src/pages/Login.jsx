@@ -96,14 +96,12 @@ const Login = ({ setIsLoggedIn }) => {
     navigate('/');
   };
 
-  const handleToggle = () => {
-    navigate('/signup');
-  };
-
   return (
     <PageContainer>
-      <FormContainer>
-        <Title>로그인</Title>
+      <RightTrapezoidWrapper>
+        <RightTrapezoid />
+      </RightTrapezoidWrapper>
+        <Tag>SUPER<br/>Tasty</Tag>
         <form onSubmit={handleLogin}>
           <Input
             type='text'
@@ -128,10 +126,6 @@ const Login = ({ setIsLoggedIn }) => {
           <Button type='submit'>로그인</Button>
         </form>
 
-        {errorMessage && <Message error={isError}>{errorMessage}</Message>}
-        <ToggleButton onClick={handleToggle}>회원가입 하러가기</ToggleButton>
-      </FormContainer>
-
       {/* 로그인 성공 시 Modal2 표시 */}
       {isModalVisible && (
         <Modal2 onClose={handleModalClose} content='로그인 성공' />
@@ -142,31 +136,51 @@ const Login = ({ setIsLoggedIn }) => {
 
 export default Login;
 
+
 const PageContainer = styled.div`
-  background-color: #000;
+  background-color: #fff;
   min-height: 100vh;
+  min-width: 100vw;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  overflow: hidden;
 `;
 
-const FormContainer = styled.div`
-  background-color: #111;
-  padding: 2rem;
-  border: 1px solid #cc0033;
-  border-radius: 10px;
-  box-shadow: 0 0 15px #cc0033;
+const RightTrapezoidWrapper = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
   width: 100%;
-  max-width: 400px;
-  text-align: center;
-  font-family: 'Courier New', Courier, monospace;
+  height: 300px;
+  overflow: hidden;
+  z-index: 0; /* 이 부분이 핵심! 다른 요소보다 뒤로 보냅니다. */
 `;
 
-const Title = styled.h1`
-  color: #cc0033;
+const RightTrapezoid = styled.div`
+  position: absolute; /* 주석 해제: 요소를 원하는 위치에 배치 */
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 100%; /* 100vw는 이미 창 크기에 맞춰 작동 */
+  height: 300px; 
+  background: linear-gradient(90deg, #ff0000 77%, #ff8c00 100%);
+  clip-path: polygon(0 0, 95% 0, 100% 100%, 0 100%);
+`;
+
+const Tag = styled.h1`
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 100px;
   margin-bottom: 1.5rem;
-  font-size: 2rem;
+  position: absolute; /* 절대 위치를 사용하여 원하는 곳에 배치 */
+  top: 45%;
+  left: 5%; /* 왼쪽에서 5% 떨어진 위치 */
+  transform: translateY(-50%);
+  z-index: 1; /* 사다리꼴 위에 나타나게 합니다 */
+  /* 추가적으로 텍스트를 정렬하려면 text-align을 사용할 수 있습니다. */
   @media (max-width: 480px) {
     font-size: 1.5rem;
   }

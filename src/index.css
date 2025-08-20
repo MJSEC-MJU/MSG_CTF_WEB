@@ -26,11 +26,11 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-
+  overflow: hidden;
   min-width: 320px;
   min-height: 100vh;
-  /* background-color: #fff; */
-  background-color: #000;
+  background-color: #fff;
+  /* background-color: #000; */
 }
 
 h1 {
