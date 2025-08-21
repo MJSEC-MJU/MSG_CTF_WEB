@@ -108,23 +108,34 @@ const Login = ({ setIsLoggedIn }) => {
           TASTY
         </Tag>
         <InputWrapper>
-        <Label>ID</Label>
-        <Input
-          type='text'
-          value={loginId}
-          onChange={(e) => setLoginId(e.target.value)}
-          required
-        />
-        {fieldErrors.loginId && <FieldError>{fieldErrors.loginId}</FieldError>}
-        <Label>Password</Label>
-        <Input
-          type='password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        {fieldErrors.password && <FieldError>{fieldErrors.password}</FieldError>}
-        <Button onClick={handleLogin}>Log In</Button>
+          <PatternWrapper>
+            <Pattern/>
+            <PatternReverse/>
+            <Pattern/>
+            <PatternReverse/>
+            <Pattern/>
+            <PatternReverse/>
+          </PatternWrapper>
+          <Label>ID</Label>
+          <Input
+            type='text'
+            value={loginId}
+            onChange={(e) => setLoginId(e.target.value)}
+            required
+          />
+          {fieldErrors.loginId && <FieldError>{fieldErrors.loginId}</FieldError>}
+          <Label><br/>Password</Label>
+          <Input
+            type='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          {fieldErrors.password && <FieldError>{fieldErrors.password}</FieldError>}
+          <br/>
+          <ButtonWrapper>
+            <Button onClick={handleLogin}>Log In</Button>
+          </ButtonWrapper>
         </InputWrapper>
       </ContentWrapper>
 
@@ -148,8 +159,8 @@ const PageContainer = styled.div`
 `;
 
 const RightTrapezoidWrapper = styled.div`
-  position: absolute;
-  top: 50%;
+  position: fixed;
+  top: 55%;
   left: 0;
   transform: translateY(-50%);
   width: 100%;
@@ -164,7 +175,7 @@ const RightTrapezoid = styled.div`
   left: 0;
   transform: translateY(-50%);
   width: 100%;
-  height: 300px;
+  height: 250px;
   background: linear-gradient(90deg, #ff0000 77%, #ff8c00 100%);
   clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
 `;
@@ -174,17 +185,20 @@ const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  z-index: 1;
+  justify-content: center;
+  z-index: 2;
+  position: relative;
+  width: 100%;
 `;
 
 const Tag = styled.h1`
   color: #ffffff;
   font-weight: bold;
-  font-size: 100px;
+  font-size: 95px;
   margin-bottom: 1.5rem;
   position: absolute;
-  top:43%;
-  left: 5%;
+  top:35%;
+  left: 0%;
   transform: translateY(-50%);
   @media (max-width: 480px) {
     font-size: 1.5rem;
@@ -194,14 +208,80 @@ const Tag = styled.h1`
 // Input Wrapper
 const InputWrapper = styled.div`
   background-color: #fff;
-  padding: 1.5rem;
+  padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 4px 15px #ff0000;
   display: flex;
   flex-direction: column;
-  width: 300px;
-  max-width: 80%;
+  width: 500px;
+  max-width: 90%;
+  z-index: 3;
+  position: relative;
+  margin-left: -6%;
+  align-items: stretch; 
+  min-height: 450px;
+  
+  @media (max-width: 768px) {
+    margin-left: 8%;
+    width: 350px;
+  }
+  @media (max-width: 480px) {
+    width: 300px;
+    padding: 1.5rem;
+    margin-left: 5%;
+  }
+`;
+
+//Pattern Wrapper
+const PatternWrapper = styled.div`
+  width: 113%;
+  height: 90px;
+  overflow: hidden;
   margin-bottom: 1rem;
+  border-radius: 10px 10px 0 0;
+  margin: -2rem -2rem 1rem -2rem;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,0.2) 100%
+    );
+    pointer-events: none;
+  }
+`;
+
+const Pattern = styled.div`
+  width: 200%;
+  height: 15px;
+  background: repeating-linear-gradient(
+    90deg,
+    #ff0000 0px,
+    #ff0000 30px,
+    #ffffff 30px,
+    #ffffff 60px
+  );
+  transform: skewX(-30deg);
+`;
+
+const PatternReverse = styled.div`
+  width: 200%;
+  height: 15px;
+  background: repeating-linear-gradient(
+    90deg,
+    #ffffff 0px,
+    #ffffff 30px,
+    #ff0000 30px,
+    #ff0000 60px
+  );
+  transform: skewX(-30deg);
 `;
 
 const Label = styled.label`
@@ -214,13 +294,13 @@ const Label = styled.label`
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   margin: 0.5rem 0;
   background-color: #fff;
   border: 2px solid #B50202;
   color: #000;
   font-size: 1rem;
-  border-radius: 5px;
+  border-radius: 20px;
   box-sizing: border-box;
   &:focus {
     outline: none;
@@ -232,18 +312,23 @@ const Input = styled.input`
   }
 `;
 
+const ButtonWrapper = styled.div`
+  text-align: right;
+  margin-top: 1rem;
+`;
+
 const Button = styled.button`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
   text-decoration: none;
-  width: 100%;
+  width: 150px;
   padding: 0.75rem;
   margin-top: 1rem;
   background: linear-gradient(90deg, #F00000 0%, #F9D905 100%);
   border: none;
-  border-radius: 5px;
+  border-radius: 30px;
   color: #fff;
   font-size: 1rem;
   font-weight: bold;
@@ -258,24 +343,12 @@ const Button = styled.button`
   }
 `;
 
-const ToggleButton = styled.button`
-  background: none;
-  border: none;
-  color: #00ff00;
-  margin-top: 1rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  text-decoration: underline;
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
 const FieldError = styled.p`
   margin: 0rem;
   font-size: 0.8rem;
   color: #FF0000;
   text-align: left;
+  min-height: 1rem;
 `;
 
 const Message = styled.p`
