@@ -96,46 +96,51 @@ const Login = ({ setIsLoggedIn }) => {
     navigate('/');
   };
 
-  const handleToggle = () => {
-    navigate('/signup');
-  };
-
   return (
     <PageContainer>
-      <FormContainer>
-        <Title>로그인</Title>
-        <form onSubmit={handleLogin}>
+      <RightTrapezoidWrapper>
+        <RightTrapezoid />
+      </RightTrapezoidWrapper>
+
+      <ContentWrapper>
+        <Tag>
+          SUPER<br />
+          TASTY
+        </Tag>
+        <InputWrapper>
+          <PatternWrapper>
+            <Pattern/>
+            <PatternReverse/>
+            <Pattern/>
+            <PatternReverse/>
+            <Pattern/>
+            <PatternReverse/>
+          </PatternWrapper>
+          <Label>ID</Label>
           <Input
             type='text'
-            placeholder='아이디'
             value={loginId}
             onChange={(e) => setLoginId(e.target.value)}
             required
           />
-          {fieldErrors.loginId && (
-            <FieldError>{fieldErrors.loginId}</FieldError>
-          )}
+          {fieldErrors.loginId && <FieldError>{fieldErrors.loginId}</FieldError>}
+          <Label><br/>Password</Label>
           <Input
             type='password'
-            placeholder='비밀번호'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          {fieldErrors.password && (
-            <FieldError>{fieldErrors.password}</FieldError>
-          )}
-          <Button type='submit'>로그인</Button>
-        </form>
-
-        {errorMessage && <Message error={isError}>{errorMessage}</Message>}
-        <ToggleButton onClick={handleToggle}>회원가입 하러가기</ToggleButton>
-      </FormContainer>
+          {fieldErrors.password && <FieldError>{fieldErrors.password}</FieldError>}
+          <br/>
+          <ButtonWrapper>
+            <Button onClick={handleLogin}>Log In</Button>
+          </ButtonWrapper>
+        </InputWrapper>
+      </ContentWrapper>
 
       {/* 로그인 성공 시 Modal2 표시 */}
-      {isModalVisible && (
-        <Modal2 onClose={handleModalClose} content='로그인 성공' />
-      )}
+      {isModalVisible && <Modal2 onClose={handleModalClose} content='로그인 성공' />}
     </PageContainer>
   );
 };
@@ -143,44 +148,159 @@ const Login = ({ setIsLoggedIn }) => {
 export default Login;
 
 const PageContainer = styled.div`
-  background-color: #000;
+  background-color: #fff;
   min-height: 100vh;
+  min-width: 100vw;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  overflow: hidden;
 `;
 
-const FormContainer = styled.div`
-  background-color: #111;
-  padding: 2rem;
-  border: 1px solid #cc0033;
-  border-radius: 10px;
-  box-shadow: 0 0 15px #cc0033;
+const RightTrapezoidWrapper = styled.div`
+  position: fixed;
+  top: 55%;
+  left: 0;
+  transform: translateY(-50%);
   width: 100%;
-  max-width: 400px;
-  text-align: center;
-  font-family: 'Courier New', Courier, monospace;
+  height: 300px;
+  overflow: hidden;
+  z-index: 0;
 `;
 
-const Title = styled.h1`
-  color: #cc0033;
+const RightTrapezoid = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 250px;
+  background: linear-gradient(90deg, #ff0000 77%, #ff8c00 100%);
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+`;
+
+// Content wrapper
+const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  position: relative;
+  width: 100%;
+`;
+
+const Tag = styled.h1`
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 95px;
   margin-bottom: 1.5rem;
-  font-size: 2rem;
+  position: absolute;
+  top:35%;
+  left: 0%;
+  transform: translateY(-50%);
   @media (max-width: 480px) {
     font-size: 1.5rem;
   }
 `;
 
+// Input Wrapper
+const InputWrapper = styled.div`
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 4px 4px 15px #ff0000;
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  max-width: 90%;
+  z-index: 3;
+  position: relative;
+  margin-left: -6%;
+  align-items: stretch; 
+  min-height: 450px;
+  
+  @media (max-width: 768px) {
+    margin-left: 8%;
+    width: 350px;
+  }
+  @media (max-width: 480px) {
+    width: 300px;
+    padding: 1.5rem;
+    margin-left: 5%;
+  }
+`;
+
+//Pattern Wrapper
+const PatternWrapper = styled.div`
+  width: 113%;
+  height: 90px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border-radius: 10px 10px 0 0;
+  margin: -2rem -2rem 1rem -2rem;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,0.2) 100%
+    );
+    pointer-events: none;
+  }
+`;
+
+const Pattern = styled.div`
+  width: 200%;
+  height: 15px;
+  background: repeating-linear-gradient(
+    90deg,
+    #ff0000 0px,
+    #ff0000 30px,
+    #ffffff 30px,
+    #ffffff 60px
+  );
+  transform: skewX(-30deg);
+`;
+
+const PatternReverse = styled.div`
+  width: 200%;
+  height: 15px;
+  background: repeating-linear-gradient(
+    90deg,
+    #ffffff 0px,
+    #ffffff 30px,
+    #ff0000 30px,
+    #ff0000 60px
+  );
+  transform: skewX(-30deg);
+`;
+
+const Label = styled.label`
+  font-size: 1.2rem;
+  color: #B50202;
+  text-align: left;
+  margin-bottom: 0.25rem;
+  font-weight: bold;
+`;
+
 const Input = styled.input`
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   margin: 0.5rem 0;
-  background-color: #222;
-  border: 1px solid #cc0033;
-  color: #cc0033;
+  background-color: #fff;
+  border: 2px solid #B50202;
+  color: #000;
   font-size: 1rem;
-  border-radius: 5px;
+  border-radius: 20px;
   box-sizing: border-box;
   &:focus {
     outline: none;
@@ -192,20 +312,26 @@ const Input = styled.input`
   }
 `;
 
+const ButtonWrapper = styled.div`
+  text-align: right;
+  margin-top: 1rem;
+`;
+
 const Button = styled.button`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
   text-decoration: none;
-  width: 100%;
+  width: 150px;
   padding: 0.75rem;
   margin-top: 1rem;
-  background-color: #cc0033;
+  background: linear-gradient(90deg, #F00000 0%, #F9D905 100%);
   border: none;
-  border-radius: 5px;
-  color: #000;
+  border-radius: 30px;
+  color: #fff;
   font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s;
   &:hover {
@@ -217,24 +343,12 @@ const Button = styled.button`
   }
 `;
 
-const ToggleButton = styled.button`
-  background: none;
-  border: none;
-  color: #00ff00;
-  margin-top: 1rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  text-decoration: underline;
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
 const FieldError = styled.p`
   margin: 0rem;
   font-size: 0.8rem;
-  color: #00ff00;
+  color: #FF0000;
   text-align: left;
+  min-height: 1rem;
 `;
 
 const Message = styled.p`
