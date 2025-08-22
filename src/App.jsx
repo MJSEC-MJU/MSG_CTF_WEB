@@ -106,7 +106,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route
             path="/ranking"
-            element={<PrivateRoute element={isLoggedIn ? <Ranking /> : <Navigate to="/login" />} />}
+            element={<Ranking />}
+            // element={<PrivateRoute element={isLoggedIn ? <Ranking /> : <Navigate to="/login" />} />}
           />
           <Route
             path="/scoreboard"
