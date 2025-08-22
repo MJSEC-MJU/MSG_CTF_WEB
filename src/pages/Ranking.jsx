@@ -205,22 +205,35 @@ export default Ranking;
 const RankingWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  // align-items: center;
   width: 100%;
 `;
 
 const Title = styled.h2`
-  color: #8cff66;
   margin-bottom: 20px;
-  text-shadow: 0 0 40px rgba(0, 255, 0, 0.8);
-  font-size: 3.5rem;
-  font-family: 'Courier New', Courier, monospace;
-  text-transform: uppercase;
+  font-size: 2rem;
+  align-self: flex-start;
+  font-family: 'Courier New', Courier, monospace; // 수정 필요.
+
+
+    /* 🔥 텍스트 위아래 그라데이션 */
+  background: linear-gradient(to bottom, #ff9000 20%, #dc0000 100%); 
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* 앞에 | 기호 추가 */
+  position: relative;
+  &::before {
+    content: '|';
+    margin-right: 8px;
+    color: #ff4500;  /* 기호 색상 */
+    font-weight: bold;
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
-  min-width: 600px;
+  min-width: 1200px;
   border-collapse: collapse;
   margin-bottom: 20px;
 
@@ -284,3 +297,105 @@ const LoadingWrapper = styled.div`
   width: 100%;
   padding: 20px;
 `;
+
+// return (
+//     <RankingWrapper>
+//       <Title>Ranking</Title>
+//       <List>
+//         {scores.map((score, index) => {
+//           const rank = index + 1;
+//           return (
+//             <Card key={score.id} top3={rank <= 3}>
+//               <Rank>
+//                 {rank <= 3 ? (
+//                   <span role="img" aria-label="fire">
+//                     🔥{rank}
+//                   </span>
+//                 ) : (
+//                   <span>{rank}</span>
+//                 )}
+//                 <User>{score.userId}</User>
+//               </Rank>
+//               <Score>{score.totalPoint}</Score>
+//             </Card>
+//           );
+//         })}
+//       </List>
+//     </RankingWrapper>
+//   );
+// };
+
+// export default Ranking;
+
+// // 스타일 정의
+
+// const RankingWrapper = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   width: 100%;
+// `;
+
+// const Title = styled.h2`
+//   margin-bottom: 20px;
+//   font-size: 2rem;
+//   align-self: flex-start;
+//   font-family: 'Courier New', Courier, monospace; // 수정 필요.
+
+
+//     /* 🔥 텍스트 위아래 그라데이션 */
+//   background: linear-gradient(to bottom, #ff9000 20%, #dc0000 100%); 
+//   -webkit-background-clip: text;
+//   -webkit-text-fill-color: transparent;
+
+//   /* 앞에 | 기호 추가 */
+//   position: relative;
+//   &::before {
+//     content: '|';
+//     margin-right: 8px;
+//     color: #ff4500;  /* 기호 색상 */
+//     font-weight: bold;
+//   }
+// `;
+
+// const List = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   gap: 12px;
+//   width: 1000px;
+// `;
+
+// const Card = styled.div`
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+
+//   background: ${(props) => (props.top3 ? "#f9f9f9" : "#eee")};
+//   border: ${(props) => (props.top3 ? "3px solid #aaa" : "none")};
+//   border-radius: 6px;
+//   padding: 16px;
+//   font-size: 1.2rem;
+// `;
+
+// const Rank = styled.div`
+//   flex: 3;
+//   display: flex;
+//   align-items: center;
+//   gap: 12px;
+//   font-weight: bold;
+//   color: ${(props) => (props.top3 ? "#282828" : "#5e5e5e")};
+// `;
+
+// const User = styled.span`
+//   flex: 3;
+//   font-weight: 500;
+//   text-align: center;
+// `;
+
+// const Score = styled.span`
+//   flex: 0.5;
+//   font-weight: bold;
+//   font-size: 1.4rem;
+//   background: linear-gradient(to bottom, #ff9000, #dc0000);
+//   -webkit-background-clip: text;
+//   -webkit-text-fill-color: transparent;
+// `;
