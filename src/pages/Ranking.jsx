@@ -169,47 +169,43 @@ const dummyScores = [
     );
   }
 
-  return (
+return (
+  <ResponsiveWrapper>
     <RankingWrapper>
       <Title>Ranking</Title>
-      <Table>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Tier</th>
-            <th>ID</th>
-            <th>SCORE</th>
-          </tr>
-        </thead>
-        <tbody>{displayScores}</tbody>
-      </Table>
-      <Pagination>
-        <ReactPaginate
-          previousLabel={'←'}
-          nextLabel={'→'}
-          pageCount={pageCount}
-          onPageChange={changePage}
-          containerClassName={'paginationBttns'}
-          previousLinkClassName={'previousBttn'}
-          nextLinkClassName={'nextBttn'}
-          disabledClassName={'paginationDisabled'}
-          activeClassName={'paginationActive'}
-        />
-      </Pagination>
+      <List>
+        {scores.map((score, index) => {
+          const rank = index + 1;
+          return (
+            <Card key={score.id} top3={rank <= 3}>
+              <Rank top3={rank <= 3}>
+              <RankNumber top3={rank <= 3}>{rank}</RankNumber>
+                <User>{score.userId}</User>
+              </Rank>
+              <Score top3={rank <=3 }>{score.totalPoint}</Score>
+            </Card>
+          );
+        })}
+      </List>
     </RankingWrapper>
+  </ResponsiveWrapper>
   );
 };
 
 export default Ranking;
 
+// 스타일 정의
+
 const RankingWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  // align-items: center;
   width: 100%;
+  min-height: 100vh; /* 화면 전체 높이 확보 */
+  padding: 20px 40px; /* 상하좌우 여백 */
 `;
 
 const Title = styled.h2`
+  margin-top: 70px;
   margin-bottom: 20px;
   font-size: 2rem;
   align-self: flex-start;
@@ -226,176 +222,111 @@ const Title = styled.h2`
   &::before {
     content: '|';
     margin-right: 8px;
-    color: #ff4500;  /* 기호 색상 */
+    color: linear-gradient(to bottom, #ff9000 20%, #dc0000 100%); 
     font-weight: bold;
   }
 `;
 
-const Table = styled.table`
-  width: 100%;
-  min-width: 1200px;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-
-  th,
-  td {
-    border: 1px solid #333;
-    padding: 10px;
-    text-align: center;
-    color: #fff;
-    background-color: #222;
-  }
-
-  th {
-    background-color: #000;
-    color: #8cff66;
-    cursor: pointer;
-    &:hover {
-      background-color: #333;
-    }
-  }
-`;
-
-const Pagination = styled.div`
+const List = styled.div`
   display: flex;
-  justify-content: center;
-  width: 100%;
-
-  .paginationBttns {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    gap: 8px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-
-  .previousBttn,
-  .nextBttn {
-    border: 1px solid #8cff66;
-    background-color: transparent;
-    cursor: pointer;
-    color: #8cff66;
-    transition: transform 0.2s;
-    &:hover {
-      transform: scale(1.1);
-    }
-  }
-
-  .paginationDisabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    color: #666;
-  }
+  flex-direction: column;
+  gap: 12px;
+  width: 1000px;
+  max-width: 1000px; /* 최대 폭 제한 */
+  margin: 0 auto;    /* 중앙 정렬 */
 `;
 
-const LoadingWrapper = styled.div`
+const Card = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: "#f9f9f9";
+  border: 3px solid #aaa;
+  border-radius: 6px;
+  padding: 16px;
+  font-size: 1.2rem;
+`;
+
+const Rank = styled.div`
+  flex: 3;
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  width: 100%;
-  padding: 20px;
+  gap: 12px;
+  font-weight: bold;
+  color: ${(props) => (props.top3 ? "#000" : "#5e5e5e")};
+
 `;
 
-// return (
-//     <RankingWrapper>
-//       <Title>Ranking</Title>
-//       <List>
-//         {scores.map((score, index) => {
-//           const rank = index + 1;
-//           return (
-//             <Card key={score.id} top3={rank <= 3}>
-//               <Rank>
-//                 {rank <= 3 ? (
-//                   <span role="img" aria-label="fire">
-//                     🔥{rank}
-//                   </span>
-//                 ) : (
-//                   <span>{rank}</span>
-//                 )}
-//                 <User>{score.userId}</User>
-//               </Rank>
-//               <Score>{score.totalPoint}</Score>
-//             </Card>
-//           );
-//         })}
-//       </List>
-//     </RankingWrapper>
-//   );
-// };
+const RankNumber = styled.span`
+  position: relative;
+  display: inline-block;
+  width: 40px;   /* 숫자 영역 크기 */
+  height: 40px;  /* 이미지 크기와 맞춤 */
+  text-align: center;
+  line-height: 40px; /* 세로 중앙 정렬 */
+  font-weight: bold;
+  font-size: 1.5rem;
+  z-index: 1; /* 숫자 위 */
 
-// export default Ranking;
-
-// // 스타일 정의
-
-// const RankingWrapper = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   width: 100%;
-// `;
-
-// const Title = styled.h2`
-//   margin-bottom: 20px;
-//   font-size: 2rem;
-//   align-self: flex-start;
-//   font-family: 'Courier New', Courier, monospace; // 수정 필요.
+  /* 불꽃 이미지를 배경으로 */
+  background: ${(props) =>
+  props.top3 ? "url('/src/assets/Ranking/flame.png') no-repeat center center" : "none"};
+  background-size: contain; /* 비율 유지하면서 맞춤 */
+`;
 
 
-//     /* 🔥 텍스트 위아래 그라데이션 */
-//   background: linear-gradient(to bottom, #ff9000 20%, #dc0000 100%); 
-//   -webkit-background-clip: text;
-//   -webkit-text-fill-color: transparent;
+const User = styled.span`
+  flex: 3;
+  font-weight: 500;
+  text-align: center;
+  font-size: 1.5rem;
+`;
 
-//   /* 앞에 | 기호 추가 */
-//   position: relative;
-//   &::before {
-//     content: '|';
-//     margin-right: 8px;
-//     color: #ff4500;  /* 기호 색상 */
-//     font-weight: bold;
-//   }
-// `;
+const Score = styled.span`
+  flex: 0.5;
+  font-weight: bold;
+  font-size: 35px;
 
-// const List = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   gap: 12px;
-//   width: 1000px;
-// `;
+  ${(props) =>
+    props.top3
+      ? `
+        background: linear-gradient(to bottom, #ff8000 33% , #ff0000 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -webkit-text-stroke: 1px #242323;
+      `
+      : `
+        color: #333; /* 4위 이후는 그냥 일반 색 */
+      `}
+`;
 
-// const Card = styled.div`
-//   display: flex;
-//   justify-content: space-between;
-//   align-items: center;
 
-//   background: ${(props) => (props.top3 ? "#f9f9f9" : "#eee")};
-//   border: ${(props) => (props.top3 ? "3px solid #aaa" : "none")};
-//   border-radius: 6px;
-//   padding: 16px;
-//   font-size: 1.2rem;
-// `;
+// 반응형: 모바일에서 리스트 폭 줄이기
+const ResponsiveWrapper = styled.div`
+  width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
 
-// const Rank = styled.div`
-//   flex: 3;
-//   display: flex;
-//   align-items: center;
-//   gap: 12px;
-//   font-weight: bold;
-//   color: ${(props) => (props.top3 ? "#282828" : "#5e5e5e")};
-// `;
+  @media (max-width: 768px) {
+    ${List} {
+      max-width: 100%;
+    }
 
-// const User = styled.span`
-//   flex: 3;
-//   font-weight: 500;
-//   text-align: center;
-// `;
+    ${Card} {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
 
-// const Score = styled.span`
-//   flex: 0.5;
-//   font-weight: bold;
-//   font-size: 1.4rem;
-//   background: linear-gradient(to bottom, #ff9000, #dc0000);
-//   -webkit-background-clip: text;
-//   -webkit-text-fill-color: transparent;
-// `;
+    ${Rank} {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    ${Score} {
+      width: 100%;
+      text-align: left;
+    }
+  }
+`;
