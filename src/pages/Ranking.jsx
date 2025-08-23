@@ -1,22 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import ReactPaginate from 'react-paginate';
 
-import BronzeIcon from '../assets/Ranking/BronzeIcon.svg';
-import SilverIcon from '../assets/Ranking/SilverIcon.svg';
-import GoldIcon from '../assets/Ranking/GoldIcon.svg';
-import PlatinumIcon from '../assets/Ranking/PlatinumIcon.svg';
-import DiamondIcon from '../assets/Ranking/DiamondIcon.svg';
-import ChallengerIcon from '../assets/Ranking/ChallengerIcon.svg';
 import Loading from '../components/Loading';
 
 const Ranking = () => {
   const [scores, setScores] = useState([]);
-  const [pageNumber, setPageNumber] = useState(0);
   const [loading, setLoading] = useState(true);
-  const scoresPerPage = 10;
-  const pagesVisited = pageNumber * scoresPerPage;
-  const pageCount = Math.ceil(scores.length / scoresPerPage);
 
   // 더미 데이터 (SSE 대신 임시로 테스트용)
 const dummyScores = [
@@ -107,57 +96,24 @@ const dummyScores = [
   //   };
   // }, [loading]);
 
-  const getIconForRank = (rank) => {
-    if (rank >= 1 && rank <= 3) return ChallengerIcon;
-    if (rank >= 4 && rank <= 8) return DiamondIcon;
-    if (rank >= 9 && rank <= 14) return PlatinumIcon;
-    if (rank >= 15 && rank <= 30) return GoldIcon;
-    if (rank >= 31 && rank <= 60) return SilverIcon;
-    return BronzeIcon;
-  };
+    const displayScores = useMemo(() => {
+    const rows = scores.map((score, index) => {
+      const rank = index + 1;
+      const userId = score.userId;
 
-  const displayScores = useMemo(() => {
-    const slicedScores = scores.slice(
-      pagesVisited,
-      pagesVisited + scoresPerPage
-    );
-    const rows = slicedScores.map((score, index) => {
-      const rank = pagesVisited + index + 1;
-
-      const userId = score.userId
-        ? score.userId.replace(/.(?=.{3})/g, '*')
-        : '알 수 없음';
       return (
-        <tr key={score.id || rank}>
-          <td>{rank}</td>
-          <td>
-            <img
-              src={getIconForRank(rank)}
-              alt={`Rank ${rank}`}
-              style={{ width: '30px', height: '30px' }}
-            />
-          </td>
-          <td>{userId}</td>
-          <td>{score.totalPoint}</td>
-        </tr>
+        <Card key={score.id || rank} top3={rank <= 3}>
+          <Rank top3={rank <= 3}>
+            <RankNumber top3={rank <= 3}>{rank}</RankNumber>
+            <User>{userId}</User>
+          </Rank>
+          <Score top3={rank <= 3}>{score.totalPoint}</Score>
+        </Card>
       );
     });
 
-    // 페이지에 부족한 데이터가 있을 경우 빈 행 추가
-    for (let i = rows.length; i < scoresPerPage; i++) {
-      rows.push(
-        <tr key={`empty-${i}`}>
-          <td>----</td>
-          <td>----</td>
-          <td>----</td>
-          <td>----</td>
-        </tr>
-      );
-    }
     return rows;
-  }, [pageNumber, scores, pagesVisited, scoresPerPage]);
-
-  const changePage = ({ selected }) => setPageNumber(selected);
+  }, scores);
 
   if (loading) {
     return (
@@ -174,18 +130,7 @@ return (
     <RankingWrapper>
       <Title>Ranking</Title>
       <List>
-        {scores.map((score, index) => {
-          const rank = index + 1;
-          return (
-            <Card key={score.id} top3={rank <= 3}>
-              <Rank top3={rank <= 3}>
-              <RankNumber top3={rank <= 3}>{rank}</RankNumber>
-                <User>{score.userId}</User>
-              </Rank>
-              <Score top3={rank <=3 }>{score.totalPoint}</Score>
-            </Card>
-          );
-        })}
+        {displayScores}
       </List>
     </RankingWrapper>
   </ResponsiveWrapper>
@@ -202,6 +147,7 @@ const RankingWrapper = styled.div`
   width: 100%;
   min-height: 100vh; /* 화면 전체 높이 확보 */
   padding: 20px 40px; /* 상하좌우 여백 */
+  overflow-y: auto;
 `;
 
 const Title = styled.h2`
@@ -241,7 +187,7 @@ const Card = styled.div`
   justify-content: space-between;
   align-items: center;
 
-  background: "#f9f9f9";
+  background: #f9f9f9;
   border: 3px solid #aaa;
   border-radius: 6px;
   padding: 16px;
@@ -329,4 +275,13 @@ const ResponsiveWrapper = styled.div`
       text-align: left;
     }
   }
+`;
+
+const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
 `;
