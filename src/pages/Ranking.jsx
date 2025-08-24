@@ -96,24 +96,18 @@ const dummyScores = [
   //   };
   // }, [loading]);
 
-    const displayScores = useMemo(() => {
-    const rows = scores.map((score, index) => {
-      const rank = index + 1;
-      const userId = score.userId;
-
-      return (
-        <Card key={score.id || rank} top3={rank <= 3}>
-          <Rank top3={rank <= 3}>
-            <RankNumber top3={rank <= 3}>{rank}</RankNumber>
-            <User>{userId}</User>
-          </Rank>
-          <Score top3={rank <= 3}>{score.totalPoint}</Score>
-        </Card>
-      );
-    });
-
-    return rows;
-  }, scores);
+  const displayScores = scores.map((score, index) => {
+    const rank = index + 1;
+    return (
+      <Card key={score.id ?? rank} top3={rank <= 3}>
+        <Rank top3={rank <= 3}>
+          <RankNumber top3={rank <= 3}>{rank}</RankNumber>
+          <User>{score.userId}</User>
+        </Rank>
+        <Score top3={rank <= 3}>{score.totalPoint}</Score>
+      </Card>
+    );
+  }); 
 
   if (loading) {
     return (
