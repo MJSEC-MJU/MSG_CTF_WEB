@@ -1,80 +1,219 @@
+:root {
+  --bg: #fff;
+  --brand-red: #ff0000;
+  --brand-orange: #ff8c00;
+  --brand-black: #000;
+  --muted: #6b7280;
+  --card: #ffffff;
+  --ink: #111827;
+  --line: #e5e7eb;
+  --shadow: 0 6px 24px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.06);
+}
+
+* { box-sizing: border-box; }
+
+body { background: var(--bg); }
+
 .mypage-container {
-  background-color: #a1a1a1;
-  width: 1200px;
-  height: 100vh;
+  width: 100%;
+  max-width: 960px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
   display: flex;
   flex-direction: column;
+  gap: 24px;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/* 상단 브랜드 바 */
+.brand-bar {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--brand-red) 77%, var(--brand-orange) 100%);
+  border-radius: 999px;
+}
+
+/* 카드 공통 */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.card-header {
+  display: flex;
   align-items: center;
-  margin-top: 20px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-/* 프로필 스타일 */
+.card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.spacer { flex: 1; }
+
+/* 버튼 */
+.btn {
+  border: 1px solid var(--line);
+  background: var(--brand-black);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .04s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.btn:hover { opacity: .95; }
+.btn:active { transform: translateY(1px); }
+
+.btn.ghost {
+  background: #fff;
+  color: var(--brand-black);
+  border: 1px solid var(--line);
+}
+
+/* 프로필 */
 .profile {
-  background-color: #333;
-  color: white;
-  width: 1200px;
-  text-align: center;
-  padding: 30px 0;
+  padding: 24px;
 }
-
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 .avatar {
-  width: 100px;
-  height: 100px;
-  background-color: white;
+  width: 96px;
+  height: 96px;
+  background-color: #f3f4f6;
   border-radius: 50%;
   overflow: hidden;
-  margin: 0 auto 10px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
 }
-
 .avatar-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
-.problems-section {
-  width: 60%;
-  margin-top: 20px;
-}
-
-h3 {
-  color: black;
-}
-
-.problems-box {
-  background-color: #d3d3d3;
-  padding: 15px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-}
-
-.problem-link {
-  color: blue;
-  text-decoration: underline;
-  margin-right: 10px;
-  cursor: pointer;
-}
-
-.problem-link:hover {
-  color: darkblue;
-}
-
-.message-container {
-  display: flex;
-  justify-content: center;
+.profile-meta { display: flex; flex-direction: column; gap: 8px; }
+.profile-name { margin: 0; font-size: 1.25rem; font-weight: 800; }
+.profile-sub { margin: 0; color: var(--muted); }
+.profile-stats { display: flex; gap: 8px; margin-top: 4px; }
+.pill {
+  display: inline-flex;
   align-items: center;
-  height: 100vh;
-  background: #f5f5f5;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-weight: 700;
 }
 
-.loading-message {
-  font-size: 1.8rem;
-  color: #555;
-  font-weight: 500;
+/* 결제 QR */
+.qr .qr-body {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.qr-image {
+  width: 200px; height: 200px;
+  display: grid; place-items: center;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+.qr-image img, .qr-image canvas {
+  width: 192px; height: 192px;
 }
 
-.error-message {
-  font-size: 1.8rem;
-  color: #e74c3c;
-  font-weight: bold;
+.qr-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-weight: 800;
+  color: var(--brand-black);
+}
+.badge::before {
+  content: "";
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--brand-red);
+  box-shadow: 0 0 0 4px rgba(255,0,0,0.12);
+}
+.dim { color: var(--muted); }
+
+.mt24 { margin-top: 24px; }
+
+/* 문제 섹션 */
+.problems .problems-box {
+  background: #fafafa;
+  border: 1px solid var(--line);
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--brand-black);
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s ease, transform .04s ease;
+  font-weight: 600;
+}
+.chip:hover { background: #f9fafb; }
+.chip:active { transform: translateY(1px); }
+.chip.ghost {
+  background: #fff;
+}
+.chip-pts {
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+  color: var(--muted);
+}
+
+/* 메시지/로딩/에러 */
+.message-container {
+  display: flex; justify-content: center; align-items: center;
+  min-height: 60vh; background: var(--bg);
+}
+.loading-message { font-size: 1.1rem; color: var(--muted); font-weight: 500; }
+.error-message { font-size: 1rem; color: #e11d48; font-weight: 700; }
+.error-message.small { font-size: .95rem; }
+
+/* 반응형 */
+@media (max-width: 640px) {
+  .profile-row { flex-direction: column; align-items: flex-start; }
+  .qr .qr-body { grid-template-columns: 1fr; }
+}
+/* Mileage 강조 */
+.mileage {
+  margin-top: 10px;
+  display: inline-block;
+  font-size: 1.35rem;          
+  font-weight: 900;
+  line-height: 1.2;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: #ff0000;
+  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.15);
+}
+
+.mileage strong {
+  font-weight: 900;
 }

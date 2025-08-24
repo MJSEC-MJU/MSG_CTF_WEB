@@ -120,7 +120,8 @@ function App() {
           <Route path="/problem/:id" element={<PrivateRoute element={<ProblemDetail />} />} />
           <Route
             path="/myPage"
-            element={<PrivateRoute element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />} />}
+            element={<MyPage />}
+            // element={<PrivateRoute element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />} />}
           />
           {/* <Route path="/adminLogin" element={<AdminLogin />} /> */}
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
