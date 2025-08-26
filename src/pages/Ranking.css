@@ -1,0 +1,154 @@
+/* Wrapper */
+.ranking-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh; /* 화면 전체 높이 확보 */
+  padding: 20px 40px; /* 상하좌우 여백 */
+  overflow-y: auto;
+}
+
+/* Title */
+.title {
+  margin-top: 70px;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  align-self: flex-start;
+  font-family: 'Courier New', Courier, monospace;
+
+  /* 🔥 텍스트 위아래 그라데이션 */
+  background: linear-gradient(to bottom, #ff9000 20%, #dc0000 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  position: relative;
+}
+
+.title::before {
+  content: '|';
+  margin-right: 8px;
+  font-weight: bold;
+  background: linear-gradient(to bottom, #ff9000 20%, #dc0000 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* List */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 1000px;
+  max-width: 1000px;
+  margin: 0 auto; /* 중앙 정렬 */
+}
+
+/* Card */
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: #f9f9f9 !important;
+  border: 3px solid #aaa !important;
+  border-radius: 6px;
+  padding: 16px;
+  font-size: 1.2rem;
+}
+
+/* Rank */
+.rank {
+  flex: 3;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: bold;
+  color: #5e5e5e;
+}
+
+.rank.top3 {
+  color: #000;
+}
+
+/* Rank Number */
+.rank-number {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+  font-weight: bold;
+  font-size: 1.5rem;
+  z-index: 1;
+}
+
+.rank-number.top3 {
+  background: url('/src/assets/Ranking/flame.png') no-repeat center center;
+  background-size: contain;
+}
+
+/* User */
+.user {
+  flex: 3;
+  font-weight: 500;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+/* Score */
+.score {
+  flex: 0.5;
+  font-weight: bold;
+  font-size: 35px;
+  color: #333;
+}
+
+.score.top3 {
+  background: linear-gradient(to bottom, #ff8000 33%, #ff0000 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px #242323;
+}
+
+/* Responsive Wrapper */
+.responsive-wrapper {
+  width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .list {
+    max-width: 100%;
+  }
+
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .rank {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .score {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Loading Wrapper */
+.loading-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
+}
