@@ -66,7 +66,7 @@ function Challenge() {
               >
                 <div className="button-wrapper">
                   <img 
-                    src={isSolved ? "/assets/meat-cook.svg" : "/assets/challenge.svg"} 
+                    src={isSolved ? "/assets/meat-cook.svg" : "/assets/challenge.png"} 
                     alt={problem.title} 
                   />
                   <img 

@@ -4,7 +4,7 @@
   background-size: cover;
   width: 1200px;
   height: auto;
-  min-height: 100vh; 
+  /* min-height: 100vh;  */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -20,7 +20,7 @@
   grid-template-columns: repeat(4, 1fr);
   justify-content: center;
   align-items: center;
-  background: url("/assets/grill.svg") no-repeat center center;
+  /* background: url("/assets/grill.svg") no-repeat center center; */
   background-size: contain;
   padding: 50px;
 
@@ -40,8 +40,8 @@
 }
 
 .button-wrapper img {
-  width: 212px; 
-  height: 142px;
+  width: 413px; 
+  height: 413px;
 }
 
 .category-icon {
