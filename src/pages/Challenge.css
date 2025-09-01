@@ -1,6 +1,6 @@
 .challenge-container {
   text-align: center;
-  background: url("/assets/background.svg") no-repeat center center;
+  /* background: url("/assets/background.svg") no-repeat center center; */
   background-size: cover;
   width: 1200px;
   height: auto;

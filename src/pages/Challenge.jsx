@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchProblems } from "../api/ChallengeAllAPI"; // API 함수 import
 import { fetchSolvedChallenges } from "../api/UserChallengeAPI";
+// import { SignatureModal } from "../components/SignatureModal";
 import "./Challenge.css";
 
 function Challenge() {
@@ -44,6 +45,15 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
+      <button 
+        style={{ height: "5vh", margin: "10px", backgroundColor: "#444", color: "white" }}
+        onClick={() => {
+        // 새로고침 기능
+        window.location.reload(); 
+        }}
+      >
+        Signature
+      </button>
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
@@ -56,7 +66,7 @@ function Challenge() {
               >
                 <div className="button-wrapper">
                   <img 
-                    src={isSolved ? "/assets/meat-cook.svg" : "/assets/meat-raw.svg"} 
+                    src={isSolved ? "/assets/meat-cook.svg" : "/assets/challenge.svg"} 
                     alt={problem.title} 
                   />
                   <img 
@@ -96,6 +106,7 @@ function Challenge() {
         >
           다음
         </button>
+
       </div>
     </div>
   );
