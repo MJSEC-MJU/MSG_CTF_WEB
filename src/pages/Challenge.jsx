@@ -10,6 +10,7 @@ function Challenge() {
   const [solvedChallenges, setSolvedChallenges] = useState(new Set());
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [signatureForm, setSignatureForm] = useState(false);
   const categoryImages = {
     FORENSICS: "/assets/forensics.svg",
     CRYPTO: "/assets/crypto.svg",
@@ -45,15 +46,18 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
-      <button 
-        style={{ height: "5vh", margin: "10px", backgroundColor: "#444", color: "white" }}
-        onClick={() => {
-        // 새로고침 기능
-        window.location.reload(); 
+      <div className="signature-button">
+      <img 
+        src="/assets/signature.svg" 
+        alt="signature" 
+        style={{ 
+          width: "100%", 
+          height: "100%", 
+          cursor: "pointer"  // 마우스 올리면 손가락 모양
         }}
-      >
-        Signature
-      </button>
+        onClick={() => setSignatureForm(true)}
+      />
+      </div>
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
@@ -66,7 +70,7 @@ function Challenge() {
               >
                 <div className="button-wrapper">
                   <img 
-                    src={isSolved ? "/assets/meat-cook.svg" : "/assets/challenge.png"} 
+                    src={isSolved ? "/assets/meat-cook.svg" : "/assets/challenge.svg"} 
                     alt={problem.title} 
                   />
                   <img 
@@ -108,6 +112,20 @@ function Challenge() {
         </button>
 
       </div>
+
+      {signatureForm && (
+        <div className="signature-modal">
+          <div className="signature-form">
+          <h3>Signature 코드 입력</h3>
+          <input type="text" placeholder="코드 입력" />
+          <button onClick={() => {
+            // TODO: 제출 로직
+            setShowSignatureForm(false); // 제출 후 폼 닫기
+            }}>제출</button>
+          <button onClick={() => setSignatureForm(false)}>취소</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
