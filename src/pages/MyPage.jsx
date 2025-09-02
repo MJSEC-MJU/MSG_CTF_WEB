@@ -42,9 +42,11 @@ const MyPage = () => {
   const [unsolvedProblems, setUnsolvedProblems] = useState([]);
   const [problemsLoading, setProblemsLoading] = useState(true);
   const [problemsError, setProblemsError] = useState(false);
-  const MILEAGE_PER_SOLVE = 500; //푼 문제당 500마일리지
+
+  const MILEAGE_PER_SOLVE = 500; // 푼 문제당 500 마일리지
   const mileage = useMemo(
-   () => solvedProblems.length * MILEAGE_PER_SOLVE,[solvedProblems]
+    () => solvedProblems.length * MILEAGE_PER_SOLVE,
+    [solvedProblems]
   );
 
   // 결제 QR 상태
@@ -61,13 +63,12 @@ const MyPage = () => {
     if (MOCK) {
       // 🚨 실제 배포시 이 블록은 삭제
       setProfile({
-        loginId: "tester01",
+        teamName: "tester01",
         user_id: 1001,
-        name: "tester01@example.com",
+        members: ["tester01@example.com", "tester02@example.com"],
         rank: 1,
         points: 1234,
         avatarUrl: "/assets/profileSample.webp",
-        univ: "MJSEC University",
       });
       return;
     }
@@ -77,13 +78,17 @@ const MyPage = () => {
       .then((data) => {
         const user = data.data;
         setProfile({
-          loginId: user.loginId,
+          teamName: user.teamName ?? user.userId ?? "TEAM",
           user_id: user.user_id,
-          name: user.email,
-          rank: 1,
+          // 백엔드가 members 배열을 주면 그대로 사용, 없으면 email을 단일 멤버로
+          members: Array.isArray(user.members)
+            ? user.members
+            : user.email
+            ? [user.email]
+            : [],
+          rank: 1, // 최초 진입 시 임시값, SSE에서 업데이트
           points: user.total_point,
           avatarUrl: "/assets/profileSample.webp",
-          univ: user.univ,
         });
       })
       .catch(() => setProfileError(true));
@@ -132,8 +137,9 @@ const MyPage = () => {
         const payload = JSON.parse(jsonStr);
         const leaderboard = Array.isArray(payload) ? payload : payload.data;
         if (!Array.isArray(leaderboard)) return;
+
         const rankIndex = leaderboard.findIndex(
-          (item) => item.userId === profile.loginId
+          (item) => item.userId === profile.teamName
         );
         if (rankIndex !== -1)
           setProfile((prev) => ({ ...prev, rank: rankIndex + 1 }));
@@ -235,12 +241,24 @@ const MyPage = () => {
             />
           </div>
           <div className="profile-meta">
-            <h2 className="profile-name">{profile.name}</h2>
-            <p className="profile-sub">University: {profile.univ}</p>
+            <h2 className="profile-name">{profile.teamName}</h2>
+
+            {/* 팀 멤버 목록 */}
+            {profile.members?.length > 0 && (
+              <ul className="member-list">
+                {profile.members.map((m, i) => (
+                  <li key={i} className="member-item">
+                    {m}
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <div className="profile-stats">
               <span className="pill">Rank #{profile.rank}</span>
               <span className="pill">{profile.points} pts</span>
             </div>
+
             <div className="mileage">
               마일리지&nbsp;
               <strong>{mileage.toLocaleString()}</strong>
@@ -250,102 +268,89 @@ const MyPage = () => {
         </div>
       </section>
 
-      {/* 결제 QR */}
-      <section className="qr card">
-        <div className="card-header">
-          <h3>결제 QR</h3>
-          <div className="spacer" />
-          <button className="btn ghost" onClick={manualRefresh}>
-            재발급
-          </button>
-        </div>
-        <div className="qr-body">
+    {/* 결제 QR */}
+    <section className="qr card">
+      <div className="card-header qr-header">
+        <h3>결제 QR</h3>
+        <button className="btn ghost" onClick={manualRefresh}>재발급</button>
+      </div>
+
+      <div className="qr-body">
+        <div className="qr-image">
           {qrLoading ? (
             <Loading />
           ) : qrError ? (
-            <p className="error-message small">
-              QR 발급에 실패했습니다. 재발급을 눌러주세요.
-            </p>
+            <p className="error-message small">QR 발급에 실패했습니다. 재발급을 눌러주세요.</p>
+          ) : qrData ? (
+            <QRCodeCanvas value={qrData} size={192} includeMargin />
           ) : (
-            <>
-              <div className="qr-image">
-                {qrData ? (
-                  <QRCodeCanvas value={qrData} size={192} includeMargin />
-                ) : (
-                  <p className="error-message small">
-                    표시할 QR 데이터가 없습니다.
-                  </p>
-                )}
-              </div>
-              <div className="qr-meta">
-                <span className="badge">
-                  자동 갱신 · 남은 시간 {formatMMSS(timeLeft)}
-                </span>
-                {qrExpireAt && (
-                  <span className="dim">
-                    만료 시각: {new Date(qrExpireAt).toLocaleString()}
-                  </span>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </section>
-
-      {/* 문제 */}
-      <section className="problems card">
-        <div className="card-header">
-          <h3>Solved Problems</h3>
-        </div>
-        <div className="problems-box">
-          {problemsLoading ? (
-            <Loading />
-          ) : problemsError ? (
-            <p className="error-message">문제 데이터를 불러오는 중 오류가 발생했습니다.</p>
-          ) : solvedProblems.length ? (
-            <div className="chips">
-              {solvedProblems.map((problem) => (
-                <button
-                  key={problem.challengeId}
-                  className="chip"
-                  onClick={() => navigate(`/problem/${problem.challengeId}`)}
-                >
-                  {problem.title}{" "}
-                  <span className="chip-pts">{problem.points} pts</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="dim">푼 문제가 없습니다.</p>
+            <p className="error-message small">표시할 QR 데이터가 없습니다.</p>
           )}
         </div>
 
-        <div className="card-header mt24">
-          <h3>Unsolved Problems</h3>
-        </div>
-        <div className="problems-box">
-          {problemsLoading ? (
-            <Loading />
-          ) : problemsError ? (
-            <p className="error-message">문제 데이터를 불러오는 중 오류가 발생했습니다.</p>
-          ) : unsolvedProblems.length ? (
-            <div className="chips">
-              {unsolvedProblems.map((problem) => (
-                <button
-                  key={problem.challengeId}
-                  className="chip ghost"
-                  onClick={() => navigate(`/problem/${problem.challengeId}`)}
-                >
-                  {problem.title}{" "}
-                  <span className="chip-pts">{problem.points} pts</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="dim">안 푼 문제가 없습니다.</p>
+        <div className="qr-meta">
+          <div className="qr-status">
+            <span className="led" />
+            <span>자동 갱신 · 남은 시간 <strong>{formatMMSS(timeLeft)}</strong></span>
+          </div>
+          {qrExpireAt && (
+            <span className="dim">만료 시각: {new Date(qrExpireAt).toLocaleString()}</span>
           )}
         </div>
-      </section>
+      </div>
+    </section>
+
+    {/* 문제 */}
+    <section className="problems card">
+      <div className="card-header"><h3>Solved Problems</h3></div>
+      <div className="problems-box">
+        {problemsLoading ? (
+          <Loading />
+        ) : problemsError ? (
+          <p className="error-message">문제 데이터를 불러오는 중 오류가 발생했습니다.</p>
+        ) : solvedProblems.length ? (
+          <div className="chips">
+            {solvedProblems.map((problem) => (
+              <button
+                key={problem.challengeId}
+                className="chip"
+                onClick={() => navigate(`/problem/${problem.challengeId}`)}
+              >
+                {problem.title}
+                <span className="chip-pts">{problem.points} pts</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="dim">푼 문제가 없습니다.</p>
+        )}
+      </div>
+
+      <div className="card-header mt24"><h3>Unsolved Problems</h3></div>
+      <div className="problems-box">
+        {problemsLoading ? (
+          <Loading />
+        ) : problemsError ? (
+          <p className="error-message">문제 데이터를 불러오는 중 오류가 발생했습니다.</p>
+        ) : unsolvedProblems.length ? (
+          <div className="chips">
+            {unsolvedProblems.map((problem) => (
+              <button
+                key={problem.challengeId}
+                className="chip ghost"
+                onClick={() => navigate(`/problem/${problem.challengeId}`)}
+              >
+                {problem.title}
+                <span className="chip-pts">{problem.points} pts</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="dim">안 푼 문제가 없습니다.</p>
+        )}
+      </div>
+    </section>
+
 
       {leaderboardError && (
         <p className="error-message">리더보드 업데이트에 실패했습니다.</p>
@@ -355,3 +360,4 @@ const MyPage = () => {
 };
 
 export default MyPage;
+
