@@ -116,13 +116,15 @@ function Challenge() {
       {signatureForm && (
         <div className="signature-modal">
           <div className="signature-form">
-          <h3>Signature 코드 입력</h3>
-          <input type="text" placeholder="코드 입력" />
+          <h3>Signature Code</h3>
+          <input type="text" placeholder="Signature Code" />
+          <div className="signature-buttons">
           <button onClick={() => {
             // TODO: 제출 로직
-            setShowSignatureForm(false); // 제출 후 폼 닫기
+            setSignatureForm(false); // 제출 후 폼 닫기
             }}>제출</button>
           <button onClick={() => setSignatureForm(false)}>취소</button>
+          </div>
           </div>
         </div>
       )}
