@@ -43,7 +43,6 @@ const ProblemDetail = () => {
     setTimeout(() => setIsSubmitting(false), 1000);
 
     const result = await submitFlag(id, flag);
-    //console.log('API 응답:', result);
 
     if (result.data === 'Correct') {
       alert('정답입니다!');
@@ -65,58 +64,129 @@ const ProblemDetail = () => {
   if (loading) return <h1>로딩 중...</h1>;
   if (error) return <h1>{error}</h1>;
 
+  const heroImage = '/assets/hamburger.png'; //나중에 카테고리별로
+
+  // 별점(0~5 정수)을 표시하고 싶다면 problem.difficulty 사용 (없으면 표시 안 함)
+  const diffNum = (() => {
+    const n = Math.round(Number(problem?.difficulty));
+    return Number.isFinite(n) ? Math.max(0, Math.min(5, n)) : null;
+  })();
+
   return (
-    <div className="problem-detail-container">
-      <div className="problem-content">
-        <h1 className="problem-title">{problem.title}</h1>
-        <p className="problem-description">{problem.description}</p>
-        <p className="solved-count">{problem.solvers}명이 해결함</p>
+    <div className="pd-page">
+      {/* 상단 히어로 (카테고리 배지) */}
+      <div className="pd-hero">
+        <img src={heroImage} alt="dish hero" className="pd-hero-img" />
+        <div className="pd-hero-overlay" />
+        <div className="pd-hero-content">
+          {diffNum !== null && (
+            <div className="pd-hero-stars" aria-label={`난이도 ${diffNum} / 5`}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <svg key={i} className={`pd-star ${i < diffNum ? 'filled' : 'empty'}`} viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2.5l3.09 6.26 6.91.99-5 4.86 1.18 6.89L12 18.77l-6.18 3.23 1.18-6.89-5-4.86 6.91-.99L12 2.5z" />
+                </svg>
+              ))}
+              <span className="pd-hero-stars-text">{diffNum}/5</span>
+            </div>
+          )}
 
-        <div className="button-group">
-          <div className="link-btn-wrapper">
-            <a
-              href={problem.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-btn"
-            >
-              <img src="/assets/link-btn1.png" alt="LINK" />
-              <span className="link-btn-text">LINK</span>
-            </a>
+          <h1 className="pd-hero-title">{problem.title}</h1>
+
+          <div className="pd-hero-meta">
+            <span className="pd-hero-badge pd-badge-difficulty">
+              {problem?.category || 'Problem'}
+            </span>
           </div>
-          <button className="download-btn" onClick={() => downloadFile(id)}>
-            <b>FILE</b>
-          </button>
         </div>
+      </div>
 
-        {/* Flag 제출 (정답 제출 시 숨김) */}
-        {!isCorrect && (
-          <div className="flag-submit">
-            <input
-              type="text"
-              placeholder="FLAG 입력"
-              value={flag}
-              onChange={(e) => setFlag(e.target.value)}
-            />
-            <button
-              className="submit-btn"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              style={{
-                cursor: isSubmitting ? 'not-allowed' : 'pointer',
-              }}
-            >
-              <b>제출</b>
-            </button>
-          </div>
-        )}
+      {/* 본문: 좌측 메인 / 우측 사이드 */}
+      <div className="pd-container">
+        <div className="pd-grid">
+          {/* 좌측: 설명 + (Link 자리 → 플래그 제출) + 뒤로가기 */}
+          <section className="pd-card pd-main">
+            <div className="pd-section pd-main-header">
+              <div className="pd-solved">{problem.solvers}명이 해결함</div>
+            </div>
 
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          <b>뒤로 가기</b>
-        </button>
+            <div className="pd-section">
+              <p className="pd-description">{problem.description}</p>
+            </div>
+
+            {/* ✅ Link 버튼 있던 자리에 플래그 입력/제출 배치 (기존 로직 그대로) */}
+            {!isCorrect && (
+              <div className="pd-section flag-submit">
+                <input
+                  type="text"
+                  placeholder="FLAG 입력"
+                  value={flag}
+                  onChange={(e) => setFlag(e.target.value)}
+                />
+                <button
+                  className="submit-btn"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                >
+                  <b>제출</b>
+                </button>
+              </div>
+            )}
+
+            <div className="pd-section">
+              <button className="back-btn" onClick={() => navigate(-1)}>
+                <b>뒤로 가기</b>
+              </button>
+            </div>
+          </section>
+
+          {/* 우측: 제출 제한 + 파일 다운로드(단일 버튼) + ✅ Link 버튼 이동 */}
+          <aside className="pd-card pd-side">
+            <div className="pd-section">
+              <h3 className="pd-side-title">추가 정보</h3>
+              <div className="pd-info">
+                <div className="pd-info-label">제출 제한</div>
+                <div className="pd-info-value">30초 쿨다운</div>
+              </div>
+
+              {/* Link 버튼: 사이드에 배치 */}
+              {problem?.url && (
+                <a
+                  href={problem.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-btn-modern block"
+                >
+                  LINK
+                </a>
+              )}
+
+              {/* 파일 다운로드 버튼 */}
+              <button
+                className="download-btn pd-download"
+                onClick={() => downloadFile(id)}
+                aria-label="파일 다운로드"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M3 14.5A1.5 1.5 0 0 0 4.5 16h11a1.5 1.5 0 0 0 1.5-1.5V12h-2v2h-10v-2H3v2.5zM10 3a1 1 0 0 1 1 1v6.586l1.293-1.293 1.414 1.414L10 14.414 6.293 10.707l1.414-1.414L9 10.586V4a 1 1 0 0 1 1-1z" />
+                </svg>
+                파일 다운로드
+              </button>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );
 };
 
 export default ProblemDetail;
+
+
+
