@@ -11,6 +11,7 @@ function Challenge() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [signatureForm, setSignatureForm] = useState(false);
+  const [signatureInput, setSignatureInput] = useState("");
   const categoryImages = {
     FORENSICS: "/assets/forensics.svg",
     CRYPTO: "/assets/crypto.svg",
@@ -123,10 +124,10 @@ function Challenge() {
               value={signatureInput}
               onChange={(e) => setSignatureInput(e.target.value)}
             />
-            {signatureError && <p style={{ color: 'red', fontSize: '12px' }}>{signatureError}</p>}
+            {/* {signatureError && <p style={{ color: 'red', fontSize: '12px' }}>{signatureError}</p>} */}
 
             <div className="signature-buttons">
-        <button onClick={handleSignatureSubmit}>제출</button>
+        <button>제출</button>
         <button onClick={() => setSignatureForm(false)}>취소</button>
       </div>
     </div>
