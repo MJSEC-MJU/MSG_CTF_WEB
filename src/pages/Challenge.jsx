@@ -116,18 +116,22 @@ function Challenge() {
       {signatureForm && (
         <div className="signature-modal">
           <div className="signature-form">
-          <h3>Signature Code</h3>
-          <input type="text" placeholder="Signature Code" />
-          <div className="signature-buttons">
-          <button onClick={() => {
-            // TODO: 제출 로직
-            setSignatureForm(false); // 제출 후 폼 닫기
-            }}>제출</button>
-          <button onClick={() => setSignatureForm(false)}>취소</button>
-          </div>
-          </div>
-        </div>
-      )}
+            <h3>Signature Code</h3>
+            <input
+              type="text"
+              placeholder="Signature Code"
+              value={signatureInput}
+              onChange={(e) => setSignatureInput(e.target.value)}
+            />
+            {signatureError && <p style={{ color: 'red', fontSize: '12px' }}>{signatureError}</p>}
+
+            <div className="signature-buttons">
+        <button onClick={handleSignatureSubmit}>제출</button>
+        <button onClick={() => setSignatureForm(false)}>취소</button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

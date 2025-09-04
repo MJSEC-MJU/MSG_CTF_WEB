@@ -138,7 +138,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  color: #dc0000;
+  color: #840B0B;
   font-size: 25px;
   width: 500px;
   height: 300px;
@@ -178,7 +178,7 @@
 }
 
 .signature-buttons button:first-of-type {
-  background-color: #dc0000;   /* 제출 버튼 색상 */
+  background-color: #840B0B;   /* 제출 버튼 색상 */
   color: #fff;
 }
 
