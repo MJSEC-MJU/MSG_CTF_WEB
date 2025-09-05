@@ -52,3 +52,12 @@ export const signupSchema = yup.object().shape({
       '비밀번호는 소문자, 대문자, 숫자 및 특수문자(!@#$%^&*)를 모두 포함해야 합니다.'
     ),
 });
+
+export const signatureSchema = yup.object().shape({
+  signature: yup
+    .string()
+    .trim()
+    .required('Signature 코드를 입력해주세요.')
+    .matches(/^[a-zA-Z0-9]+$/, 'Signature 코드는 영문과 숫자만 사용할 수 있습니다.')
+    .matches(/^\S+$/, 'Signature 코드에 공백을 포함할 수 없습니다.'),
+});

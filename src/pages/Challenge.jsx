@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchProblems } from "../api/ChallengeAllAPI"; // API 함수 import
 import { fetchSolvedChallenges } from "../api/UserChallengeAPI";
+// import { SignatureModal } from "../components/SignatureModal";
 import "./Challenge.css";
 
 function Challenge() {
@@ -9,6 +10,8 @@ function Challenge() {
   const [solvedChallenges, setSolvedChallenges] = useState(new Set());
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [signatureForm, setSignatureForm] = useState(false);
+  const [signatureInput, setSignatureInput] = useState("");
   const categoryImages = {
     FORENSICS: "/assets/forensics.svg",
     CRYPTO: "/assets/crypto.svg",
@@ -44,6 +47,18 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
+      <div className="signature-button">
+      <img 
+        src="/assets/signature.svg" 
+        alt="signature" 
+        style={{ 
+          width: "100%", 
+          height: "100%", 
+          cursor: "pointer"  // 마우스 올리면 손가락 모양
+        }}
+        onClick={() => setSignatureForm(true)}
+      />
+      </div>
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
@@ -56,7 +71,7 @@ function Challenge() {
               >
                 <div className="button-wrapper">
                   <img 
-                    src={isSolved ? "/assets/meat-cook.svg" : "/assets/meat-raw.svg"} 
+                    src={isSolved ? "/assets/meat-cook.svg" : "/assets/challenge.svg"} 
                     alt={problem.title} 
                   />
                   <img 
@@ -96,7 +111,28 @@ function Challenge() {
         >
           다음
         </button>
+
       </div>
+
+      {signatureForm && (
+        <div className="signature-modal">
+          <div className="signature-form">
+            <h3>Signature Code</h3>
+            <input
+              type="text"
+              placeholder="Signature Code"
+              value={signatureInput}
+              onChange={(e) => setSignatureInput(e.target.value)}
+            />
+            {/* {signatureError && <p style={{ color: 'red', fontSize: '12px' }}>{signatureError}</p>} */}
+
+            <div className="signature-buttons">
+        <button>제출</button>
+        <button onClick={() => setSignatureForm(false)}>취소</button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

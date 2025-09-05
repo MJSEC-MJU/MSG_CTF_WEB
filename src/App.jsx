@@ -115,7 +115,8 @@ function App() {
           />
           <Route
             path="/challenge"
-            element={<PrivateRoute element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
+            element={<Challenge />}
+            // element={<PrivateRoute element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
           />
           <Route path="/problem/:id" element={<PrivateRoute element={<ProblemDetail />} />} />
           <Route

@@ -1,8 +1,28 @@
 import { Axios } from './Axios';
 import Cookies from "js-cookie";
+
+import { dummyProblems } from '../mock/problems';
+
 const API_BASE_URL = "/challenges/all";
 
-export const fetchProblems = async (page = 0, size = 12) => {
+export const fetchProblems = async (page = 1, size = 10) => {
+  const USE_MOCK = true; // true로 설정하면 목업 데이터를 사용합니다.
+  if (USE_MOCK) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const start = page * size;
+      const end = start + size;
+      const pagedProblems = dummyProblems.problems.slice(start, end);
+      const totalPages = Math.ceil(dummyProblems.problems.length / size);
+      resolve({
+        problems: pagedProblems,
+        totalPages: totalPages,
+      });
+    }, 300);
+  });
+}
+
+  // 실제 API 사용 부분.
   try {
      const token = Cookies.get("accessToken"); 
     if (!token) {
