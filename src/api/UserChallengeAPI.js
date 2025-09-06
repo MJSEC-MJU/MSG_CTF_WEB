@@ -1,5 +1,6 @@
 import { Axios } from './Axios';
 import Cookies from 'js-cookie';
+import { dummySolved } from '/src/mock/problems'; // 더미데이터
 
 const API_URL = "/users/challenges";
 
