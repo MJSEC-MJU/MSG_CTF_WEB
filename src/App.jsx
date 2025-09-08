@@ -22,6 +22,7 @@ import Admin from "./pages/Admin";
 import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
+import ProblemDetailMock from './pages/ProblemDetailMock';
 
 const CONTEST_START_TIME = new Date("2025-03-29T01:00:00Z").getTime(); // UTC 기준
 const CONTEST_END_TIME = new Date("2025-03-29T13:00:00Z").getTime(); // 대회 종료 시간
@@ -119,6 +120,8 @@ function App() {
             // element={<PrivateRoute element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
           />
           <Route path="/problem/:id" element={<PrivateRoute element={<ProblemDetail />} />} />
+          {/* 미리보기: /problem?mock 로 접속 (파라미터 없는 /problem 경로) */}
+          <Route path="/problem" element={<ProblemDetailMock />} />
           <Route
             path="/myPage"
             element={<MyPage />}
