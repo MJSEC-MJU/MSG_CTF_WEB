@@ -42,7 +42,7 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
     }
 
     // 새 SSE 연결 생성
-    eventSource = new EventSource('https://msg.mjsec.kr/api/leaderboard/graph');
+    eventSource = new EventSource(`${process.env.REACT_APP_API_URL}/api/leaderboard/graph`);
 
     eventSource.onopen = () => {
       //console.log('SSE 연결이 열렸습니다.');
