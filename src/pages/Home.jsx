@@ -37,23 +37,8 @@ function Home() {
 
   return (
     <HomeWrapper>
-      <div className='WallWrapper'>
-        <img src={`/assets/wall.png`} />
-        <div className='MainLogoWrapper'>
-          <img src={`/assets/MainLogo.png`} />
-        </div>
-        <div className='CtButtonWrapper'>
-          <CenteredButton onClick={toggleModal}></CenteredButton>
-        </div>
-        {isModalOpen && <Modal onClose={toggleModal} content={rulesContent} />}
-        <div className='GamsungWrapper'>
-          <img src={`/assets/gamsung.png`} />
-        </div>
-        <div className='ClickWrapper'>
-          <img src={`/assets/click.png`} />
-        </div>
-        {/* AdminLogin 클릭 영역 */}
-        {/* <div className='AdminLogin' onClick={handleAdminLogin}></div> */}
+      <div className="RightTrapezoidWrapper">
+        <div className="RightTrapezoid" />
       </div>
     </HomeWrapper>
   );
@@ -74,31 +59,3 @@ const HomeWrapper = styled.div`
   position: relative;
 `;
 
-const CenteredButton = styled.button`
-  margin: 2rem auto 0;
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  font-family: 'Courier New', Courier, monospace;
-  color: #000;
-  background: url('/assets/ruleButton.png') no-repeat center center;
-  background-size: contain;
-  width: 250px;
-  height: 100px;
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-  z-index: 1;
-  transition:
-    transform 0.2s,
-    filter 0.2s;
-
-  &:hover {
-    transform: scale(1.1);
-    filter: brightness(1.2);
-  }
-
-  &:active {
-    transform: scale(0.9);
-    filter: brightness(0.9);
-  }
-`;
