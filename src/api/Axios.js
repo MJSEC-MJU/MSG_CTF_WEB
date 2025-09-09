@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const Axios = axios.create({
-  baseURL: `${process.env.REACT_APP_API_URL}/api/`,
+  baseURL: `${import.meta.env.VITE_API_URL}/api/`,
   withCredentials: true, // 쿠키를 포함하여 요청 (세션 관리 가능)
   headers: {
     'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ async function handleTokenRefresh() {
     try {
       //console.log("🔄 토큰 재발급 요청...");
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/reissue`,
+        `${import.meta.env.VITE_API_URL}/api/reissue`,
         {},
         { withCredentials: true } // 쿠키 포함 요청
       );
