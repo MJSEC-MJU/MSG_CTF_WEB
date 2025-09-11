@@ -1,61 +1,95 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import Modal from '../components/Modal';
+import { useState, useEffect, useRef } from 'react';
 import './Home.css';
 
 function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
+  const images = ['/assets/BOF.svg','/assets/shellad.svg', '/assets/hashBrown.svg'];
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const intervalRef = useRef(null);
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
+  const go = (i) => setIdx(i);
 
-  // const handleAdminLogin = () => {
-  //   navigate('/adminLogin');
-  // };
+  // 자동 슬라이드: 3초, 탭 비활성/호버/포커스 시 일시정지
+  useEffect(() => {
+    const onVisibility = () => setPaused(document.hidden);
+    document.addEventListener('visibilitychange', onVisibility);
 
-  const rulesContent = (
-    <>
-      <h2>게임 규칙</h2>
-      <ul>
-        <li>
-          플래그 형식은 문제 설명을 참고해주세요.
-          기본 플래그 형식은<strong>MSG&#123;&#125;</strong>입니다.
-        </li>
-        <li>
-          제출이 틀렸을 경우 패널티가 부여됩니다. (3회 이상 틀릴 경우 추가 시간
-          패널티)
-        </li>
-        <li>Dos 공격은 절대 금지입니다.</li>
-        <li>1~3위까지는 Writeup을 작성하여 제출해야 합니다.</li>
-        <li>파일 다운로드 중 오류 발생이 뜰 경우, 파일이 필요없는 문제입니다.</li>
-      </ul>
-    </>
-  );
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (!paused) {
+      intervalRef.current = setInterval(() => {
+        setIdx((i) => (i + 1) % images.length);
+      }, 3000);
+    }
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [paused, images.length]);
 
   return (
-    <HomeWrapper>
+    <div className="HomeWrapper">
+      {/* 배경 트래페조이드 */}
       <div className="RightTrapezoidWrapper">
         <div className="RightTrapezoid" />
       </div>
-    </HomeWrapper>
+
+      {/* 트래페조이드 중앙 위 캐러셀 */}
+      <div
+        className="CarouselWrapper"
+        aria-roledescription="carousel"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
+      >
+        <div
+          className="CarouselTrack"
+          style={{ transform: `translateX(-${idx * 100}%)` }}
+        >
+          {images.map((src, i) => (
+            <div
+              className="CarouselSlide"
+              key={src}
+              aria-hidden={i !== idx}
+            >
+              <img className="CarouselImage" src={src} alt={`slide-${i + 1}`} />
+            </div>
+          ))}
+        </div>
+
+        {/* 인디케이터 */}
+        <div className="CarouselDots" role="tablist" aria-label="슬라이드 선택">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              className={`Dot ${i === idx ? 'active' : ''}`}
+              onClick={() => {
+                setPaused(true);
+                go(i);
+              }}
+              role="tab"
+              aria-selected={i === idx}
+              aria-label={`${i + 1}번 슬라이드`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 타이틀 */}
+      <h1 className="Tag">
+        SUPER
+        <br />
+        TASTY
+      </h1>
+    </div>
   );
 }
 
 export default Home;
-
-const HomeWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: auto;
-  min-height: 100vh;
-  width: auto;
-  min-width: 100xw;
-  overflow: hidden;
-  position: relative;
-`;
-
