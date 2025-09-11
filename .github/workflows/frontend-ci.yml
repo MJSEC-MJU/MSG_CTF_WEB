@@ -10,6 +10,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
+      REACT_APP_API_URL: ${{ secrets.DOMAIN }}  
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       SERVER_IP: ${{ secrets.SERVER_IP }}
@@ -46,7 +47,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /home/ubuntu/app/docker-compose.yml/
+            cd /home/ubuntu/app            # ← docker-compose.yml 이 있는 디렉터리로 이동
             sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:latest
-            sudo docker-compose up -d frontend
+            sudo docker compose up -d frontend || sudo docker-compose up -d frontend
             sudo docker image prune -f
