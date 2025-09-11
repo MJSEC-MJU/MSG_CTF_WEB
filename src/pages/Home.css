@@ -1,65 +1,96 @@
-.WallWrapper {
-  text-align: center;
-  position: relative;
+/* ===== Carousel: 래퍼(클리핑 창) ===== */
+.CarouselWrapper {
+  position: fixed;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 폭은 뷰포트에 맞춰 줄이고, 비율(8:5)을 유지 */
+  width: min(800px, 80vw);
+  aspect-ratio: 8 / 5;           /* 비율 유지의 핵심 */
+  z-index: 2;
+
   display: flex;
-  z-index: 0;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;              /* 보이는 창 역할 */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  background: #00000010;
+  backdrop-filter: blur(0.5px);
 }
 
-.WallWrapper img {
+/* 트랙: 좌우로 슬라이드되는 줄 */
+.CarouselTrack {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;                 /* 가로로 슬라이드 나열 */
+  transition: transform 360ms ease;
+  will-change: transform;
+}
+
+/* 각 슬라이드: 정확히 한 화면 너비 차지 */
+.CarouselSlide {
+  flex: 0 0 100%;
+  height: 100%;
+  position: relative;
+}
+
+.CarouselImage {
   width: 100%;
   height: 100%;
-}
-@keyframes blink {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-.MainLogoWrapper {
-  position: absolute;
-  top: 50%; /* 중앙 정렬 */
-  left: 50%;
-  transform: translate(-58%, -65%);
-  z-index: 2;
-}
-.MainLogoWrapper img {
-  width: 80%;
-  height: 80%;
-}
-.CtButtonWrapper {
-  position: absolute;
-  top: 50%; /* 중앙 정렬 */
-  left: 50%;
-  transform: translate(-50%, 130%);
-}
-.GamsungWrapper {
-  position: absolute;
-  top: 50%; /* 중앙 정렬 */
-  left: 50%;
-  transform: translate(10%, -90%);
-  z-index: 1;
-}
-.GamsungWrapper img {
-  width: 80%;
-  height: 80%;
-}
-.ClickWrapper {
-  position: absolute;
-  top: 50%; /* 중앙 정렬 */
-  left: 50%;
-  transform: translate(-127%, 190%);
-}
-.ClickWrapper img {
-  width: 300px;
-  height: 100px;
-  animation: blink 1.5s infinite;
+  object-fit: contain;           /* SVG 전체가 보이도록 */
+  display: block;
 }
 
+/* 인디케이터 (완전한 원형) */
+.CarouselDots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.Dot {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+
+  width: 14px;
+  height: 14px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  display: inline-block;
+  line-height: 0;
+  box-sizing: content-box;
+  position: relative;
+}
+.Dot::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2) inset;
+  transition: transform 160ms ease, opacity 160ms ease;
+  opacity: 0.5;
+}
+.Dot.active::before {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+/* ===== 기존 스타일 유지 ===== */
 .RightTrapezoidWrapper {
   position: fixed;
   top: 55%;
@@ -76,8 +107,59 @@
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  width: 100%;
+  width: 90%;
   height: 250px;
   background: linear-gradient(90deg, #ff0000 77%, #ff8c00 100%);
   clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
 }
+
+.Tag {
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 95px;
+  margin-bottom: 1.5rem;
+  position: absolute;
+  top: 35%;
+  left: 7%;
+  z-index: 4;
+}
+
+.HomeWrapper {
+  background-color: #fff;
+  max-height: 100vh;
+  max-width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+/* ===== 반응형 튜닝 ===== */
+@media (max-width: 1024px) {
+  .CarouselWrapper {
+    width: min(820px, 86vw);     /* 살짝 더 유동적으로 */
+  }
+  .Tag { font-size: 72px; top: 33%; }
+}
+
+@media (max-width: 768px) {
+  .CarouselWrapper {
+    width: 92vw;                 /* 모바일에서 화면 폭에 거의 꽉 차게 */
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+  }
+  .CarouselDots { bottom: 10px; gap: 6px; }
+  .Dot { width: 8px; height: 8px; }
+  .Tag { font-size: 48px; top: 30%; left: 6%; }
+}
+
+@media (max-width: 420px) {
+  .CarouselWrapper {
+    width: 94vw;
+    border-radius: 12px;
+  }
+  .Dot { width: 7px; height: 7px; }
+  .Tag { font-size: 40px; top: 28%; left: 6%; }
+}
+

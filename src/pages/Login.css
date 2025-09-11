@@ -27,7 +27,7 @@
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  width: 100%;
+  width: 90%;
   height: 250px;
   background: linear-gradient(90deg, #ff0000 77%, #ff8c00 100%);
   clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
