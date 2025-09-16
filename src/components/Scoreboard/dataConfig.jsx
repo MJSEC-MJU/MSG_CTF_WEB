@@ -162,34 +162,57 @@
 
 // src/components/Scoreboard/dataConfig.js
 
+// src/components/Scoreboard/dataConfig.js
+
 export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
   setTimeout(() => {
+    const generateScores = (startHour = 9, count = 10, startValue = 50) => {
+      const scores = [];
+      let currentValue = startValue;
+      for (let i = 0; i < count; i++) {
+        const hour = startHour + i;
+        const minute = Math.floor(Math.random() * 60);
+        // 이전 점수보다 20~70 사이에서 증가
+        const increment = Math.floor(Math.random() * 50) + 20;
+        currentValue += increment;
+        const isoTime = `2025-09-16T${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}:00Z`;
+        scores.push({ time: isoTime, value: currentValue });
+      }
+      return scores;
+    };
+
+    const colors = [
+      "rgba(255, 99, 132, 1)",
+      "rgba(54, 162, 235, 1)",
+      "rgba(75, 192, 192, 1)",
+      "rgba(255, 206, 86, 1)",
+      "rgba(153, 102, 255, 1)",
+      "rgba(255, 159, 64, 1)",
+      "rgba(199, 199, 199, 1)",
+      "rgba(83, 102, 255, 1)",
+      "rgba(255, 99, 255, 1)",
+      "rgba(99, 255, 132, 1)",
+      "rgba(54, 99, 235, 1)",
+      "rgba(192, 75, 192, 1)",
+      "rgba(255, 206, 100, 1)",
+      "rgba(153, 50, 255, 1)",
+      "rgba(255, 159, 200, 1)",
+      "rgba(199, 50, 199, 1)",
+      "rgba(83, 200, 255, 1)",
+      "rgba(255, 50, 255, 1)",
+      "rgba(99, 255, 200, 1)",
+      "rgba(54, 150, 235, 1)",
+    ];
+
     const dummyData = [
       {
         title: "CTF Qualifier Round",
-        labels: ["Round 1", "Round 2", "Round 3", "Round 4", "Round 5"],
-        data: [
-          {
-            id: "Team Alpha",
-            scores: [120, 200, 350, 400, 500],
-            color: "rgba(255, 99, 132, 1)", // 빨강
-          },
-          {
-            id: "Team Beta",
-            scores: [100, 150, 250, 380, 450],
-            color: "rgba(54, 162, 235, 1)", // 파랑
-          },
-          {
-            id: "Team Gamma",
-            scores: [80, 170, 220, 300, 370],
-            color: "rgba(75, 192, 192, 1)", // 민트
-          },
-          {
-            id: "Team Delta",
-            scores: [60, 120, 180, 260, 330],
-            color: "rgba(255, 206, 86, 1)", // 노랑
-          },
-        ],
+        labels: Array.from({ length: 10 }, (_, i) => `Round ${i + 1}`),
+        data: Array.from({ length: 20 }, (_, i) => ({
+          id: `Team ${i + 1}`,
+          scores: generateScores(9 + i % 3, 10, Math.floor(Math.random() * 100) + 50),
+          color: colors[i % colors.length],
+        })),
       },
     ];
 
@@ -201,20 +224,13 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
 export const options = {
   responsive: true,
   plugins: {
-    legend: {
-      position: "top",
-      labels: {
-        color: "#ffffff",
-      },
-    },
-    title: {
-      display: true,
-      text: "Score Progression",
-      color: "#ffffff",
-    },
+    legend: { position: "top", labels: { color: "#ffffff" } },
+    title: { display: true, text: "Score Progression", color: "#ffffff" },
   },
   scales: {
     x: {
+      type: "time",
+      time: { parser: "isoDateTime", unit: "hour", displayFormats: { hour: "HH:mm" } },
       ticks: { color: "#ffffff" },
       grid: { color: "rgba(255,255,255,0.2)" },
     },
