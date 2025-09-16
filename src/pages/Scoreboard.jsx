@@ -24,7 +24,7 @@ const Scoreboard = () => {
 
   return (
     <Wrapper>
-      <GlitchText>HACKER SCOREBOARD</GlitchText>
+      <GlitchText>SCOREBOARD</GlitchText>
       {datasetsConfig.length > 0 ? (
         datasetsConfig.map((dataset) => (
           <ContentBlock key={dataset.title} dataset={dataset} />
