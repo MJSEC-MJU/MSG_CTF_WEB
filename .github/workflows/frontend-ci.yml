@@ -10,7 +10,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      VITE_API_URLL: ${{ secrets.DOMAIN }}  
+      VITE_API_URL: ${{ secrets.DOMAIN }}  
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       SERVER_IP: ${{ secrets.SERVER_IP }}
