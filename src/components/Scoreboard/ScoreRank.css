@@ -1,0 +1,52 @@
+.Wrapper {
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    min-height: 100vh;
+}
+
+.Top3Container {
+    all: unset;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* 1등 카드가 중앙 높게 */
+    gap: 20px;
+}
+
+.TopCard {
+    all: unset;
+    padding: 20px;
+    border: 10px solid;
+    border-radius: 20px;
+    background-color: #ffffff;
+    text-align: center;
+    color: #333;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.PlayerID {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.PlayerScore {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* 하단 순위 숫자용 */
+.RankText {
+    all: unset;
+    font-size: 20px;
+    font-weight: bold;
+    color: #000; /* TOP3 카드 글자 색과 분리 */
+    margin-top: 10px;
+    text-align: center;
+}
