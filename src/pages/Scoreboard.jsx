@@ -15,7 +15,7 @@ const Scoreboard = () => {
   useEffect(() => {
     // 마운트 시 배경색 변경
     const prevColor = document.body.style.backgroundColor;
-    document.body.style.backgroundColor = "#f4f6fa";
+    document.body.style.backgroundColor = "#505050";
 
     // 언마운트 시 원래 배경 복구
     return () => {
@@ -55,7 +55,7 @@ const Wrapper = styled.div`
   align-items: center;
   width: 100%;
   min-height: 100vh;
-  background: #f4f6fa
+  background: #505050
 `;
 
 const GlitchText = styled.h1`

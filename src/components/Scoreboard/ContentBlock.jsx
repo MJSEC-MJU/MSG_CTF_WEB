@@ -339,7 +339,7 @@ const ContentBlock = ({ dataset }) => {
     responsive: true,
     plugins: {
       legend: { position: 'top', labels: { color: '#fff' } },
-      title: { display: true, text: 'Score Progression', color: '#fff' },
+      // title: { display: true, text: 'Score Progression', color: '#fff' },
     },
     scales: {
       x: {
@@ -460,8 +460,8 @@ const TeamLabels = styled.div`
   justify-content: center;
   gap: 10px -5px; // 줄 간격, 칸 간격
   margin-top: 10px;
-  border: 2px solid #ff4500;   /* 흰색 테두리 */
-  border-radius: 10px;      /* 모서리 둥글게 */
+  border: 10px solid #ff4650;   /* 흰색 테두리 */
+  border-radius: 20px;      /* 모서리 둥글게 */
   padding: 15px;            /* 안쪽 여백 */
 `;
 

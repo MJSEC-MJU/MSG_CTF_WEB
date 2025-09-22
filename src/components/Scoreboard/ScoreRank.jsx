@@ -339,7 +339,6 @@ const ScoreRank = ({ data }) => {
     .sort((a, b) => b.latestScore - a.latestScore);
 
   const top3 = sortedData.slice(0, 3);
-  const rest = sortedData.slice(3, 8); // 4~8등 (사용 예정이면 여기에 표시)
 
   const rankColors = ["#FFD700", "#C0C0C0", "#CD7F32"]; // 1,2,3 순위 색
   const cardSizes = ["180px", "150px", "150px"]; // 1등 크게, 2/3등 작게
