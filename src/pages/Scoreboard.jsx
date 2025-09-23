@@ -12,17 +12,6 @@ const Scoreboard = () => {
     fetchLeaderboardData(setDatasetsConfig, setLoading);
   }, []);
 
-  useEffect(() => {
-    // 마운트 시 배경색 변경
-    const prevColor = document.body.style.backgroundColor;
-    document.body.style.backgroundColor = "#505050";
-
-    // 언마운트 시 원래 배경 복구
-    return () => {
-      document.body.style.backgroundColor = prevColor;
-    };
-  }, []);
-
   if (loading) {
     return (
       <Wrapper>
@@ -55,27 +44,18 @@ const Wrapper = styled.div`
   align-items: center;
   width: 100%;
   min-height: 100vh;
-  background: #505050
+  // background: #505050
 `;
 
 const GlitchText = styled.h1`
   font-size: 3.5rem;
   font-family: 'Courier New', Courier, monospace;
   text-transform: uppercase;
-  color: #ff4500; /* 불 느낌 주황 */
-  text-shadow: 
-    0 0 5px #ff6347,
-    0 0 10px #ff4500,
-    0 0 20px #ff0000,
-    0 0 40px #ff8c00,
-    0 0 80px #ff4500;
-  animation: flicker 1.5s infinite alternate;
-  
-  @keyframes flicker {
-    0%   { opacity: 1; text-shadow: 0 0 5px #ff6347, 0 0 10px #ff4500, 0 0 20px #ff0000, 0 0 40px #ff8c00, 0 0 80px #ff4500; }
-    50%  { opacity: 0.8; text-shadow: 0 0 3px #ff6347, 0 0 6px #ff4500, 0 0 12px #ff0000, 0 0 24px #ff8c00, 0 0 48px #ff4500; }
-    100% { opacity: 1; text-shadow: 0 0 6px #ff6347, 0 0 12px #ff4500, 0 0 24px #ff0000, 0 0 48px #ff8c00, 0 0 96px #ff4500; }
-  }
+  background: linear-gradient(to right, #ff4500 20%, #dc0000 100%);
+  -webkit-background-clip: text;  /* 크롬, 사파리 */
+  -webkit-text-fill-color: transparent;
+  background-clip: text;          /* 파이어폭스 최신 버전 */
+  color: transparent; 
 `;
 
 const NoDataText = styled.p`

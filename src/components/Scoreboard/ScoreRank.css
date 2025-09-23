@@ -18,7 +18,7 @@
     all: unset;
     padding: 20px;
     border: 10px solid;
-    border-radius: 20px;
+    border-radius: 50%;
     background-color: #ffffff;
     text-align: center;
     color: #333;
@@ -31,7 +31,7 @@
 
 .PlayerID {
     font-weight: bold;
-    font-size: 18px;
+    font-size: 35px;
     margin-bottom: 10px;
 }
 
