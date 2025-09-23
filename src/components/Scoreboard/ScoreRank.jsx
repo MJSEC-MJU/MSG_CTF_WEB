@@ -23,22 +23,7 @@ const ScoreRank = ({ data }) => {
     <div className="Wrapper">
       {/* Top 3 카드 */}
       <div className="Top3Container">
-        {/* 2등
-        {top3[1] && (
-          <div
-            className="TopCard"
-            style={{
-              borderColor: rankColors[1],
-              width: cardSizes[1],
-              height: cardSizes[1],
-            }}
-          >
-            <div className="RankText">2등</div>
-            <div className="PlayerID">{top3[1].id}</div>
-            <div className="PlayerScore">{top3[1].latestScore}</div>
-          </div>
-        )} */}
-                {/* 2등 */}
+        {/* 2등 */}
         {top3[1] && (
           <div
             className="TopCard"
@@ -49,8 +34,10 @@ const ScoreRank = ({ data }) => {
             }}
           >
             <img src={rankImages[1]} alt="2등" className="RankImage" />
-            <div className="PlayerID">{top3[1].id}</div>
-            <div className="PlayerScore">{top3[1].latestScore}</div>
+            <div className="OverlayText">
+              <div className="PlayerID">{top3[1].id}</div>
+              <div className="PlayerScore">{top3[1].latestScore}</div>
+            </div>
           </div>
         )}
 
@@ -64,9 +51,11 @@ const ScoreRank = ({ data }) => {
               height: cardSizes[0],
             }}
           >
-            <div className="RankText">1등</div>
-            <div className="PlayerID">{top3[0].id}</div>
-            <div className="PlayerScore">{top3[0].latestScore}</div>
+            <img src={rankImages[0]} alt="1등" className="RankImage" />
+            <div className="OverlayText">
+              <div className="PlayerID">{top3[0].id}</div>
+              <div className="PlayerScore">{top3[0].latestScore}</div>
+            </div>
           </div>
         )}
 
@@ -80,9 +69,11 @@ const ScoreRank = ({ data }) => {
               height: cardSizes[2],
             }}
           >
-            <div className="RankText">3등</div>
-            <div className="PlayerID">{top3[2].id}</div>
-            <div className="PlayerScore">{top3[2].latestScore}</div>
+            <img src={rankImages[2]} alt="3등" className="RankImage" />
+            <div className="OverlayText">
+              <div className="PlayerID">{top3[2].id}</div>
+              <div className="PlayerScore">{top3[2].latestScore}</div>
+            </div>
           </div>
         )}
       </div>

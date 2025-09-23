@@ -11,14 +11,13 @@
     display: flex;
     justify-content: center;
     align-items: flex-end; /* 1등 카드가 중앙 높게 */
-    gap: 20px;
+    gap: 140px;
+    margin-top: 80px;
 }
 
 .TopCard {
     all: unset;
     padding: 20px;
-    border: 10px solid;
-    border-radius: 50%;
     background-color: #ffffff;
     text-align: center;
     color: #333;
@@ -48,4 +47,23 @@
     color: #000; /* TOP3 카드 글자 색과 분리 */
     margin-top: 10px;
     text-align: center;
+}
+
+.ImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.RankImage {
+  width: 200%;
+  height: 200%;
+  object-fit: contain; /* 비율 유지하면서 맞춤 */
+}
+
+.OverlayText {
+  position: absolute;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
 }
