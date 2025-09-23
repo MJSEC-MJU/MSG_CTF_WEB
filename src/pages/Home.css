@@ -1,19 +1,25 @@
+.Hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;               /* 한 뷰포트 높이 */
+  overflow: hidden;            /* 내부 장식 넘침 숨김 */
+}
+
 /* ===== Carousel: 래퍼(클리핑 창) ===== */
 .CarouselWrapper {
-  position: fixed;
-  top: 55%;
+  position: absolute;          /* ← fixed 제거 */
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  /* 폭은 뷰포트에 맞춰 줄이고, 비율(8:5)을 유지 */
   width: min(800px, 80vw);
-  aspect-ratio: 8 / 5;           /* 비율 유지의 핵심 */
+  aspect-ratio: 8 / 5;
   z-index: 2;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  overflow: hidden;              /* 보이는 창 역할 */
+  overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   background: #00000010;
   backdrop-filter: blur(0.5px);
@@ -92,7 +98,7 @@
 
 /* ===== 기존 스타일 유지 ===== */
 .RightTrapezoidWrapper {
-  position: fixed;
+  position: absolute;          
   top: 55%;
   left: 0;
   transform: translateY(-50%);
@@ -119,21 +125,100 @@
   font-size: 95px;
   margin-bottom: 1.5rem;
   position: absolute;
-  top: 35%;
+  top: 30%;
   left: 7%;
-  z-index: 4;
+  z-index: 1;
+}
+.HomeWrapper {
+  position: relative;
+  background-color: #fff;
+  margin: 0 auto; 
+  width: 100%;                 /* 기본: 작은 화면에서 꽉 채움 */
+  box-sizing: border-box;      /* 패딩 포함 폭 계산 */
+  padding: 1rem;               /* 필요 시 조정 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: visible;
+}
+@media (min-width: 1780px) {
+  .HomeWrapper {
+    width: 1780px;             /* ← 정확히 고정 */
+    max-width: none;           /* 다른 max-width 영향 제거 */
+  }
+}
+/* 히어로 영역 높이만큼 빈 공간을 만들어 실제 스크롤을 가능하게 하는 스페이서 */
+.ScrollSpacer {
+  height: 100vh; /* ← 가장 간단하고 견고한 방법 */
 }
 
-.HomeWrapper {
-  background-color: #fff;
-  max-height: 100vh;
-  max-width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  overflow: hidden;
+/* RULE 섹션: 꽉 찬 배경 이미지 + 반투명 검정 오버레이 */
+/* RULE 섹션: 화면 꽉 채우기 + 동일 크기 오버레이 */
+.RuleSection {
+  position: relative;
+  width: 100%;
+  min-height: 100vh; /* 전체 화면 채움 */
+  /* 오버레이(앞) + 이미지(뒤) — 둘 다 동일한 컨테이너 크기와 커버 규칙 적용 */
+  background-image:
+    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+    url('/assets/spaghetti-1932466_1280.jpg');      /* 실제 경로로 교체 */
+  background-size: cover, cover;
+  background-position: center center, center center;
+  background-repeat: no-repeat, no-repeat;
+
+  display: grid;
+  place-items: start center;
+  padding: 0px;
+  z-index: 1;
 }
+
+/* RULE 내부 카드 */
+.RuleInner {
+  position: relative;
+  z-index: 1;
+  width: min(960px, 92vw);
+  color: #fff;
+  text-align: left;
+  padding: 24px 28px;
+  border-radius: 16px;
+}
+
+/* 타이틀/텍스트/목록 — 기존 그대로 사용 가능 */
+.RuleInner h1 {
+  text-align: center;
+  margin: 0 0 12px 0;
+  font-size: clamp(50px, 10vw, 100px);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.RuleLead {
+  margin: 0 0 16px 0;
+  font-size: clamp(14px, 2.4vw, 18px);
+  line-height: 1.6;
+  color: #f1f5f9;
+}
+.RuleList {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 10px;
+  font-size: clamp(14px, 2.2vw, 17px);
+  line-height: 1.7;
+}
+.RuleList li {
+  list-style: disc;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+
+/* 반응형 튜닝 */
+@media (max-width: 768px) {
+  .RuleInner {
+    padding: 18px 16px;
+    border-radius: 12px;
+  }
+}
+
 
 /* ===== 반응형 튜닝 ===== */
 @media (max-width: 1024px) {
@@ -163,3 +248,8 @@
   .Tag { font-size: 40px; top: 28%; left: 6%; }
 }
 
+.Hero .Tag {
+  top: 37%;        /* 기존 30% → 27% (약 3% 상향) */
+  left: 1%;
+  margin: 0;       /* 절대배치에서 margin 영향 제거(안전) */
+}
