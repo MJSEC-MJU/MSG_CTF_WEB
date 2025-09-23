@@ -112,7 +112,8 @@ function App() {
           />
           <Route
             path="/scoreboard"
-            element={<PrivateRoute element={isLoggedIn ? <Scoreboard /> : <Navigate to="/login" />} />}
+            element={<Scoreboard />}
+            // element={<PrivateRoute element={isLoggedIn ? <Scoreboard /> : <Navigate to="/login" />} />}
           />
           <Route
             path="/challenge"

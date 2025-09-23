@@ -24,7 +24,7 @@ const Scoreboard = () => {
 
   return (
     <Wrapper>
-      <GlitchText>HACKER SCOREBOARD</GlitchText>
+      <GlitchText>SCOREBOARD</GlitchText>
       {datasetsConfig.length > 0 ? (
         datasetsConfig.map((dataset) => (
           <ContentBlock key={dataset.title} dataset={dataset} />
@@ -43,16 +43,19 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
+  min-height: 100vh;
+  // background: #505050
 `;
 
 const GlitchText = styled.h1`
-  margin-top: 80px;
-  color: #8cff66;
-  margin-bottom: 20px;
-  text-shadow: 0 0 40px rgba(0, 255, 0, 0.8);
   font-size: 3.5rem;
   font-family: 'Courier New', Courier, monospace;
   text-transform: uppercase;
+  background: linear-gradient(to right, #ff4500 20%, #dc0000 100%);
+  -webkit-background-clip: text;  /* 크롬, 사파리 */
+  -webkit-text-fill-color: transparent;
+  background-clip: text;          /* 파이어폭스 최신 버전 */
+  color: transparent; 
 `;
 
 const NoDataText = styled.p`
