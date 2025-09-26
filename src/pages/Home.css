@@ -1,55 +1,39 @@
 .Hero {
   position: relative;
-  width: 100%;
-  height: 100vh;               /* 한 뷰포트 높이 */
-  overflow: hidden;            /* 내부 장식 넘침 숨김 */
+  width: 100vw;                 /* 100vw → 100% (우측 넘침 방지) */
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* ===== Carousel: 래퍼(클리핑 창) ===== */
+/* ===== Carousel ===== */
 .CarouselWrapper {
-  position: absolute;          /* ← fixed 제거 */
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: min(800px, 80vw);
   aspect-ratio: 8 / 5;
   z-index: 2;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   background: #00000010;
   backdrop-filter: blur(0.5px);
 }
-
-/* 트랙: 좌우로 슬라이드되는 줄 */
 .CarouselTrack {
   position: relative;
   height: 100%;
   width: 100%;
-  display: flex;                 /* 가로로 슬라이드 나열 */
+  display: flex;
   transition: transform 360ms ease;
   will-change: transform;
 }
+.CarouselSlide { flex: 0 0 100%; height: 100%; position: relative; }
+.CarouselImage { width: 100%; height: 100%; object-fit: contain; display: block; }
 
-/* 각 슬라이드: 정확히 한 화면 너비 차지 */
-.CarouselSlide {
-  flex: 0 0 100%;
-  height: 100%;
-  position: relative;
-}
-
-.CarouselImage {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;           /* SVG 전체가 보이도록 */
-  display: block;
-}
-
-/* 인디케이터 (완전한 원형) */
+/* 인디케이터 */
 .CarouselDots {
   position: absolute;
   bottom: 12px;
@@ -59,47 +43,24 @@
   gap: 8px;
   z-index: 3;
 }
-
 .Dot {
-  appearance: none;
-  -webkit-appearance: none;
-  border: 0;
-  padding: 0;
-  margin: 0;
-
-  width: 14px;
-  height: 14px;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-
-  background: transparent;
-  cursor: pointer;
-  outline: none;
-  display: inline-block;
-  line-height: 0;
-  box-sizing: content-box;
-  position: relative;
+  appearance: none; -webkit-appearance: none; border: 0; padding: 0; margin: 0;
+  width: 14px; height: 14px; aspect-ratio: 1 / 1; border-radius: 50%;
+  background: transparent; cursor: pointer; outline: none; display: inline-block;
+  line-height: 0; box-sizing: content-box; position: relative;
 }
 .Dot::before {
-  content: "";
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
+  content: ""; display: block; width: 100%; height: 100%; border-radius: 50%;
   background: rgba(255,255,255,0.9);
   box-shadow: 0 0 0 1px rgba(0,0,0,0.2) inset;
-  transition: transform 160ms ease, opacity 160ms ease;
-  opacity: 0.5;
+  transition: transform 160ms ease, opacity 160ms ease; opacity: 0.5;
 }
-.Dot.active::before {
-  opacity: 1;
-  transform: scale(1.15);
-}
+.Dot.active::before { opacity: 1; transform: scale(1.15); }
 
-/* ===== 기존 스타일 유지 ===== */
-.RightTrapezoidWrapper {
-  position: absolute;          
-  top: 55%;
+/* ===== 트래페조이드 ===== */
+.RightTrapezoid2Wrapper {
+  position: absolute;
+  top: 50%;
   left: 0;
   transform: translateY(-50%);
   width: 100%;
@@ -107,8 +68,7 @@
   overflow: hidden;
   z-index: 0;
 }
-
-.RightTrapezoid {
+.RightTrapezoid2 {
   position: absolute;
   top: 50%;
   left: 0;
@@ -118,8 +78,7 @@
   background: linear-gradient(90deg, #ff0000 77%, #ff8c00 100%);
   clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
 }
-
-.Tag {
+.Tag2 {
   color: #ffffff;
   font-weight: bold;
   font-size: 95px;
@@ -129,13 +88,15 @@
   left: 7%;
   z-index: 1;
 }
+
+/* 페이지 래퍼 */
 .HomeWrapper {
   position: relative;
   background-color: #fff;
-  margin: 0 auto; 
-  width: 100%;                 /* 기본: 작은 화면에서 꽉 채움 */
-  box-sizing: border-box;      /* 패딩 포함 폭 계산 */
-  padding: 1rem;               /* 필요 시 조정 */
+  margin: 0 auto;
+  width: 100vw;
+  box-sizing: border-box;
+  padding: 1rem 0 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -143,48 +104,35 @@
   overflow: visible;
 }
 @media (min-width: 1780px) {
-  .HomeWrapper {
-    width: 1780px;             /* ← 정확히 고정 */
-    max-width: none;           /* 다른 max-width 영향 제거 */
-  }
-}
-/* 히어로 영역 높이만큼 빈 공간을 만들어 실제 스크롤을 가능하게 하는 스페이서 */
-.ScrollSpacer {
-  height: 100vh; /* ← 가장 간단하고 견고한 방법 */
+  .HomeWrapper { width: 1780px; max-width: none; }
 }
 
-/* RULE 섹션: 꽉 찬 배경 이미지 + 반투명 검정 오버레이 */
-/* RULE 섹션: 화면 꽉 채우기 + 동일 크기 오버레이 */
+/* RULE 섹션: 컨테이너 폭에 맞춤(100%) */
 .RuleSection {
   position: relative;
-  width: 100%;
-  min-height: 100vh; /* 전체 화면 채움 */
-  /* 오버레이(앞) + 이미지(뒤) — 둘 다 동일한 컨테이너 크기와 커버 규칙 적용 */
+  width: 100vw;                /* 100vw → 100% */
+  min-height: 100vh;
   background-image:
     linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
-    url('/assets/spaghetti-1932466_1280.jpg');      /* 실제 경로로 교체 */
+    url('/assets/spaghetti-1932466_1280.jpg');
   background-size: cover, cover;
   background-position: center center, center center;
   background-repeat: no-repeat, no-repeat;
 
   display: grid;
   place-items: start center;
-  padding: 0px;
+  padding: 0;
   z-index: 1;
 }
-
-/* RULE 내부 카드 */
 .RuleInner {
   position: relative;
   z-index: 1;
-  width: min(960px, 92vw);
+  width: min(1200px, 92vw);
   color: #fff;
   text-align: left;
   padding: 24px 28px;
   border-radius: 16px;
 }
-
-/* 타이틀/텍스트/목록 — 기존 그대로 사용 가능 */
 .RuleInner h1 {
   text-align: center;
   margin: 0 0 12px 0;
@@ -194,62 +142,125 @@
 }
 .RuleLead {
   margin: 0 0 16px 0;
-  font-size: clamp(14px, 2.4vw, 18px);
+  padding-top: 100px;
+  font-size: clamp(14px, 2.4vw, 25px);
   line-height: 1.6;
   color: #f1f5f9;
 }
 .RuleList {
   margin: 0;
   padding-left: 20px;
+  padding-top: 20px;
   display: grid;
   gap: 10px;
-  font-size: clamp(14px, 2.2vw, 17px);
+  font-size: clamp(14px, 2.2vw, 20px);
   line-height: 1.7;
 }
-.RuleList li {
-  list-style: disc;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-}
+.RuleList li { list-style: disc; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
 
-/* 반응형 튜닝 */
-@media (max-width: 768px) {
-  .RuleInner {
-    padding: 18px 16px;
-    border-radius: 12px;
-  }
-}
-
-
-/* ===== 반응형 튜닝 ===== */
+/* 반응형 */
 @media (max-width: 1024px) {
-  .CarouselWrapper {
-    width: min(820px, 86vw);     /* 살짝 더 유동적으로 */
-  }
+  .CarouselWrapper { width: min(820px, 86vw); }
   .Tag { font-size: 72px; top: 33%; }
 }
-
 @media (max-width: 768px) {
-  .CarouselWrapper {
-    width: 92vw;                 /* 모바일에서 화면 폭에 거의 꽉 차게 */
-    border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.16);
-  }
+  .CarouselWrapper { width: 92vw; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.16); }
   .CarouselDots { bottom: 10px; gap: 6px; }
   .Dot { width: 8px; height: 8px; }
   .Tag { font-size: 48px; top: 30%; left: 6%; }
 }
-
 @media (max-width: 420px) {
-  .CarouselWrapper {
-    width: 94vw;
-    border-radius: 12px;
-  }
+  .CarouselWrapper { width: 94vw; border-radius: 12px; }
   .Dot { width: 7px; height: 7px; }
   .Tag { font-size: 40px; top: 28%; left: 6%; }
 }
 
-.Hero .Tag {
-  top: 37%;        /* 기존 30% → 27% (약 3% 상향) */
-  left: 1%;
-  margin: 0;       /* 절대배치에서 margin 영향 제거(안전) */
+/* ============================
+   Row-based Typography Scroll
+   ============================ */
+
+.TypeRowsSection {
+  position: relative;
+
+  /* 뷰포트 가로를 꽉 채우는 풀-블리드 */
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+
+  /* 고정 세로 길이 (필요 시 숫자만 조정) */
+  --typoH: 200vh;
+  height: var(--typoH);
+  min-height: 100vh;
+
+  box-sizing: border-box;
+  overflow: hidden;
+
+  /* 배경은 섹션 전체에 적용 */
+  background: linear-gradient(90deg, #ff0000 0%, #ff8c00 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* sticky: 실제 뷰포트 보정 --vh 사용 (변경 없음) */
+.TypeRowsSticky {
+  position: sticky;
+  top: 0;
+  height: calc(var(--vh, 1vh) * 100);
+  overflow: hidden;
+  background: transparent;
+}
+
+/* 행 배치: 끝까지 내렸을 때 위↔아래를 꽉 채우도록 */
+.Rows {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* space-evenly → space-between */
+  gap: 0;
+  padding: clamp(6px, 2.2vw, 24px) 0;
+}
+
+/* 상하 잘림 방지 (변경 없음) */
+.Row { position: relative; overflow: visible; padding-block: 0.18em; }
+.RowViewport { position: relative; overflow: hidden; }
+.RowStack { display: grid; }
+.RowStack > * { grid-area: 1 / 1; }
+.RowLine { white-space: nowrap; min-width: max-content; }
+
+.Word {
+  display: inline-block;
+  margin-right: clamp(12px, 2vw, 28px);
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 0.015em;
+  line-height: 1;
+  font-size: clamp(40px, 9vw, 90px);
+}
+
+/* 아웃라인 (변경 없음) */
+.RowOutline {
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(255,255,255,0.95);
+  opacity: var(--o, 0);
+  transition: opacity 0.08s linear;
+}
+
+/* 채움: 맨 끝 스크롤에서 완전히 채워 보이도록 살짝 포화 보정 */
+.RowFill {
+  color: #ffffff;
+  /* var(--f)가 1에 약간 못 미치는 경우도 최종엔 1로 포화되도록 보정 */
+  opacity: clamp(0, calc(var(--f) * 1.2 + 0.1), 1);
+  transition: opacity 0.1s linear;
+}
+
+/* 모바일 튜닝 (변경 최소) */
+@media (max-width: 768px) {
+  .Word {
+    font-size: clamp(32px, 11vw, 90px);
+    margin-right: clamp(8px, 2.4vw, 20px);
+  }
+  .RowOutline { -webkit-text-stroke: 1.6px rgba(255,255,255,0.95); }
 }

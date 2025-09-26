@@ -1,7 +1,7 @@
 #root {
   max-width: 1780px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 0 0 0;
   text-align: center;
 }
 
@@ -44,3 +44,4 @@
 .read-the-docs {
   color: #888;
 }
+body { overflow-x: hidden; }
