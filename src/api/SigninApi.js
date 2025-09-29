@@ -1,6 +1,5 @@
 import { Axios } from './Axios';
 import Cookies from 'js-cookie';
-import axios from 'axios';
 
 // 토큰 재발급 API (필요 시 호출)
 export const reissueToken = async () => {
@@ -29,7 +28,7 @@ export const signIn = async (credentials) => {
       loginId: credentials.loginId,
       password: credentials.password,
     };
-    const response = await axios.post('users/sign-in', payload);
+    const response = await Axios.post('users/sign-in', payload);
     const { accessToken, refreshToken } = response.data;
     if (accessToken) {
       Axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
