@@ -130,7 +130,7 @@ function App() {
           />
           {/* <Route path="/adminLogin" element={<AdminLogin />} /> */}
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          <Route path="/signup" element={<Signup />} />
+          {/* <Route path="/signup" element={<Signup />} /> */}
           <Route
             path="/adminPage"
             element={
