@@ -1,50 +1,48 @@
 import { Axios } from './Axios';
 import Cookies from 'js-cookie';
+import axios from 'axios';
 
-// 토큰 재발급 API
+// 토큰 재발급 API (필요 시 호출)
 export const reissueToken = async () => {
-  const resp = await Axios.post('/reissue', null, { withCredentials: true });
-
-  // 1) Authorization 헤더 우선
-  const authHeader = resp.headers?.['authorization'];
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.slice('Bearer '.length);
-    Cookies.set('accessToken', token, { secure: true });
-    Axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    return token;
+  try {
+    const response = await Axios.post('reissue', null, {
+      withCredentials: true,
+    });
+    const newAccessToken = response.headers['authorization'];
+    if (newAccessToken) {
+      Cookies.set('accessToken', newAccessToken, { secure: true });
+      Axios.defaults.headers.common['Authorization'] = newAccessToken;
+      return newAccessToken;
+    }
+    throw new Error('토큰 재발급 실패: 새 토큰이 없습니다.');
+  } catch (error) {
+    throw error.response ? error.response.data : error;
   }
-
-  // 2) 또는 본문에서 제공
-  const bodyToken = resp.data?.accessToken;
-  if (bodyToken) {
-    Cookies.set('accessToken', bodyToken, { secure: true });
-    Axios.defaults.headers.common['Authorization'] = `Bearer ${bodyToken}`;
-    return bodyToken;
-  }
-
-  throw new Error('토큰 재발급 실패: 새 토큰이 없습니다.');
 };
 
-// 로그인 API (credentials: { loginId, password })
-export const signIn = async ({ loginId, password }) => {
-  const payload = { loginId, password };
-
-  // 로그인은 자격증명 불필요. 명시적으로 끄기
-  const resp = await Axios.post('/users/sign-in', payload, { withCredentials: false });
-
-  const { accessToken, refreshToken } = resp.data || {};
-
-  if (accessToken) {
-    // 순수 토큰만 저장
-    Cookies.set('accessToken', accessToken, { secure: true });
-    Axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+// 로그인 API (평면한 JSON 객체로 전송)
+// credentials: { loginId, password }
+export const signIn = async (credentials) => {
+  try {
+    // 평면한 JSON 객체로 요청 본문을 구성합니다.
+    const payload = {
+      loginId: credentials.loginId,
+      password: credentials.password,
+    };
+    const response = await axios.post('users/sign-in', payload);
+    const { accessToken, refreshToken } = response.data;
+    if (accessToken) {
+      Axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      Cookies.set('accessToken', accessToken, { secure: true });
+    }
+    if (refreshToken) {
+      Cookies.set('refreshToken', refreshToken, { secure: true });
+    }
+    // reissueToken 호출은 중복 문제를 피하기 위해 생략합니다.
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error;
   }
-
-  if (refreshToken) {
-    Cookies.set('refreshToken', refreshToken, { secure: true });
-  }
-
-  return resp.data;
 };
 
 export default { signIn, reissueToken };
