@@ -96,7 +96,7 @@ const Admin = () => {
       email: editingUser.email,
       univ: editingUser.univ,
       loginId: editingUser.loginId,
-      roles: editingUser.roles,
+      role: editingUser.role,
     };
     
 
@@ -195,8 +195,8 @@ const Admin = () => {
               <input type="text" name="univ" value={editingUser.univ} onChange={handleChangeInput} />
               <label>Login ID:</label>
               <input type="text" name="loginId" value={editingUser.loginId} onChange={handleChangeInput} />
-              <label>Roles:</label>
-              <input type="text" name="roles" value={editingUser.roles} onChange={handleChangeInput} />
+              <label>Role:</label>
+              <input type="text" name="role" value={editingUser.role} onChange={handleChangeInput} />
               <button onClick={handleSaveUser}>Save</button>
               <button onClick={() => setEditingUser(null)}>Cancel</button>
             </div>
@@ -207,7 +207,7 @@ const Admin = () => {
                 <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>ID</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Email</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>LoginId</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Roles</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Role</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Point</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Univ</th>
                 <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Created</th>
@@ -221,7 +221,7 @@ const Admin = () => {
                   <td style={{ padding: '10px', textAlign: 'center', color:'black',border: '1px solid black' }}>{user.userId}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.email}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.loginId}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.roles}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.role}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.totalPoint}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.univ}</td>
                   <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.createdAt.slice(0, 19)}</td>
