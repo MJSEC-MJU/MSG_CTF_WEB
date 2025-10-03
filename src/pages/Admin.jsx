@@ -408,7 +408,7 @@ const Admin = () => {
                     width: "100%",
                     padding: "10px",
                     marginBottom: "10px",
-                    backgroundColor: "black",
+                    backgroundColor: "white",
                     color: "black",
                   }}
                 >
