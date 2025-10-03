@@ -207,7 +207,7 @@
 .TypeRowsSticky {
   position: sticky;
   top: 0;
-  height: calc(var(--vh, 1vh) * 100);
+  height: calc(var(--vh, 1vh) * 300);
   overflow: hidden;
   background: transparent;
 }
@@ -263,4 +263,95 @@
     margin-right: clamp(8px, 2.4vw, 20px);
   }
   .RowOutline { -webkit-text-stroke: 1.6px rgba(255,255,255,0.95); }
+}
+
+/* =========================
+   Card Rail (scroll reveal)
+   ========================= */
+.CardRail {
+  position: absolute;
+  inset: 0;
+  /* 세로 스크롤 동안 중앙 정렬된 “가로형 카드”가 아래로 나열 */
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: start;
+  justify-items: center;
+  gap: clamp(300px, 10vw, 500px);
+  padding: clamp(32px, 6vw, 72px)  min(4vw, 32px);
+  pointer-events: none; /* 카드 위에 마우스 이벤트 비활성(필요 시 해제) */
+  z-index: 2; /* 타이포 위에 올리고 싶으면 2, 아래로 내리려면 0 또는 1 */
+}
+
+/* 가로형 정보 카드 */
+.InfoCard {
+  width: clamp(680px, 70vw, 1100px);  /* 요청: 가로가 더 길게 */
+  min-height: clamp(180px, 24vh, 320px);
+  background: rgba(20, 20, 22, 0.8);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+
+  display: grid;
+  grid-template-columns: 48% 52%;    /* 좌: 이미지 / 우: 설명 */
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+
+  /* 등장 애니메이션 초기 상태 */
+  opacity: 0;
+  transform: translateX(-36px);      /* “옆에서 나타나는” 느낌 */
+  transition:
+    opacity 520ms ease-out var(--delay, 0ms),
+    transform 520ms ease-out var(--delay, 0ms);
+  pointer-events: auto;              /* 내부 링크 등을 쓰려면 auto 유지 */
+}
+
+.InfoCard.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.CardImageWrap {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+}
+
+.CardImageWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;  /* SVG는 contain이 어울릴 수 있음: 필요 시 교체 */
+}
+
+/* 우측 설명 */
+.CardBody {
+  padding: clamp(16px, 2.6vw, 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(6px, 1.2vw, 12px);
+  color: #fff;
+}
+
+.CardTitle {
+  font-size: clamp(18px, 2.2vw, 28px);
+  line-height: 1.24;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.CardDesc {
+  font-size: clamp(14px, 1.6vw, 18px);
+  line-height: 1.5;
+  color: rgba(255,255,255,0.92);
+  white-space: pre-line; 
+}
+
+/* 모바일/태블릿: 카드 세로 스택 */
+@media (max-width: 860px) {
+  .InfoCard {
+    grid-template-columns: 1fr;
+  }
+  .CardImageWrap {
+    height: min(42vw, 260px);
+  }
 }

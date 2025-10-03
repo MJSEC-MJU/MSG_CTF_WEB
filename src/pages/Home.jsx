@@ -8,6 +8,23 @@ function Home() {
   const intervalRef = useRef(null);
 
   const go = (i) => setIdx(i);
+  const cards = [
+    {
+      img: '/assets/card1.svg',
+      title: 'MSG CTF의 시작',
+      desc: '명지대학교의 Mjsec, 건국대학교의 seKurity, 세종대학교의 SSG 세 학교가 연합하여 "음식점" 이라는 컨셉의 CTF를 \n 2024년에 개최하였습니다.'
+    },
+    {
+      img: '/assets/card2.svg',
+      title: '시그니처 문제를 풀어보세요',
+      desc: '각 대학교 부스에서 시그니처 문제를 해금하고 \n 추가점수를 획득해보세요!'
+    },
+    {
+      img: '/assets/card3.svg',
+      title: '마일리지를 쌓아보세요',
+      desc: '문제를 풀고 오프라인샵에서 쓸 수 있는 \n 마일리지를 획득해보세요!'
+    }
+  ];
 
   useEffect(() => {
     const onVisibility = () => setPaused(document.hidden);
@@ -101,15 +118,22 @@ function Home() {
       </section>
 
       {/* 행 단위 스크롤 타이포그래피 */}
-      <TypeRowsSection rows={20} phrase="MSG CTF " repeatX={14} stepVH={70} />
+      <TypeRowsSection rows={30} phrase="MSG CTF " repeatX={14} stepVH={70} cards={cards}/>
     </div>
   );
 }
 
 /** 행 단위 스크롤 타이포그래피 */
-function TypeRowsSection({ rows = 20, phrase = 'MSG CTF ', repeatX = 14, stepVH = 70 }) {
+function TypeRowsSection({
+  rows = 30,
+  phrase = 'MSG CTF ',
+  repeatX = 14,
+  stepVH = 70,
+  cards = []                // ← 추가
+}) {
   const sectionRef = useRef(null);
   const rowRefs = useRef([]);
+  const cardRefs = useRef([]); // ← 추가
 
   // 실제 뷰포트 보정(--vh)
   useEffect(() => {
@@ -125,6 +149,7 @@ function TypeRowsSection({ rows = 20, phrase = 'MSG CTF ', repeatX = 14, stepVH 
     };
   }, []);
 
+  // 스크롤 진행도 → 행 등장 제어 (기존 로직)
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -137,16 +162,13 @@ function TypeRowsSection({ rows = 20, phrase = 'MSG CTF ', repeatX = 14, stepVH 
       const height = el.offsetHeight;
       const y = window.scrollY || window.pageYOffset;
 
-      // 0~1 진행도
       const denom = Math.max(height - vh, 1);
       const p = Math.min(Math.max((y - rectTop) / denom, 0), 1);
 
-      // 각 행 순차 등장: 아웃라인(o) 먼저, 채움(f)은 약간 지연
       for (let r = 0; r < rowRefs.current.length; r++) {
-        const t = p * rows - r;               // r행의 진행도 기반
-        const o = Math.max(0, Math.min(1, t * 1.4));            // outline opacity
-        const f = Math.max(0, Math.min(1, (t - 0.35) * 1.3));   // fill opacity(지연 시작)
-
+        const t = p * rows - r;
+        const o = Math.max(0, Math.min(1, t * 1.4));
+        const f = Math.max(0, Math.min(1, (t - 0.35) * 1.3));
         const rowEl = rowRefs.current[r];
         if (rowEl) {
           rowEl.style.setProperty('--o', o.toFixed(4));
@@ -171,6 +193,28 @@ function TypeRowsSection({ rows = 20, phrase = 'MSG CTF ', repeatX = 14, stepVH 
     };
   }, [rows]);
 
+  // 카드 등장: IntersectionObserver로 순차 노출
+  useEffect(() => {
+    if (!cardRefs.current.length) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '0px 0px -30% 0px', // 하단 여유
+        threshold: 0.5
+      }
+    );
+
+    cardRefs.current.forEach((el) => el && obs.observe(el));
+    return () => obs.disconnect();
+  }, [cards]);
+
   const rowArray = Array.from({ length: rows });
   const wordRow = Array.from({ length: repeatX });
 
@@ -182,6 +226,27 @@ function TypeRowsSection({ rows = 20, phrase = 'MSG CTF ', repeatX = 14, stepVH 
       aria-label="typography-rows-scroll"
     >
       <div className="TypeRowsSticky">
+        {/* 카드 레일: 세로 스크롤하며 하나씩 등장 */}
+        <div className="CardRail" aria-label="정보 카드 목록">
+          {cards.map((c, i) => (
+            <article
+              key={i}
+              ref={(el) => (cardRefs.current[i] = el)}
+              className="InfoCard"
+              style={{ '--delay': `${i * 80}ms` }} // 약한 계단식 지연
+            >
+              <div className="CardImageWrap">
+                <img src={c.img} alt={c.title} />
+              </div>
+              <div className="CardBody">
+                <h3 className="CardTitle">{c.title}</h3>
+                <p className="CardDesc">{c.desc}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* 기존 타이포(행) */}
         <div className="Rows">
           {rowArray.map((_, r) => (
             <div
@@ -192,13 +257,11 @@ function TypeRowsSection({ rows = 20, phrase = 'MSG CTF ', repeatX = 14, stepVH 
             >
               <div className="RowViewport">
                 <div className="RowStack">
-                  {/* 아웃라인: 처음엔 보이지 않음(opacity: --o) */}
                   <div className="RowLine RowOutline">
                     {wordRow.map((__, i) => (
                       <span className="Word" key={`o-${r}-${i}`}>{phrase}</span>
                     ))}
                   </div>
-                  {/* 채움: 아웃라인 후 지연 등장(opacity: --f) */}
                   <div className="RowLine RowFill" aria-hidden="true">
                     {wordRow.map((__, i) => (
                       <span className="Word" key={`f-${r}-${i}`}>{phrase}</span>
@@ -209,6 +272,7 @@ function TypeRowsSection({ rows = 20, phrase = 'MSG CTF ', repeatX = 14, stepVH 
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );
