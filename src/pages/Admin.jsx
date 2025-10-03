@@ -175,19 +175,19 @@ const Admin = () => {
 
   return (
     <div>
-      <h1 style={{color:'white'}}>Admin Page</h1>
+      <h1 style={{color:'black'}}>Admin Page</h1>
 
       <button onClick={toggleUsers}>User List</button>
       <button onClick={toggleProblems}>Problem List</button>
 
       {showUsers && (
         <section>
-          <h2 style={{color:'white'}}>Users</h2>
+          <h2 style={{color:'black'}}>Users</h2>
           <button>Add User</button>
           <input style={{ padding: '5px',  marginLeft: '30px',marginRight: '10px', marginBottom: '10px' }}/>
           <button>찾기</button>
           {editingUser && (
-            <div style={{color:'white'}}>
+            <div style={{color:'black'}}>
               <h3>Edit User</h3>
               <label>Email:</label>
               <input type="email" name="email" value={editingUser.email} onChange={handleChangeInput} />
@@ -201,32 +201,32 @@ const Admin = () => {
               <button onClick={() => setEditingUser(null)}>Cancel</button>
             </div>
           )}
-          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid white'}}>
+          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid black'}}>
             <thead>
               <tr>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>ID</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Email</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>LoginId</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Roles</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Point</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Univ</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Created</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Updated</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Action</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>ID</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Email</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>LoginId</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Roles</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Point</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Univ</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Created</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Updated</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {users.map(user => (
                 <tr key={user.userId}>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white',border: '1px solid white' }}>{user.userId}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.email}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.loginId}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.roles}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.totalPoint}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.univ}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.createdAt.slice(0, 19)}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{user.updatedAt.slice(0, 19)}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black',border: '1px solid black' }}>{user.userId}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.email}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.loginId}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.roles}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.totalPoint}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.univ}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.createdAt.slice(0, 19)}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.updatedAt.slice(0, 19)}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>
                     <button style={{margin:'5px'}} onClick={() => handleDeleteUser(user.userId)}>Delete</button>
                     <button style={{margin:'5px'}} onClick={() => handleEditUser(user)}>Change</button>
                   </td>
@@ -239,7 +239,7 @@ const Admin = () => {
 
       {showProblems && (
         <section>
-          <h2 style={{color:'white'}}>Problems</h2>
+          <h2 style={{color:'black'}}>Problems</h2>
           <button onClick={toggleAddProblemForm}>
             {showAddProblemForm ? 'Close Add Problem' : 'Add Problem'}
           </button>
@@ -247,7 +247,7 @@ const Admin = () => {
           <button>찾기</button>
           {/* change Problem 폼 */}
           {showEditProblemForm && editingProblem && (
-            <div style={{ color: "white", padding: "10px", border: "1px solid white", marginTop: "10px" }}>
+            <div style={{ color: "black", padding: "10px", border: "1px solid black", marginTop: "10px" }}>
               <h3>Edit Problem</h3>
               <form>
                 <label>Title:</label>
@@ -281,7 +281,7 @@ const Admin = () => {
           {showAddProblemForm && (
             <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
               <div>
-                <label style={{color:'white'}}>Title</label>
+                <label style={{color:'black'}}>Title</label>
                 <input
                   type="text"
                   name="title"
@@ -293,7 +293,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{ color: "white" }}>Description</label>
+                <label style={{ color: "black" }}>Description</label>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -310,13 +310,13 @@ const Admin = () => {
                     height: "100px",
                   }}
                 />
-                <p style={{ color: "white", fontSize: "12px", textAlign: "right" }}>
+                <p style={{ color: "black", fontSize: "12px", textAlign: "right" }}>
                   {formData.description.length} / 300
                 </p>
               </div>
 
               <div>
-                <label style={{color:'white'}}>Flag</label>
+                <label style={{color:'black'}}>Flag</label>
                 <input
                   type="text"
                   name="flag"
@@ -328,7 +328,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{color:'white'}}>Points</label>
+                <label style={{color:'black'}}>Points</label>
                 <input
                   type="number"
                   name="points"
@@ -340,7 +340,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{color:'white'}}>Min Points</label>
+                <label style={{color:'black'}}>Min Points</label>
                 <input
                   type="number"
                   name="minPoints"
@@ -352,7 +352,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{color:'white'}}>Date</label>
+                <label style={{color:'black'}}>Date</label>
                 <input
                   type="date"
                   name="date"
@@ -364,7 +364,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{color:'white'}}>Time</label>
+                <label style={{color:'black'}}>Time</label>
                 <input
                   type="time"
                   name="time"
@@ -376,17 +376,17 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{color:'white'}}>File Upload</label>
+                <label style={{color:'black'}}>File Upload</label>
                 <input
                   type="file"
                   name="file"
                   onChange={handleFileChange}
-                  style={{ marginBottom: '10px', color:'white' }}
+                  style={{ marginBottom: '10px', color:'black' }}
                 />
               </div>
 
               <div>
-                <label style={{color:'white'}}>URL</label>
+                <label style={{color:'black'}}>URL</label>
                 <input
                   type="url"
                   name="url"
@@ -398,7 +398,7 @@ const Admin = () => {
               </div>
 
               <div>
-                <label style={{ color: "white" }}>CATEGORY</label>
+                <label style={{ color: "black" }}>CATEGORY</label>
                 <select
                   name="category"
                   value={formData.category}
@@ -408,7 +408,7 @@ const Admin = () => {
                     width: "100%",
                     padding: "10px",
                     marginBottom: "10px",
-                    backgroundColor: "white",
+                    backgroundColor: "black",
                     color: "black",
                   }}
                 >
@@ -435,24 +435,24 @@ const Admin = () => {
               </div>
             </form>
           )}
-          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid white' }}>
+          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid black' }}>
             <thead>
               <tr>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>ID</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Title</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Points</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Category</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>Action</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>ID</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Title</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Points</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Category</th>
+                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {problems.map(problem => (
                 <tr key={problem.challengeId}>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.challengeId}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.title}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.points}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>{problem.category}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'white', border: '1px solid white' }}>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{problem.challengeId}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{problem.title}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{problem.points}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{problem.category}</td>
+                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>
                     <button onClick={() => handleDeleteProblem(problem.challengeId)} style={{margin:'5px'}}>Delete</button>
                     <button style={{margin:'5px'}} onClick={() => handleEditProblem(problem)}>Change</button>
                   </td>
