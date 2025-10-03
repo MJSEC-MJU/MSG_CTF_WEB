@@ -160,12 +160,12 @@ const Navigation = styled.nav`
 const StyledLink = styled(Link)`
   color: #ffffff;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
   &:hover {
-    color: #00ff00;
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+    color: #ff5500ff;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
   }
   @media (max-width: 768px) {
     font-size: 14px;
