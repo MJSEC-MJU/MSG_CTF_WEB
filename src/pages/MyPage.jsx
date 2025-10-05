@@ -283,9 +283,8 @@ const MyPage = () => {
 
               <div className="qr-meta">
                 <div className="qr-status">
-                  <span className="led" />
                   <span>
-                    남은 시간 <strong>{formatMMSS(timeLeft)}</strong>
+                    <strong>{formatMMSS(timeLeft)}</strong>
                   </span>
                 </div>
               </div>

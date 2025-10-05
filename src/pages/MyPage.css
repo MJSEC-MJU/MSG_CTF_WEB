@@ -233,22 +233,17 @@ body { background: var(--bg); }
   display: inline-flex; align-items: center; gap: 8px;
   font-weight: 700; color: var(--brand-black);
 }
-.led {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--brand-red);
-  box-shadow: 0 0 0 4px rgba(255, 0, 0, 0.12);
-}
 
 /* 자잘한 여백 */
 .mt24 { margin-top: 24px; }
 @media (max-width: 640px) {
   .qr-image {
-    width: 170px !important;   /* 기존 200px → 144px */
-    height: 170px !important;
+    width: 134px !important;   /* 기존 200px → 144px */
+    height: 134px !important;
   }
   .qr-image canvas {
-    width: 166px !important;   /* 기존 192px → 136px */
-    height: 166px !important;
+    width: 126px !important;   /* 기존 192px → 136px */
+    height: 126px !important;
   }
    .mileage {
     font-size: 1.0rem;  /* 기존 1.35rem → 소폭 축소 */
