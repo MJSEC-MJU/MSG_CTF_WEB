@@ -254,3 +254,24 @@ body { background: var(--bg); }
     font-size: 1.0rem;  /* 기존 1.35rem → 소폭 축소 */
   }
 }
+@media (min-width: 960px) {
+  /* 카드 내부 콘텐츠 폭: 960 컨테이너 - 좌우 padding(24*2)=48 → 912px
+     고정폭 680 + QR 200 + gap 20 = 900px 로 안전한 마진 확보 */
+  .profile-layout {
+    grid-template-columns: 600px 200px !important;
+  }
+
+  /* 고정폭과 텍스트 줄바꿈 안정화 */
+  .profile-main {
+    max-width: 600px;   /* 시각적 보정용(선택) */
+    min-width: 0;       /* 그리드 축약 시 줄바꿈 안정화 */
+  }
+
+  /* 아주 긴 팀명/이메일이 있어도 줄바꿈되도록 */
+  .profile-meta,
+  .member-list,
+  .member-item {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+}
