@@ -16,7 +16,7 @@ import ProblemDetail from "./pages/ProblemDetail";
 import MyPage from "./pages/MyPage";
 // import AdminLogin from "./pages/AdminLogin";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+// import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import AdminAuth from "./api/AdminAuth";
