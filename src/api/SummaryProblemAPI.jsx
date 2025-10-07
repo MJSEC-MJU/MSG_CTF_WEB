@@ -1,56 +1,19 @@
-const API_BASE_URL = "/api/admin"; 
-import Cookies from "js-cookie";
+// src/api/SummaryProblemAPI.js
+import { Axios } from './Axios';
 
-//전체조회api
-export const fetchProblems = async () => {
-  const token = Cookies.get("accessToken"); // 내부에서 토큰 가져오기
+// 전체조회
+export async function fetchProblems() {
+  // GET /api/admin/challenge/summary  ->  [ {challengeId,title,category,points}, ... ]
+  const { data } = await Axios.get('/admin/challenge/summary');
+  // 서버가 순수 배열을 주면 그대로, 혹시 {data:[...]}면 내부만 꺼냄
+  return Array.isArray(data) ? data
+       : Array.isArray(data?.data) ? data.data
+       : [];
+}
 
-  if (!token) {
-    //console.error("토큰이 없습니다. 로그인이 필요합니다.");
-    return [];
-  }
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/challenge/summary`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-
-    if (response.status === 401) {
-      throw new Error("인증 정보가 올바르지 않습니다.");
-    }
-    if (response.status === 403) {
-      throw new Error("관리자 권한이 필요합니다.");
-    }
-    if (response.status === 500) {
-      throw new Error("서버 내부 오류가 발생했습니다.");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    //console.error("Problem Fetch Error:", error);
-    return [];
-  }
-};
-//삭제api
-export const deleteProblem = async (challengeId) => {
-  const token = Cookies.get("accessToken");
-  try {
-    const responseD = await fetch(`${API_BASE_URL}/delete/challenge/${challengeId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-
-    return await responseD.json();
-  } catch (error) {
-    //console.error("문제 삭제 오류:", error);
-    return { code: "ERROR", message: "문제 삭제 실패" };
-  }
-};
+// 삭제
+export async function deleteProblem(challengeId) {
+  const resp = await Axios.delete(`/admin/delete/challenge/${challengeId}`);
+  // 보통 { code, message } 형태일 테니 그대로 반환
+  return resp.data ?? { code: 'SUCCESS' };
+}
