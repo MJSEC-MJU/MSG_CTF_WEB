@@ -1,4 +1,4 @@
-import Axios from "./Axios";
+import { Axios } from "./Axios";
 
 export async function fetchTeamProfiles() {
 const { data } = await Axios.get("/team/profile");
