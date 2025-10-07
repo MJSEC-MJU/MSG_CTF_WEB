@@ -59,24 +59,35 @@ const Admin = () => {
   // ===== Effects: initial data load =====
   useEffect(() => {
     (async () => {
-      try {
-        const [memberResp, problemResp, teamRowsResp] = await Promise.all([
-          fetchAdminMembers(),
-          fetchProblems(),
-          fetchTeamProfileRows(),
-        ]);
+       const [m, p, t] = await Promise.allSettled([
+        fetchAdminMembers(),
+        fetchProblems(),
+        fetchTeamProfileRows(),
+      ]);
 
-        // members: array 그대로 옴
-        const usersList = Array.isArray(memberResp) ? memberResp : (Array.isArray(memberResp?.data) ? memberResp.data : []);
+      if (m.status === 'fulfilled') {
+        const memberResp = m.value;
+        const usersList = Array.isArray(memberResp)
+          ? memberResp
+          : (Array.isArray(memberResp?.data) ? memberResp.data : []);
         setUsers(usersList);
+      } else {
+        console.error('[Admin] fetchAdminMembers failed:', m.reason);
+      }
 
-        // problems: 기존 처리 유지
+      if (p.status === 'fulfilled') {
+        const problemResp = p.value;
         setProblems(Array.isArray(problemResp) ? problemResp : []);
+      } else {
+        console.error('[Admin] fetchProblems failed:', p.reason);
+      }
 
-        // team profile rows: 이미 배열로 normalize되어 반환됨
+      if (t.status === 'fulfilled') {
+        const teamRowsResp = t.value;
         setTeamRows(Array.isArray(teamRowsResp) ? teamRowsResp : []);
-      } catch (e) {
-        alert('데이터 로딩 중 오류가 발생했습니다.');
+      } else {
+        console.error('[Admin] fetchTeamProfileRows failed:', t.reason);
+        setTeamRows([]); // 실패해도 비워두고 진행
       }
     })();
   }, []);
