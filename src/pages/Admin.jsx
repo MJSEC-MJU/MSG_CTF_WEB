@@ -477,6 +477,7 @@ const Admin = () => {
                   <option value="PWN">PWN</option>
                   <option value="WEB">WEB</option>
                   <option value="CRYPTO">CRYPTO</option>
+                  <option value="SIGNATURE">SIGNATURE</option>
                 </select>
               </div>
               <div style={{ marginTop: 20 }}>
