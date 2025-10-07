@@ -355,3 +355,83 @@
     height: min(42vw, 260px);
   }
 }
+
+/* =========================================================
+   모바일 전용 오버라이드 (데스크탑 영향 없음)
+   ========================================================= */
+@media (max-width: 768px) {
+  .Hero,
+  .HomeWrapper,
+  .RuleSection {
+    width: 100%; /* 모바일에서만 가로 넘침 방지 */
+  }
+
+  .CarouselWrapper {
+    width: 92vw;
+    border-radius: 16px;
+    transform: translate(-50%, -52%); /* 시각적 중앙 보정 */
+    box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+  }
+
+  .CarouselDots { bottom: 10px; gap: 6px; }
+  .Dot { width: 8px; height: 8px; }
+
+  .RightTrapezoid2Wrapper { height: 260px; }
+  .RightTrapezoid2 { height: 220px; width: 92%; }
+
+  .Tag2 {
+    font-size: clamp(36px, 12vw, 72px);
+    top: 28%;
+    left: 6%;
+    margin: 0;
+    line-height: 0.95;
+    font-weight: 800;
+  }
+
+  .RuleInner h1 { font-size: clamp(42px, 12vw, 100px); }
+  .RuleLead {
+    padding-top: 80px; /* 100 → 80 */
+    font-size: clamp(14px, 3.8vw, 22px);
+  }
+  .RuleList {
+    padding-top: 16px;
+    gap: 8px;
+    font-size: clamp(14px, 3.6vw, 18px);
+  }
+
+  .TypeRowsSection { --typoH: 180vh; }
+  .Word {
+    font-size: clamp(32px, 11vw, 90px);
+    margin-right: clamp(8px, 2.4vw, 20px);
+  }
+  .RowOutline { -webkit-text-stroke: 1.6px rgba(255,255,255,0.95); }
+
+  .CardRail {
+    gap: clamp(220px, 12vw, 360px);
+    padding: clamp(24px, 6vw, 72px) min(4vw, 32px);
+  }
+
+  .InfoCard {
+    width: clamp(320px, 92vw, 980px);
+    min-height: clamp(180px, 28vh, 320px);
+    transform: translateX(-28px);
+  }
+  .CardBody {
+    padding: clamp(14px, 3.6vw, 24px);
+    gap: clamp(6px, 1.8vw, 12px);
+  }
+  .CardTitle { font-size: clamp(16px, 4.2vw, 26px); }
+  .CardDesc  { font-size: clamp(13px, 3.6vw, 18px); }
+}
+
+@media (max-width: 420px) {
+  .CarouselWrapper { width: 94vw; border-radius: 12px; }
+  .Dot { width: 7px; height: 7px; }
+
+  .RightTrapezoid2Wrapper { height: 240px; }
+  .RightTrapezoid2 { height: 200px; }
+
+  .Tag2 { font-size: clamp(34px, 12vw, 52px); top: 26%; left: 6%; }
+
+  .CardImageWrap { height: min(42vw, 240px); }
+}
