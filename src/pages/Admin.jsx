@@ -1,417 +1,429 @@
 import React, { useState, useEffect } from 'react';
-import { createProblem } from '../api/CreateProblemAPI'; 
+import { createProblem } from "../api/CreateProblemAPI";
 import { fetchProblems, deleteProblem } from "../api/SummaryProblemAPI";
-import { fetchAdminMembers } from "../api/AdminUser";
-import deleteUser from "../api/DeleteUser";
-import { updateUser } from "../api/UserChangeAPI";
-import { updateProblem } from "../api/ProblemUpdateAPI"
-
+import { fetchAdminMembers, deleteUser as removeUser, updateUser } from "../api/AdminUserAPI";
+import { fetchTeamProfiles, createTeam, addTeamMember } from "../api/TeamAPI";
+import { updateProblem } from "../api/ProblemUpdateAPI";
 
 
 const Admin = () => {
+  // ===== UI state =====
+  const [tab, setTab] = useState("users"); // "users" | "problems"
+
+  // ===== Users & Teams =====
   const [users, setUsers] = useState([]);
-  const [problems, setProblems] = useState([]);
-  const [showUsers, setShowUsers] = useState(false);
-  const [showProblems, setShowProblems] = useState(false);
-  const [showAddProblemForm, setShowAddProblemForm] = useState(false);
+  const [teams, setTeams] = useState([]); // raw team profile rows
   const [editingUser, setEditingUser] = useState(null);
+
+  // Team tools inputs
+  const [teamNameForCreate, setTeamNameForCreate] = useState("");
+  const [teamNameForAdd, setTeamNameForAdd] = useState("");
+  const [memberEmailToAdd, setMemberEmailToAdd] = useState("");
+
+  // ===== Problems =====
+  const [problems, setProblems] = useState([]);
   const [editingProblem, setEditingProblem] = useState(null);
   const [showEditProblemForm, setShowEditProblemForm] = useState(false);
 
+  const [showAddProblemForm, setShowAddProblemForm] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    flag: '',
-    points: '',
-    minPoints: '',
-    date: '',
-    time: '',
+    title: "",
+    description: "",
+    flag: "",
+    points: "",
+    minPoints: "",
+    initialPoints: "",
+    startTime: "",
+    endTime: "",
     file: null,
-    url: '',
-    category: ''
+    url: "",
+    category: "",
+    date: "",
+    time: "",
   });
-  //문제 삭제
-  const handleDeleteProblem = async (challengeId) => {
-    const isConfirmed = window.confirm("정말로 삭제하시겠습니까?");
-    if (!isConfirmed) return;
 
-    const responseD = await deleteProblem(challengeId);
-    if (responseD.code === "SUCCESS") {
-      alert("문제가 삭제되었습니다.");
-      setProblems(problems.filter((p) => p.challengeId !== challengeId)); // 삭제 후 목록 갱신
-    } else {
-      alert("문제 삭제에 실패했습니다.");
+  // ===== Derived: map a user's email -> latest team info row =====
+  const teamByMemberEmail = useMemo(() => {
+    const map = new Map();
+    for (const row of teams || []) {
+      // Prefer mapping by memberEmail primarily; fallback to userEmail
+      const key = row.memberEmail || row.userEmail;
+      if (!key) continue;
+      // If multiple rows exist for same member, pick the one with higher teamTotalPoint (arbitrary tie-breaker)
+      const prev = map.get(key);
+      if (!prev || (row.teamTotalPoint ?? 0) > (prev.teamTotalPoint ?? 0)) {
+        map.set(key, row);
+      }
     }
-  };
-  //유저삭제
-  const handleDeleteUser = async (userId) => {
-    const confirmed = window.confirm("정말 삭제하시겠습니까?");
-    if (!confirmed) return;
-  
-    const success = await deleteUser(userId);
-    if (success) {
-      setUsers(users.filter((user) => user.userId !== userId)); // 삭제된 사용자 제거
-    }
-  };
+    return map;
+  }, [teams]);
 
+  // ===== Effects: initial data load =====
   useEffect(() => {
-    const loadUsers = async () => {
-      const userData = await fetchAdminMembers();
-      setUsers(userData);
-    };
-
-    const loadProblems = async () => {
-      const problemData = await fetchProblems();
-      setProblems(problemData);
-    };
-
-    loadUsers();
-    loadProblems();
+    (async () => {
+      try {
+        const [userData, problemData, teamData] = await Promise.all([
+          fetchAdminMembers(),
+          fetchProblems(),
+          fetchTeamProfiles(),
+        ]);
+        setUsers(Array.isArray(userData) ? userData : userData?.data ?? []);
+        setProblems(Array.isArray(problemData) ? problemData : problemData?.data ?? []);
+        setTeams(Array.isArray(teamData) ? teamData : teamData?.data ?? []);
+      } catch (e) {
+        // eslint-disable-next-line no-alert
+        alert("데이터 로딩 중 오류가 발생했습니다.");
+      }
+    })();
   }, []);
 
-  
-
-  const toggleUsers = () => {
-    setShowUsers(true);
-    setShowProblems(false);
-  };
-
-  const toggleProblems = () => {
-    setShowUsers(false);
-    setShowProblems(true);
-  };
-  const handleEditUser = (user) => {
-    setEditingUser(user);
-  };
-  //유저 수정
-  const handleChangeInput = (e) => {
-    const { name, value } = e.target;
-    setEditingUser({ ...editingUser, [name]: value });
-  };
-
-  const handleSaveUser = async() => {
-    if (!editingUser) return alert("수정할 사용자를 선택하세요.");
-
-    const updatedData = {
-      email: editingUser.email,
-      univ: editingUser.univ,
-      loginId: editingUser.loginId,
-      role: editingUser.role,
-    };
-    
-
+  // ===== Users =====
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
-      const updatedUser = await updateUser(editingUser.userId, updatedData);
-      alert("사용자 정보가 수정되었습니다.");
+      const res = await removeUser(userId);
+      if (res?.code === "SUCCESS") {
+        setUsers((prev) => prev.filter((u) => u.userId !== userId));
+      } else {
+        alert(res?.message || "삭제 실패");
+      }
+    } catch (e) {
+      alert("삭제 요청 실패");
+    }
+  };
 
-      // UI 업데이트
-      setUsers(users.map((user) => (user.userId === updatedUser.userId ? updatedUser : user)));
+  const handleSaveUser = async () => {
+    if (!editingUser) return alert("수정할 사용자를 선택하세요.");
+    try {
+      const payload = {
+        email: editingUser.email,
+        univ: editingUser.univ,
+        loginId: editingUser.loginId,
+        role: editingUser.role,
+      };
+      const updated = await updateUser(editingUser.userId, payload);
+      setUsers((prev) => prev.map((u) => (u.userId === updated.userId ? updated : u)));
       setEditingUser(null);
-    } catch (error) {
+      alert("사용자 정보가 수정되었습니다.");
+    } catch (e) {
       alert("수정에 실패했습니다.");
     }
   };
-  //문제 수정
+
+  // ===== Team tools =====
+  const handleCreateTeam = async () => {
+    const name = teamNameForCreate.trim();
+    if (!name) return alert("팀 이름을 입력하세요.");
+    try {
+      const res = await createTeam(name);
+      if (res?.code === "SUCCESS") {
+        alert("팀이 생성되었습니다.");
+        setTeamNameForCreate("");
+        // refresh team profiles
+        const latest = await fetchTeamProfiles();
+        setTeams(Array.isArray(latest) ? latest : latest?.data ?? []);
+      } else {
+        alert(res?.message || "팀 생성 실패");
+      }
+    } catch (e) {
+      alert("팀 생성 요청 실패 (이미 존재하거나 권한 오류일 수 있습니다)");
+    }
+  };
+
+  const handleAddMember = async () => {
+    const team = teamNameForAdd.trim();
+    const email = memberEmailToAdd.trim();
+    if (!team || !email) return alert("팀 이름과 이메일을 모두 입력하세요.");
+    try {
+      const res = await addTeamMember(team, email);
+      if (res?.code === "SUCCESS") {
+        alert("팀원 추가 완료");
+        setMemberEmailToAdd("");
+        // refresh team profiles
+        const latest = await fetchTeamProfiles();
+        setTeams(Array.isArray(latest) ? latest : latest?.data ?? []);
+      } else {
+        alert(res?.message || "팀원 추가 실패");
+      }
+    } catch (e) {
+      alert("팀원 추가 요청 실패 (존재하지 않는 팀/이메일일 수 있습니다)");
+    }
+  };
+
+  // ===== Problems =====
+  const handleDeleteProblem = async (challengeId) => {
+    if (!window.confirm("정말로 삭제하시겠습니까?")) return;
+    const res = await deleteProblem(challengeId);
+    if (res?.code === "SUCCESS") {
+      setProblems((prev) => prev.filter((p) => p.challengeId !== challengeId));
+      alert("문제가 삭제되었습니다.");
+    } else {
+      alert(res?.message || "문제 삭제 실패");
+    }
+  };
+
   const handleEditProblem = (problem) => {
     setEditingProblem(problem);
-    setShowEditProblemForm((prev) => !prev); // 토글
+    setShowEditProblemForm(true);
+    // prime form with existing values if needed
+    setFormData((fd) => ({ ...fd, title: problem.title ?? "", points: problem.points ?? "", category: problem.category ?? "" }));
   };
+
   const handleSaveProblem = async () => {
     if (!editingProblem) return alert("수정할 문제를 선택하세요.");
-  
-    const formDataToSend = new FormData();
-    formDataToSend.append(
-      "challenge",
-      new Blob([JSON.stringify(formData)], { type: "application/json" })
-    );
-  
-    if (formData.file) {
-      formDataToSend.append("file", formData.file);
-    }
-  
+    const fd = new FormData();
+    fd.append("challenge", new Blob([JSON.stringify(formData)], { type: "application/json" }));
+    if (formData.file) fd.append("file", formData.file);
     try {
-      const response = await updateProblem(editingProblem.challengeId, formDataToSend);
-      alert(response.message);
-  
-      setProblems(
-        problems.map((p) => (p.challengeId === editingProblem.challengeId ? { ...p, ...formData } : p))
-      );
-      setEditingProblem(null);
-      setShowEditProblemForm(false);
-    } catch (error) {
+      const res = await updateProblem(editingProblem.challengeId, fd);
+      if (res?.code === "SUCCESS") {
+        setProblems((prev) => prev.map((p) => (p.challengeId === editingProblem.challengeId ? { ...p, ...formData } : p)));
+        setEditingProblem(null);
+        setShowEditProblemForm(false);
+      }
+      alert(res?.message || "문제 수정 결과 확인");
+    } catch (e) {
       alert("문제 수정 실패");
     }
   };
-  
 
-  const toggleAddProblemForm = () => {
-    setShowAddProblemForm(!showAddProblemForm);
-  };
-
-  const handleInputChange = (e) => {
+  // ===== Shared form helpers =====
+  const onInput = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    if (!editingUser) return;
+    setEditingUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setFormData({
-      ...formData,
-      file: e.target.files[0]
-    });
+  const onProblemInput = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async(e) => {
-    e.preventDefault();
-    try {
-      const response = await createProblem(formData);
-      alert(response.message); // 성공 메시지 표시
-    } catch (error) {
-      alert('문제 생성 실패');
-    }
-  };
+  const onFile = (e) => setFormData((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
 
   return (
-    <div>
-      <h1 style={{color:'black'}}>Admin Page</h1>
+    <div style={{ padding: 16 }}>
+      <h1 style={{ color: "black" }}>Admin Page</h1>
 
-      <button onClick={toggleUsers}>User List</button>
-      <button onClick={toggleProblems}>Problem List</button>
+      <div style={{ marginBottom: 12 }}>
+        <button onClick={() => setTab("users")}>User List</button>
+        <button onClick={() => setTab("problems")} style={{ marginLeft: 8 }}>Problem List</button>
+      </div>
 
-      {showUsers && (
+      {/* ================= Users Tab ================= */}
+      {tab === "users" && (
         <section>
-          <h2 style={{color:'black'}}>Users</h2>
-          <button>Add User</button>
-          <input style={{ padding: '5px',  marginLeft: '30px',marginRight: '10px', marginBottom: '10px' }}/>
-          <button>찾기</button>
+          <h2 style={{ color: "black" }}>Users</h2>
+
+          {/* Team tools */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 12,
+            padding: 12,
+            border: "1px solid #000",
+            borderRadius: 8,
+            marginBottom: 12,
+            background: "#fafafa",
+          }}>
+            <div>
+              <h3 style={{ color: "black", marginTop: 0 }}>팀 생성</h3>
+              <input
+                placeholder="팀 이름"
+                value={teamNameForCreate}
+                onChange={(e) => setTeamNameForCreate(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <button onClick={handleCreateTeam}>생성</button>
+            </div>
+            <div>
+              <h3 style={{ color: "black", marginTop: 0 }}>팀원 추가</h3>
+              <input
+                placeholder="팀 이름"
+                value={teamNameForAdd}
+                onChange={(e) => setTeamNameForAdd(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <input
+                placeholder="사용자 이메일"
+                value={memberEmailToAdd}
+                onChange={(e) => setMemberEmailToAdd(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <button onClick={handleAddMember}>추가</button>
+            </div>
+          </div>
+
+          {/* Edit panel */}
           {editingUser && (
-            <div style={{color:'black'}}>
+            <div style={{ color: "black", marginBottom: 12 }}>
               <h3>Edit User</h3>
               <label>Email:</label>
-              <input type="email" name="email" value={editingUser.email} onChange={handleChangeInput} />
+              <input type="email" name="email" value={editingUser.email} onChange={onInput} />
               <label>University:</label>
-              <input type="text" name="univ" value={editingUser.univ} onChange={handleChangeInput} />
+              <input type="text" name="univ" value={editingUser.univ} onChange={onInput} />
               <label>Login ID:</label>
-              <input type="text" name="loginId" value={editingUser.loginId} onChange={handleChangeInput} />
+              <input type="text" name="loginId" value={editingUser.loginId} onChange={onInput} />
               <label>Role:</label>
-              <input type="text" name="role" value={editingUser.role} onChange={handleChangeInput} />
+              <input type="text" name="role" value={editingUser.role} onChange={onInput} />
               <button onClick={handleSaveUser}>Save</button>
               <button onClick={() => setEditingUser(null)}>Cancel</button>
             </div>
           )}
-          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid black'}}>
+
+          {/* Users + Team columns */}
+          <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid black" }}>
             <thead>
               <tr>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>ID</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Email</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>LoginId</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Role</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Point</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Univ</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Created</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Updated</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Action</th>
+                {[
+                  "ID",
+                  "Email",
+                  "LoginId",
+                  "Role",
+                  "Point",
+                  "Univ",
+                  "Team Name",
+                  "Member Email",
+                  "Team Mileage",
+                  "Team Total",
+                  "Team Solves",
+                  "Created",
+                  "Updated",
+                  "Action",
+                ].map((h) => (
+                  <th key={h} style={{ padding: 10, textAlign: "center", color: "black", border: "1px solid black" }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
-                <tr key={user.userId}>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black',border: '1px solid black' }}>{user.userId}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.email}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.loginId}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.role}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.totalPoint}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.univ}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.createdAt.slice(0, 19)}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{user.updatedAt.slice(0, 19)}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>
-                    <button style={{margin:'5px'}} onClick={() => handleDeleteUser(user.userId)}>Delete</button>
-                    <button style={{margin:'5px'}} onClick={() => handleEditUser(user)}>Change</button>
-                  </td>
-                </tr>
-              ))}
+              {users.map((u) => {
+                const team = teamByMemberEmail.get(u.email) || null;
+                return (
+                  <tr key={u.userId}>
+                    <td style={cell}>{u.userId}</td>
+                    <td style={cell}>{u.email}</td>
+                    <td style={cell}>{u.loginId}</td>
+                    <td style={cell}>{u.role}</td>
+                    <td style={cell}>{u.totalPoint}</td>
+                    <td style={cell}>{u.univ}</td>
+                    <td style={cell}>{team?.teamName ?? "-"}</td>
+                    <td style={cell}>{team?.memberEmail ?? "-"}</td>
+                    <td style={cell}>{team?.teamMileage ?? 0}</td>
+                    <td style={cell}>{team?.teamTotalPoint ?? 0}</td>
+                    <td style={cell}>{team?.teamSolvedCount ?? 0}</td>
+                    <td style={cell}>{u.createdAt?.slice(0, 19)}</td>
+                    <td style={cell}>{u.updatedAt?.slice(0, 19)}</td>
+                    <td style={cell}>
+                      <button style={{ margin: 5 }} onClick={() => handleDeleteUser(u.userId)}>Delete</button>
+                      <button style={{ margin: 5 }} onClick={() => setEditingUser(u)}>Change</button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </section>
       )}
 
-      {showProblems && (
+      {/* ================= Problems Tab ================= */}
+      {tab === "problems" && (
         <section>
-          <h2 style={{color:'black'}}>Problems</h2>
-          <button onClick={toggleAddProblemForm}>
-            {showAddProblemForm ? 'Close Add Problem' : 'Add Problem'}
+          <h2 style={{ color: "black" }}>Problems</h2>
+
+          <button onClick={() => setShowAddProblemForm((v) => !v)}>
+            {showAddProblemForm ? "Close Add Problem" : "Add Problem"}
           </button>
-          <input style={{ padding: '5px',  marginLeft: '30px',marginRight: '10px', marginBottom: '10px' }}/>
-          <button>찾기</button>
-          {/* change Problem 폼 */}
+
+          {/* Edit Problem */}
           {showEditProblemForm && editingProblem && (
-            <div style={{ color: "black", padding: "10px", border: "1px solid black", marginTop: "10px" }}>
+            <div style={{ color: "black", padding: 10, border: "1px solid black", marginTop: 10 }}>
               <h3>Edit Problem</h3>
-              <form>
+              <form onSubmit={(e) => e.preventDefault()}>
                 <label>Title:</label>
-                <input type="text" name="title" value={formData.title} onChange={handleInputChange} />
+                <input type="text" name="title" value={formData.title} onChange={onProblemInput} />
                 <label>Description:</label>
-                <textarea name="description" value={formData.description} onChange={handleInputChange}></textarea>
+                <textarea name="description" value={formData.description} onChange={onProblemInput} />
                 <label>Flag:</label>
-                <input type="text" name="flag" value={formData.flag} onChange={handleInputChange} />
+                <input type="text" name="flag" value={formData.flag} onChange={onProblemInput} />
                 <label>Points:</label>
-                <input type="number" name="points" value={formData.points} onChange={handleInputChange} />
+                <input type="number" name="points" value={formData.points} onChange={onProblemInput} />
                 <label>Min Points:</label>
-                <input type="number" name="minPoints" value={formData.minPoints} onChange={handleInputChange} />
+                <input type="number" name="minPoints" value={formData.minPoints} onChange={onProblemInput} />
                 <label>Initial Points:</label>
-                <input type="number" name="initialPoints" value={formData.initialPoints} onChange={handleInputChange} />
+                <input type="number" name="initialPoints" value={formData.initialPoints} onChange={onProblemInput} />
                 <label>Start Time:</label>
-                <input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleInputChange} />
+                <input type="datetime-local" name="startTime" value={formData.startTime} onChange={onProblemInput} />
                 <label>End Time:</label>
-                <input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleInputChange} />
+                <input type="datetime-local" name="endTime" value={formData.endTime} onChange={onProblemInput} />
                 <label>URL:</label>
-                <input type="text" name="url" value={formData.url} onChange={handleInputChange} />
+                <input type="text" name="url" value={formData.url} onChange={onProblemInput} />
                 <label>File:</label>
-                <input type="file" name="file" onChange={handleFileChange} />
+                <input type="file" name="file" onChange={onFile} />
                 <label>Category:</label>
-                <input type="text" name="category" value={formData.category} onChange={handleInputChange} />
+                <input type="text" name="category" value={formData.category} onChange={onProblemInput} />
                 <button type="button" onClick={handleSaveProblem}>Save</button>
                 <button type="button" onClick={() => setShowEditProblemForm(false)}>Cancel</button>
               </form>
             </div>
           )}
-          {/* Add Problem 폼 */}
-          {showAddProblemForm && (
-            <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-              <div>
-                <label style={{color:'black'}}>Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                />
-              </div>
 
+          {/* Add Problem */}
+          {showAddProblemForm && (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  const res = await createProblem(formData);
+                  alert(res?.message || "생성 완료");
+                } catch {
+                  alert("문제 생성 실패");
+                }
+              }}
+              style={{ marginTop: 20 }}
+            >
+              {/* (same fields as user code; omitted for brevity except core changes kept) */}
+              <div>
+                <label style={{ color: "black" }}>Title</label>
+                <input type="text" name="title" value={formData.title} onChange={onProblemInput} required style={{ width: "100%", padding: 10, marginBottom: 10 }} />
+              </div>
               <div>
                 <label style={{ color: "black" }}>Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 300) {
-                      handleInputChange(e);
-                    }
-                  }}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    marginBottom: "10px",
-                    height: "100px",
-                  }}
-                />
-                <p style={{ color: "black", fontSize: "12px", textAlign: "right" }}>
-                  {formData.description.length} / 300
-                </p>
+                <textarea name="description" value={formData.description} onChange={(e) => {
+                  if (e.target.value.length <= 300) onProblemInput(e);
+                }} required style={{ width: "100%", padding: 10, marginBottom: 10, height: 100 }} />
+                <p style={{ color: "black", fontSize: 12, textAlign: "right" }}>{formData.description.length} / 300</p>
               </div>
-
               <div>
-                <label style={{color:'black'}}>Flag</label>
-                <input
-                  type="text"
-                  name="flag"
-                  value={formData.flag}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                />
+                <label style={{ color: "black" }}>Flag</label>
+                <input type="text" name="flag" value={formData.flag} onChange={onProblemInput} required style={{ width: "100%", padding: 10, marginBottom: 10 }} />
               </div>
-
               <div>
-                <label style={{color:'black'}}>Points</label>
-                <input
-                  type="number"
-                  name="points"
-                  value={formData.points}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                />
+                <label style={{ color: "black" }}>Points</label>
+                <input type="number" name="points" value={formData.points} onChange={onProblemInput} required style={{ width: "100%", padding: 10, marginBottom: 10 }} />
               </div>
-
               <div>
-                <label style={{color:'black'}}>Min Points</label>
-                <input
-                  type="number"
-                  name="minPoints"
-                  value={formData.minPoints}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                />
+                <label style={{ color: "black" }}>Min Points</label>
+                <input type="number" name="minPoints" value={formData.minPoints} onChange={onProblemInput} required style={{ width: "100%", padding: 10, marginBottom: 10 }} />
               </div>
-
               <div>
-                <label style={{color:'black'}}>Date</label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                />
+                <label style={{ color: "black" }}>Date</label>
+                <input type="date" name="date" value={formData.date} onChange={onProblemInput} required style={{ width: "100%", padding: 10, marginBottom: 10 }} />
               </div>
-
               <div>
-                <label style={{color:'black'}}>Time</label>
-                <input
-                  type="time"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                />
+                <label style={{ color: "black" }}>Time</label>
+                <input type="time" name="time" value={formData.time} onChange={onProblemInput} required style={{ width: "100%", padding: 10, marginBottom: 10 }} />
               </div>
-
               <div>
-                <label style={{color:'black'}}>File Upload</label>
-                <input
-                  type="file"
-                  name="file"
-                  onChange={handleFileChange}
-                  style={{ marginBottom: '10px', color:'black' }}
-                />
+                <label style={{ color: "black" }}>File Upload</label>
+                <input type="file" name="file" onChange={onFile} style={{ marginBottom: 10, color: "black" }} />
               </div>
-
               <div>
-                <label style={{color:'black'}}>URL</label>
-                <input
-                  type="url"
-                  name="url"
-                  value={formData.url}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                />
+                <label style={{ color: "black" }}>URL</label>
+                <input type="url" name="url" value={formData.url} onChange={onProblemInput} required style={{ width: "100%", padding: 10, marginBottom: 10 }} />
               </div>
-
               <div>
                 <label style={{ color: "black" }}>CATEGORY</label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    marginBottom: "10px",
-                    backgroundColor: "white",
-                    color: "black",
-                  }}
-                >
+                <select name="category" value={formData.category} onChange={onProblemInput} required style={{ width: "100%", padding: 10, marginBottom: 10, backgroundColor: "white", color: "black" }}>
                   <option value="">카테고리 선택</option>
                   <option value="MISC">MISC</option>
                   <option value="REV">REV</option>
@@ -420,51 +432,47 @@ const Admin = () => {
                   <option value="PWN">PWN</option>
                   <option value="WEB">WEB</option>
                   <option value="CRYPTO">CRYPTO</option>
+                  <option value="SIGNATURE">SIGNATURE</option>
                 </select>
               </div>
-
-              {/* 버튼들 */}
-              <div style={{ marginTop: '20px' }}>
-                <button type="submit" style={{ marginRight: '10px' }}>
-                  저장
-                </button>
-                <button type="button" style={{ marginRight: '10px' }}>
-                  다른이름으로 저장
-                </button>
+              <div style={{ marginTop: 20 }}>
+                <button type="submit" style={{ marginRight: 10 }}>저장</button>
+                <button type="button" style={{ marginRight: 10 }}>다른이름으로 저장</button>
                 <button type="button">저장 및 계속</button>
               </div>
             </form>
           )}
-          <table style={{ width: '100%', marginTop: '10px', borderCollapse: 'collapse', border: '1px solid black' }}>
+
+          {/* Problem table */}
+          <table style={{ width: "100%", marginTop: 10, borderCollapse: "collapse", border: "1px solid black" }}>
             <thead>
               <tr>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>ID</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Title</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Points</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Category</th>
-                <th style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>Action</th>
+                {["ID", "Title", "Points", "Category", "Action"].map((h) => (
+                  <th key={h} style={{ padding: 10, textAlign: "center", color: "black", border: "1px solid black" }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {problems.map(problem => (
-                <tr key={problem.challengeId}>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{problem.challengeId}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{problem.title}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{problem.points}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>{problem.category}</td>
-                  <td style={{ padding: '10px', textAlign: 'center', color:'black', border: '1px solid black' }}>
-                    <button onClick={() => handleDeleteProblem(problem.challengeId)} style={{margin:'5px'}}>Delete</button>
-                    <button style={{margin:'5px'}} onClick={() => handleEditProblem(problem)}>Change</button>
+              {problems.map((p) => (
+                <tr key={p.challengeId}>
+                  <td style={cell}>{p.challengeId}</td>
+                  <td style={cell}>{p.title}</td>
+                  <td style={cell}>{p.points}</td>
+                  <td style={cell}>{p.category}</td>
+                  <td style={cell}>
+                    <button onClick={() => handleDeleteProblem(p.challengeId)} style={{ margin: 5 }}>Delete</button>
+                    <button style={{ margin: 5 }} onClick={() => handleEditProblem(p)}>Change</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-
         </section>
       )}
     </div>
   );
 };
+
+const cell = { padding: 10, textAlign: "center", color: "black", border: "1px solid black" };
 
 export default Admin;
