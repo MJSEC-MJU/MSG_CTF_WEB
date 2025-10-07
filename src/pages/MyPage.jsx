@@ -262,8 +262,6 @@ const MyPage = () => {
           {/* 우측: 결제 QR 패널 */}
           <aside className="profile-qr">
             <div className="card-header">
-              <h3>Payment QR</h3>
-              <button className="btn ghost" onClick={manualRefresh}>재발급</button>
             </div>
 
             <div className="qr-body">
