@@ -72,7 +72,7 @@ body { background: var(--bg); }
   gap: 20px;
   align-items: start;
 }
-.profile-main { min-width: 0; } /* 긴 텍스트 줄바꿈 안정화 */
+.profile-main { min-width: 0; }
 
 .profile-row { display: flex; align-items: center; gap: 20px; }
 .avatar {
@@ -104,17 +104,14 @@ body { background: var(--bg); }
   padding: 0px;
   background: none;
 }
-
-.qr .card-header,
 .profile-qr .card-header {
   justify-content: space-between;
   margin-bottom: 8px;
 }
-
-.qr .qr-body,
 .profile-qr .qr-body {
-  grid-template-columns: 1fr;     /* 한 컬럼으로 변경 → 아래로 쌓임 */
-  justify-items: center;          /* QR 및 메타 중앙 정렬 */
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
   background: none;
 }
 .profile-qr .qr-meta {
@@ -171,52 +168,27 @@ body { background: var(--bg); }
 .error-message.small { font-size: .95rem; }
 
 /* 반응형 */
-/* ▼ 모바일: QR 최상단, 프로필 하단 — 겹침 완전 차단용 오버라이드 */
 @media (max-width: 640px) {
-  /* 상단 행을 세로 스택으로 강제 */
-  .top-row {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
+  .profile-row { flex-direction: column; align-items: flex-start; }
+  .avatar { margin: 0 0 12px 0; }
+  .qr-image {
+    width: 134px !important;
+    height: 134px !important;
   }
-
-  /* 순서: QR 먼저, 프로필 다음 */
-  .top-row > .qr {
-    order: 0 !important;
+  .qr-image canvas {
+    width: 126px !important;
+    height: 126px !important;
   }
-  .top-row > .profile {
-    order: 1 !important;
-  }
-
-  /* 겹침 유발 가능성(absolute/float/고정폭) 전부 해제 */
-  .top-row > .qr,
-  .top-row > .profile {
-    position: static !important;
-    float: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-  }
-
-  /* 프로필 내부 레이아웃 안정화(사진 위, 나머지 아래) */
-  .profile-row {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
-  .avatar {
-    float: none !important;
-    margin: 0 0 12px 0 !important;
-  }
-
-  /* QR 내부는 이미지 위 / 메타 아래 1열 유지 */
-  .qr .qr-body {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    justify-items: center !important;
-    gap: 12px !important;
+  .mileage { font-size: 1.0rem; }
+}
+@media (min-width: 960px) {
+  .profile-layout { grid-template-columns: 600px 200px !important; }
+  .profile-main { max-width: 600px; min-width: 0; }
+  .profile-meta, .member-list, .member-item {
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 }
-
-
 
 /* Mileage 강조 */
 .mileage {
@@ -228,7 +200,7 @@ body { background: var(--bg); }
 }
 .mileage strong { font-weight: 900; }
 
-/* QR 상태 라인 – 빨간 점 */
+/* QR 상태 라인 */
 .qr-status {
   display: inline-flex; align-items: center; gap: 8px;
   font-weight: 700; color: var(--brand-black);
@@ -236,37 +208,3 @@ body { background: var(--bg); }
 
 /* 자잘한 여백 */
 .mt24 { margin-top: 24px; }
-@media (max-width: 640px) {
-  .qr-image {
-    width: 134px !important;   /* 기존 200px → 144px */
-    height: 134px !important;
-  }
-  .qr-image canvas {
-    width: 126px !important;   /* 기존 192px → 136px */
-    height: 126px !important;
-  }
-   .mileage {
-    font-size: 1.0rem;  /* 기존 1.35rem → 소폭 축소 */
-  }
-}
-@media (min-width: 960px) {
-  /* 카드 내부 콘텐츠 폭: 960 컨테이너 - 좌우 padding(24*2)=48 → 912px
-     고정폭 680 + QR 200 + gap 20 = 900px 로 안전한 마진 확보 */
-  .profile-layout {
-    grid-template-columns: 600px 200px !important;
-  }
-
-  /* 고정폭과 텍스트 줄바꿈 안정화 */
-  .profile-main {
-    max-width: 600px;   /* 시각적 보정용(선택) */
-    min-width: 0;       /* 그리드 축약 시 줄바꿈 안정화 */
-  }
-
-  /* 아주 긴 팀명/이메일이 있어도 줄바꿈되도록 */
-  .profile-meta,
-  .member-list,
-  .member-item {
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
-}

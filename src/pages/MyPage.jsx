@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProfile } from "../api/ProfileAPI";
 import { fetchProblems } from "../api/ChallengeAllAPI";
@@ -42,11 +42,8 @@ const MyPage = () => {
   const [problemsLoading, setProblemsLoading] = useState(true);
   const [problemsError, setProblemsError] = useState(false);
 
-  const MILEAGE_PER_SOLVE = 500; // 푼 문제당 500 마일리지
-  const mileage = useMemo(
-    () => solvedProblems.length * MILEAGE_PER_SOLVE,
-    [solvedProblems]
-  );
+  // 팀 마일리지는 API의 teamMileage 사용
+  const mileage = profile?.mileage ?? 0;
 
   // 결제 QR 상태
   const [qrData, setQrData] = useState("");
@@ -57,40 +54,41 @@ const MyPage = () => {
   const refreshTimerRef = useRef(null);
   const tickRef = useRef(null);
 
-  // 1) 프로필
+  // 1) 팀 프로필
   useEffect(() => {
     if (MOCK) {
       setProfile({
-        teamName: "tester01",
-        user_id: 1001,
-        members: ["tester01@example.com", "tester02@example.com"],
+        teamId: 1,
+        teamName: "Admin",
+        members: ["admin@example.com"],
         rank: 1,
-        points: 1234,
+        points: 0,
+        mileage: 0,
         avatarUrl: "/assets/profileSample.webp",
       });
       return;
     }
 
     getProfile()
-      .then((data) => {
-        const user = data.data;
+      .then((resp) => {
+        // 실제 응답: { code, message, data: { teamId, teamName, userEmail, memberEmail:[...], teamMileage, teamTotalPoint, teamSolvedCount } }
+        const t = resp?.data;
+        if (!t) throw new Error("Invalid team profile");
+
         setProfile({
-          teamName: user.teamName ?? user.userId ?? "TEAM",
-          user_id: user.user_id,
-          members: Array.isArray(user.members)
-            ? user.members
-            : user.email
-            ? [user.email]
-            : [],
+          teamId: t.teamId,
+          teamName: t.teamName ?? "TEAM",
+          members: Array.isArray(t.memberEmail) ? t.memberEmail : (t.memberEmail ? [t.memberEmail] : []),
           rank: 1, // 최초 진입 시 임시값, SSE에서 업데이트
-          points: user.total_point,
+          points: t.teamTotalPoint ?? 0,
+          mileage: t.teamMileage ?? 0,
           avatarUrl: "/assets/profileSample.webp",
         });
       })
       .catch(() => setProfileError(true));
   }, []);
 
-  // 2) 문제
+  // 2) 문제 (팀 단위로 바뀌더라도 표시 로직/배치는 그대로 유지)
   useEffect(() => {
     if (MOCK) {
       const problems = Array.from({ length: 10 }).map((_, i) => ({
@@ -108,8 +106,9 @@ const MyPage = () => {
     setProblemsLoading(true);
     fetchProblems(0, 20)
       .then(({ problems }) => {
-        const solved = problems.filter((p) => p.solved === true);
-        const unsolved = problems.filter((p) => p.solved === false);
+        const list = Array.isArray(problems) ? problems : [];
+        const solved = list.filter((p) => p.solved === true);
+        const unsolved = list.filter((p) => p.solved === false);
         setSolvedProblems(solved);
         setUnsolvedProblems(unsolved);
       })
@@ -117,13 +116,11 @@ const MyPage = () => {
       .finally(() => setProblemsLoading(false));
   }, []);
 
-  // 3) 리더보드 SSE
+  // 3) 리더보드 SSE (teamName 기준으로 순위 반영)
   useEffect(() => {
-    if (MOCK || !profile) return;
+    if (MOCK || !profile?.teamName) return;
 
-    const eventSource = new EventSource(
-      "https://msg.mjsec.kr/api/leaderboard/stream"
-    );
+    const eventSource = new EventSource("https://msg.mjsec.kr/api/leaderboard/stream");
     eventSource.onmessage = (event) => {
       try {
         let jsonStr = event.data;
@@ -132,19 +129,21 @@ const MyPage = () => {
         const leaderboard = Array.isArray(payload) ? payload : payload.data;
         if (!Array.isArray(leaderboard)) return;
 
-        const rankIndex = leaderboard.findIndex(
-          (item) => item.userId === profile.teamName
-        );
-        if (rankIndex !== -1)
+        // 항목이 { teamName, points, ... } 구조라고 가정
+        const rankIndex = leaderboard.findIndex((item) => item.teamName === profile.teamName);
+        if (rankIndex !== -1) {
           setProfile((prev) => ({ ...prev, rank: rankIndex + 1 }));
-      } catch {}
+        }
+      } catch {
+        // no-op
+      }
     };
     eventSource.onerror = () => {
       setLeaderboardError(true);
       eventSource.close();
     };
     return () => eventSource.close();
-  }, [profile]);
+  }, [profile?.teamName]);
 
   // ===== QR 발급 =====
   const issueQR = async () => {
@@ -158,10 +157,7 @@ const MyPage = () => {
 
       const now = new Date();
       const expire = new Date(payload.expireAt);
-      const leftSec = Math.max(
-        0,
-        Math.floor((expire.getTime() - now.getTime()) / 1000)
-      );
+      const leftSec = Math.max(0, Math.floor((expire.getTime() - now.getTime()) / 1000));
       setTimeLeft(leftSec);
 
       if (tickRef.current) clearInterval(tickRef.current);
@@ -226,7 +222,7 @@ const MyPage = () => {
       {/* 프로필 + (우측) 결제 QR */}
       <section className="profile card">
         <div className="profile-layout">
-          {/* 좌측: 사용자 프로필 정보 */}
+          {/* 좌측: 팀 프로필 정보 */}
           <div className="profile-main">
             <div className="profile-row">
               <div className="avatar">
@@ -256,15 +252,19 @@ const MyPage = () => {
 
                 <div className="mileage">
                   마일리지&nbsp;
-                  <strong>{mileage.toLocaleString()}</strong>
+                  <strong>{Number(mileage || 0).toLocaleString()}</strong>
                   &nbsp;point
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 우측: 결제 QR 패널 (기존 QR 섹션 내용을 이동) */}
+          {/* 우측: 결제 QR 패널 */}
           <aside className="profile-qr">
+            <div className="card-header">
+              <h3>Payment QR</h3>
+              <button className="btn ghost" onClick={manualRefresh}>재발급</button>
+            </div>
 
             <div className="qr-body">
               <div className="qr-image">
