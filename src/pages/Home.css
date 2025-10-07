@@ -399,7 +399,7 @@
     font-size: clamp(14px, 3.6vw, 18px);
   }
 
-  .TypeRowsSection { --typoH: 180vh; }
+  .TypeRowsSection { --typoH: 260vh;; }
   .Word {
     font-size: clamp(32px, 11vw, 90px);
     margin-right: clamp(8px, 2.4vw, 20px);
@@ -407,7 +407,7 @@
   .RowOutline { -webkit-text-stroke: 1.6px rgba(255,255,255,0.95); }
 
   .CardRail {
-    gap: clamp(220px, 12vw, 360px);
+    gap: clamp(180px, 10vw, 300px);
     padding: clamp(24px, 6vw, 72px) min(4vw, 32px);
   }
 
