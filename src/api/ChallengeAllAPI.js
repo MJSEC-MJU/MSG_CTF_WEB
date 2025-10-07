@@ -1,55 +1,30 @@
-import { Axios } from './Axios';
+import { Axios } from "./Axios";
 import Cookies from "js-cookie";
-
-// import { dummyProblems } from '../mock/problems';
 
 const API_BASE_URL = "/challenges/all";
 
-export const fetchProblems = async (page = 1, size = 10) => {
-//   const USE_MOCK = true; // true로 설정하면 목업 데이터를 사용합니다.
-//   if (USE_MOCK) {
-//   return new Promise((resolve) => {
-//     setTimeout(() => {
-//       const start = page * size;
-//       const end = start + size;
-//       const pagedProblems = dummyProblems.problems.slice(start, end);
-//       const totalPages = Math.ceil(dummyProblems.problems.length / size);
-//       resolve({
-//         problems: pagedProblems,
-//         totalPages: totalPages,
-//       });
-//     }, 300);
-//   });
-// }
-
-  // 실제 API 사용 부분.
+// page는 0-based, size는 페이지당 개수
+export const fetchProblems = async (page = 0, size = 10) => {
   try {
-     const token = Cookies.get("accessToken"); 
+    const token = Cookies.get("accessToken");
     if (!token) {
-      throw new Error("토큰이 없습니다. 로그인 후 시도하세요.");
+      return { problems: [], totalPages: 1 };
     }
 
     const response = await Axios.get(API_BASE_URL, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: {
-        page,
-        size,
-      },
+      headers: { Authorization: `Bearer ${token}` },
+      params: { page, size },
     });
-    //console.log("API 응답:", response.data);
 
-    if (response.data.code !== "SUCCESS") {
-      throw new Error("문제 데이터를 가져오는 데 실패했습니다.");
+    if (response?.data?.code !== "SUCCESS") {
+      return { problems: [], totalPages: 1 };
     }
 
     return {
-      problems:response.data.data.content,// 문제 리스트 반환
-      totalPages: response.data.data.totalPages, // 총 페이지 수 추가
-      }
-  } catch (error) {
-    //console.error("문제 조회 API 호출 중 오류 발생:", error);
-    return{ problems: [], totalPages: 1 };
+      problems: response.data.data.content ?? [],
+      totalPages: response.data.data.totalPages ?? 1,
+    };
+  } catch {
+    return { problems: [], totalPages: 1 };
   }
 };

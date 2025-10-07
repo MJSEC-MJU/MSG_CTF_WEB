@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchProblems } from "../api/ChallengeAllAPI";
 import { fetchSolvedChallenges } from "../api/UserChallengeAPI";
-// import { SignatureModal } from "../components/SignatureModal";
 import "./Challenge.css";
 
 function Challenge() {
@@ -23,49 +22,51 @@ function Challenge() {
     WEB: "/assets/web.svg",
     SIGNATURE: "/assets/signature.svg",
   };
+  const categoryFallback = "/assets/misc.svg";
 
   useEffect(() => {
-    const loadProblems = async () => {
-      try {
-        const { problems, totalPages } = await fetchProblems(currentPage);
+    let isMounted = true;
+
+    (async () => {
+      const { problems, totalPages } = await fetchProblems(currentPage);
+      if (isMounted) {
         setProblems(problems);
         setTotalPages(totalPages);
-      } catch (error) {
-        // console.error("문제 데이터를 불러오는 중 오류 발생:", error);
       }
-    };
+    })();
 
-    const loadSolvedChallenges = async () => {
+    (async () => {
       try {
         const solvedData = await fetchSolvedChallenges();
-        setSolvedChallenges(
-          new Set(solvedData.map((solved) => String(solved.challengeId)))
-        );
-      } catch (error) {
-        // console.error("푼 문제 데이터를 불러오는 중 오류 발생:", error);
+        if (isMounted) {
+          setSolvedChallenges(
+            new Set(solvedData.map((s) => String(s.challengeId)))
+          );
+        }
+      } catch {
+        if (isMounted) setSolvedChallenges(new Set());
       }
-    };
+    })();
 
-    loadProblems();
-    loadSolvedChallenges();
+    return () => {
+      isMounted = false;
+    };
   }, [currentPage]);
 
   return (
     <div className="challenge-container">
-      {/* 문제 그리드 */}
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
-            const isSolved = solvedChallenges.has(
-              String(problem.challengeId)
-            );
-            const isSignature = problem.isSignature === true;
+            const isSolved = solvedChallenges.size
+              ? solvedChallenges.has(String(problem.challengeId))
+              : problem.solved === "true";
+
+            const isSignature =
+              problem.isSignature === true || problem.category === "SIGNATURE";
 
             return (
-              <div
-                key={problem.challengeId}
-                className="problem-button-wrapper"
-              >
+              <div key={problem.challengeId} className="problem-button-wrapper">
                 <Link
                   to={isSignature ? "#" : `/problem/${problem.challengeId}`}
                   className="problem-button"
@@ -88,19 +89,21 @@ function Challenge() {
                       alt={problem.title}
                     />
                     <img
-                      src={categoryImages[problem.category] || categoryImages.default}
+                      src={
+                        categoryImages[problem.category] ?? categoryFallback
+                      }
                       alt={problem.category}
                       className="category-icon"
                     />
                     <div
                       className="button-title"
-                      style={isSolved ? { color: "#00FF00" } : {}}
+                      style={isSolved ? { color: "#00FF00" } : undefined}
                     >
                       {problem.title}
                     </div>
                     <div
                       className="button-score"
-                      style={isSolved ? { color: "#00FF00" } : {}}
+                      style={isSolved ? { color: "#00FF00" } : undefined}
                     >
                       {problem.points}
                     </div>
@@ -110,19 +113,12 @@ function Challenge() {
             );
           })
         ) : (
-          <p
-            style={{
-              color: "white",
-              textAlign: "center",
-              marginTop: "20px",
-            }}
-          >
+          <p style={{ color: "white", textAlign: "center", marginTop: "20px" }}>
             문제 목록을 불러오는 중...
           </p>
         )}
       </div>
 
-      {/* 페이지네이션 */}
       <div className="pagination">
         <button
           style={{ height: "5vh", margin: "10px" }}
@@ -143,7 +139,6 @@ function Challenge() {
         </button>
       </div>
 
-      {/* Signature Form Modal */}
       {signatureForm && (
         <div className="signature-modal">
           <div className="signature-form">
@@ -154,7 +149,6 @@ function Challenge() {
               value={signatureInput}
               onChange={(e) => setSignatureInput(e.target.value)}
             />
-            {/* {signatureError && <p style={{ color: 'red', fontSize: '12px' }}>{signatureError}</p>} */}
             <div className="signature-buttons">
               <button>제출</button>
               <button onClick={() => setSignatureForm(false)}>취소</button>
