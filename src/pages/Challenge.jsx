@@ -58,9 +58,7 @@ function Challenge() {
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
-            const isSolved = solvedChallenges.size
-              ? solvedChallenges.has(String(problem.challengeId))
-              : problem.solved === "true";
+            const isSolved = solvedChallenges.has(String(problem.challengeId));
 
             const isSignature =
               problem.isSignature === true || problem.category === "SIGNATURE";
