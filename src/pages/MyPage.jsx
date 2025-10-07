@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile } from "../api/ProfileAPI";
+import { fetchTeamProfileRows } from "../api/TeamAPI";
 import { fetchProblems } from "../api/ChallengeAllAPI";
 import Loading from "../components/Loading";
 import "./MyPage.css";
@@ -69,7 +69,7 @@ const MyPage = () => {
       return;
     }
 
-    getProfile()
+    fetchTeamProfileRows()
       .then((resp) => {
         // 실제 응답: { code, message, data: { teamId, teamName, userEmail, memberEmail:[...], teamMileage, teamTotalPoint, teamSolvedCount } }
         const t = resp?.data;
