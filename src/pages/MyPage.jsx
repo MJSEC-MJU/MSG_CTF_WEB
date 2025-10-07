@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchTeamProfileRows } from "../api/TeamAPI";
-import { fetchProblems } from "../api/ChallengeAllAPI";
+import { fetchTeamProfileRows } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
+// import { fetchProblems } from "../api/ChallengeAllAPI"; // 🔒 팀단위 정리 전까지 미사용
 import Loading from "../components/Loading";
 import "./MyPage.css";
 import { QRCodeCanvas } from "qrcode.react";
@@ -37,10 +37,11 @@ const MyPage = () => {
   const [profileError, setProfileError] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState(false);
 
-  const [solvedProblems, setSolvedProblems] = useState([]);
-  const [unsolvedProblems, setUnsolvedProblems] = useState([]);
-  const [problemsLoading, setProblemsLoading] = useState(true);
-  const [problemsError, setProblemsError] = useState(false);
+  // 🔒 문제 섹션은 팀 단위 API 정리 전까지 주석
+  // const [solvedProblems, setSolvedProblems] = useState([]);
+  // const [unsolvedProblems, setUnsolvedProblems] = useState([]);
+  // const [problemsLoading, setProblemsLoading] = useState(true);
+  // const [problemsError, setProblemsError] = useState(false);
 
   // 팀 마일리지는 API의 teamMileage 사용
   const mileage = profile?.mileage ?? 0;
@@ -54,7 +55,7 @@ const MyPage = () => {
   const refreshTimerRef = useRef(null);
   const tickRef = useRef(null);
 
-  // 1) 팀 프로필
+  // 1) 팀 프로필 (rows -> 팀 객체로 재구성)
   useEffect(() => {
     if (MOCK) {
       setProfile({
@@ -64,31 +65,41 @@ const MyPage = () => {
         rank: 1,
         points: 0,
         mileage: 0,
+        solvedCount: 0,
         avatarUrl: "/assets/profileSample.webp",
       });
       return;
     }
 
-    fetchTeamProfileRows()
-      .then((resp) => {
-        // 실제 응답: { code, message, data: { teamId, teamName, userEmail, memberEmail:[...], teamMileage, teamTotalPoint, teamSolvedCount } }
-        const t = resp?.data;
-        if (!t) throw new Error("Invalid team profile");
+    (async () => {
+      try {
+        const rows = await fetchTeamProfileRows(); // [{teamId,teamName,userEmail,memberEmail,teamMileage,teamTotalPoint,teamSolvedCount}, ...]
+        const list = Array.isArray(rows) ? rows : [];
+        if (list.length === 0) {
+          setProfileError(true);
+          return;
+        }
+        const first = list[0];
+        const members = [...new Set(list.map((r) => r.memberEmail).filter(Boolean))];
 
         setProfile({
-          teamId: t.teamId,
-          teamName: t.teamName ?? "TEAM",
-          members: Array.isArray(t.memberEmail) ? t.memberEmail : (t.memberEmail ? [t.memberEmail] : []),
+          teamId: first.teamId,
+          teamName: first.teamName ?? "TEAM",
+          members,
           rank: 1, // 최초 진입 시 임시값, SSE에서 업데이트
-          points: t.teamTotalPoint ?? 0,
-          mileage: t.teamMileage ?? 0,
+          points: first.teamTotalPoint ?? 0,
+          mileage: first.teamMileage ?? 0,
+          solvedCount: first.teamSolvedCount ?? 0,
           avatarUrl: "/assets/profileSample.webp",
         });
-      })
-      .catch(() => setProfileError(true));
+      } catch {
+        setProfileError(true);
+      }
+    })();
   }, []);
 
-  // 2) 문제 (팀 단위로 바뀌더라도 표시 로직/배치는 그대로 유지)
+  // 2) 문제(팀단위 미구현 → 전면 주석)
+  /*
   useEffect(() => {
     if (MOCK) {
       const problems = Array.from({ length: 10 }).map((_, i) => ({
@@ -115,6 +126,7 @@ const MyPage = () => {
       .catch(() => setProblemsError(true))
       .finally(() => setProblemsLoading(false));
   }, []);
+  */
 
   // 3) 리더보드 SSE (teamName 기준으로 순위 반영)
   useEffect(() => {
@@ -188,12 +200,6 @@ const MyPage = () => {
     };
   }, []);
 
-  const manualRefresh = () => {
-    if (tickRef.current) clearInterval(tickRef.current);
-    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-    issueQR();
-  };
-
   const formatMMSS = (sec) => {
     const m = String(Math.floor(sec / 60)).padStart(2, "0");
     const s = String(sec % 60).padStart(2, "0");
@@ -248,6 +254,9 @@ const MyPage = () => {
                 <div className="profile-stats">
                   <span className="pill">Rank #{profile.rank}</span>
                   <span className="pill">{profile.points} pts</span>
+                  {/* 팀 솔브 카운트가 필요하면 아래 라인을 풀 것:
+                  <span className="pill">Solves {profile.solvedCount}</span>
+                  */}
                 </div>
 
                 <div className="mileage">
@@ -259,18 +268,15 @@ const MyPage = () => {
             </div>
           </div>
 
-          {/* 우측: 결제 QR 패널 */}
+          {/* 우측: 결제 QR 패널 (문구/버튼 없음) */}
           <aside className="profile-qr">
-            <div className="card-header">
-            </div>
-
             <div className="qr-body">
               <div className="qr-image">
                 {qrLoading ? (
                   <Loading />
                 ) : qrError ? (
                   <p className="error-message small">
-                    QR 발급에 실패했습니다. 재발급을 눌러주세요.
+                    QR 발급에 실패했습니다.
                   </p>
                 ) : qrData ? (
                   <QRCodeCanvas value={qrData} size={192} includeMargin />
@@ -291,7 +297,7 @@ const MyPage = () => {
         </div>
       </section>
 
-      {/* 문제 */}
+      {/* 🔒 문제 섹션 (팀단위 API 정리 전까지 주석 처리)
       <section className="problems card">
         <div className="card-header">
           <h3>Solved Problems</h3>
@@ -345,6 +351,7 @@ const MyPage = () => {
           )}
         </div>
       </section>
+      */}
 
       {leaderboardError && (
         <p className="error-message">리더보드 업데이트에 실패했습니다.</p>
