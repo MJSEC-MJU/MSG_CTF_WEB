@@ -24,8 +24,8 @@ import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 import ProblemDetailMock from './pages/ProblemDetailMock';
 
-const CONTEST_START_TIME = new Date("2025-03-29T01:00:00Z").getTime(); // UTC 기준
-const CONTEST_END_TIME = new Date("2025-03-29T13:00:00Z").getTime(); // 대회 종료 시간
+const CONTEST_START_TIME = new Date("2025-10-08T08:22:00Z").getTime(); // UTC 기준
+const CONTEST_END_TIME = new Date("2025-10-29T13:00:00Z").getTime(); // 대회 종료 시간
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
