@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
-const CONTEST_START_TIME = new Date("2025-03-29T01:00:00Z").getTime(); // UTC 기준
+const CONTEST_START_TIME = new Date("2025-10-08T08:22:00Z").getTime(); // UTC 기준
 
 function TimerPage() {
   const [timeLeft, setTimeLeft] = useState(CONTEST_START_TIME - Date.now());
@@ -72,11 +72,11 @@ function TimerPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h2 className="text-3xl font-bold" style={{ color: "white" }}>
+    <div className="flex flex-col items-center justify-center" style={{ transform: "translateY(120px)" }}>
+      <h2 className="text-3xl font-bold mb-4" style={{ color: "red" }}>
         대회 시작까지 남은 시간
       </h2>
-      <h1 className="text-2xl mt-4" style={{ color: "white" }}>
+      <h1 className="text-2xl mt-6" style={{ color: "black" }}>
         {formatTime(timeLeft)}
       </h1>
     </div>
