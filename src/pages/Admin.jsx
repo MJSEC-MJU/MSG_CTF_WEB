@@ -620,7 +620,7 @@ const handleCreateUser = async () => {
               </div>
               <div>
                 <label style={{ color: 'black' }}>URL</label>
-                <input type="url" name="url" value={formData.url} onChange={onProblemInput} required style={{ width: '100%', padding: 10, marginBottom: 10 }} />
+                <input type="url" name="url" value={formData.url} onChange={onProblemInput} style={{ width: '100%', padding: 10, marginBottom: 10 }} />
               </div>
               <div>
                 <label style={{ color: 'black' }}>CATEGORY</label>
