@@ -14,9 +14,7 @@ import Scoreboard from "./pages/Scoreboard";
 import Challenge from "./pages/Challenge";
 import ProblemDetail from "./pages/ProblemDetail";
 import MyPage from "./pages/MyPage";
-// import AdminLogin from "./pages/AdminLogin";
 import Login from "./pages/Login";
-// import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import AdminAuth from "./api/AdminAuth";
@@ -107,30 +105,28 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route
             path="/ranking"
-            element={<Ranking />}
-            // element={<PrivateRoute element={isLoggedIn ? <Ranking /> : <Navigate to="/login" />} />}
+            // element={<Ranking />}
+            element={<PrivateRoute element={isLoggedIn ? <Ranking /> : <Navigate to="/login" />} />}
           />
           <Route
             path="/scoreboard"
-            element={<Scoreboard />}
-            // element={<PrivateRoute element={isLoggedIn ? <Scoreboard /> : <Navigate to="/login" />} />}
+            // element={<Scoreboard />}
+            element={<PrivateRoute element={isLoggedIn ? <Scoreboard /> : <Navigate to="/login" />} />}
           />
           <Route
             path="/challenge"
-            element={<Challenge />}
-            // element={<PrivateRoute element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
+            // element={<Challenge />}
+            element={<PrivateRoute element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
           />
           <Route path="/problem/:id" element={<PrivateRoute element={<ProblemDetail />} />} />
           {/* 미리보기: /problem?mock 로 접속 (파라미터 없는 /problem 경로) */}
           <Route path="/problem" element={<ProblemDetailMock />} />
           <Route
             path="/myPage"
-            element={<MyPage />}
-            // element={<PrivateRoute element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />} />}
+            // element={<MyPage />}
+            element={<PrivateRoute element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />} />}
           />
-          {/* <Route path="/adminLogin" element={<AdminLogin />} /> */}
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          {/* <Route path="/signup" element={<Signup />} /> */}
           <Route
             path="/adminPage"
             element={
