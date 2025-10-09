@@ -462,6 +462,14 @@ const handleCreateUser = async () => {
             </thead>
             <tbody>
               {(Array.isArray(users) ? users : []).map((u) => {
+                const relatedMemberEmails = Array.from(
+                  new Set(
+                    (Array.isArray(teamRows) ? teamRows : [])
+                      .filter(r => r.memberEmail === u.email || r.userEmail === u.email)
+                      .map(r => r.memberEmail)
+                      .filter(Boolean)
+                  )
+                ).slice(0, 2);
                 const team = teamByMemberEmail.get(u.email) || null;
                 return (
                   <tr key={u.userId}>
@@ -472,7 +480,15 @@ const handleCreateUser = async () => {
                     <td style={cell}>{u.totalPoint}</td>
                     <td style={cell}>{u.univ}</td>
                     <td style={cell}>{team?.teamName ?? '-'}</td>
-                    <td style={cell}>{team?.memberEmail ?? '-'}</td>
+                    <td style={cell}>
+                      {relatedMemberEmails.length === 0 ? (
+                        '-' 
+                      ) : (
+                        relatedMemberEmails.map((em, i) => (
+                          <div key={i} style={{ lineHeight: 1.2 }}>{em}</div>
+                        ))
+                      )}
+                    </td>
                     <td style={cell}>{team?.teamMileage ?? 0}</td>
                     <td style={cell}>{team?.teamTotalPoint ?? 0}</td>
                     <td style={cell}>{team?.teamSolvedCount ?? 0}</td>
