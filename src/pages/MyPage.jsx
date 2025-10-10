@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchTeamProfileRows } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
 import { fetchPaymentQRToken } from "../api/PaymentAPI"; // 결제 QR 토큰 API
@@ -159,7 +159,7 @@ const MyPage = () => {
   }, [profile?.teamName]);
 
   // ===== QR 발급 =====
-  const issueQR = async () => {
+  const issueQR = useCallback(async () => {
     setQrLoading(true);
     setQrError(false);
     try {
@@ -186,7 +186,7 @@ const MyPage = () => {
         }, 1000);
 
         if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-        refreshTimerRef.current = setTimeout(issueQR, (leftSec + 0.5) * 1000);
+        refreshTimerRef.current = setTimeout(() => issueQR(), (leftSec + 0.5) * 1000);
       } else {
         // 실제 API 호출
         const data = await fetchPaymentQRToken();
@@ -216,7 +216,7 @@ const MyPage = () => {
 
         // 만료 시 자동 재발급
         if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-        refreshTimerRef.current = setTimeout(issueQR, (leftSec + 0.5) * 1000);
+        refreshTimerRef.current = setTimeout(() => issueQR(), (leftSec + 0.5) * 1000);
       }
     } catch (err) {
       console.error("QR 토큰 발급 실패:", err);
@@ -224,7 +224,7 @@ const MyPage = () => {
     } finally {
       setQrLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     issueQR();
@@ -232,7 +232,7 @@ const MyPage = () => {
       if (tickRef.current) clearInterval(tickRef.current);
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     };
-  }, []);
+  }, [issueQR]);
 
   const formatMMSS = (sec) => {
     const m = String(Math.floor(sec / 60)).padStart(2, "0");
