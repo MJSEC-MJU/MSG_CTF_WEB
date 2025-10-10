@@ -4,10 +4,12 @@ import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
 import { fetchAdminMembers, deleteUser as removeUser, updateUser, addUser } from '../api/AdminUserAPI';
 import { fetchTeamProfileRows, createTeam, addTeamMember } from '../api/TeamAPI';
 import { updateProblem } from '../api/ProblemUpdateAPI';
+import { useContestTime } from "../TimerComponents";
+import PaymentProcessor from '../components/PaymentProcessor';
 
 const Admin = () => {
   // ===== UI state =====
-  const [tab, setTab] = useState('users'); // 'users' | 'problems'
+  const [tab, setTab] = useState('users'); // 'users' | 'problems' | 'payment' | 'timer'
 
   // ===== Users & Teams =====
   const [users, setUsers] = useState([]);
@@ -32,6 +34,10 @@ const Admin = () => {
   const [showEditProblemForm, setShowEditProblemForm] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
 
+  // ===== Timer =====
+  const { setContestStartTime, setContestEndTime } = useContestTime();
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -66,7 +72,7 @@ const Admin = () => {
   // ===== Effects: initial data load =====
   useEffect(() => {
     (async () => {
-       const [m, p, t] = await Promise.allSettled([
+      const [m, p, t] = await Promise.allSettled([
         fetchAdminMembers(),
         fetchProblems(),
         fetchTeamProfileRows(),
@@ -135,59 +141,51 @@ const Admin = () => {
   };
 
   const onNewUserInput = (e) => {
-  const { name, value } = e.target;
-  setNewUser((prev) => ({ ...prev, [name]: value }));
-};
-
-const handleCreateUser = async () => {
-  // roles: 문자열 -> 배열 화
-  const rolesArr = newUser.roles
-    .split(',')
-    .map((r) => r.trim())
-    .filter(Boolean);
-
-  const payload = {
-    loginId: newUser.loginId.trim(),
-    password: newUser.password, // 빈 값 방지 검증은 최소한으로
-    email: newUser.email.trim(),
-    univ: newUser.univ.trim(),
-    roles: rolesArr.length ? rolesArr : ['user'],
+    const { name, value } = e.target;
+    setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  if (!payload.loginId || !payload.password || !payload.email || !payload.univ) {
-    alert('모든 입력을 채워주세요.');
-    return;
-  }
+  const handleCreateUser = async () => {
+    const rolesArr = newUser.roles
+      .split(',')
+      .map((r) => r.trim())
+      .filter(Boolean);
 
-  try {
-    const res = await addUser(payload);
-    if (res?.code === 'SUCCESS') {
-      // 서버가 생성된 유저 객체를 data나 본문으로 돌려준다고 가정
-      const created = res.data ?? res.user ?? null;
+    const payload = {
+      loginId: newUser.loginId.trim(),
+      password: newUser.password,
+      email: newUser.email.trim(),
+      univ: newUser.univ.trim(),
+      roles: rolesArr.length ? rolesArr : ['user'],
+    };
 
-      // 1) 반환 객체가 있으면 낙관적으로 리스트에 추가
-      if (created && created.userId) {
-        setUsers((prev) => (Array.isArray(prev) ? [...prev, created] : [created]));
-      } else {
-        // 2) 없다면 다시 조회해서 동기화
-        const refreshed = await fetchAdminMembers();
-        const usersList = Array.isArray(refreshed)
-          ? refreshed
-          : (Array.isArray(refreshed?.data) ? refreshed.data : []);
-        setUsers(usersList);
-      }
-
-      // 폼 초기화
-      setNewUser({ loginId: '', password: '', email: '', univ: '', roles: 'user' });
-      alert('신규 유저가 생성되었습니다.');
-    } else {
-      alert(res?.message || '생성 실패');
+    if (!payload.loginId || !payload.password || !payload.email || !payload.univ) {
+      alert('모든 입력을 채워주세요.');
+      return;
     }
-  } catch (e) {
-    alert('생성 요청 실패 (권한/중복/유효성 오류일 수 있습니다)');
-  }
-};
 
+    try {
+      const res = await addUser(payload);
+      if (res?.code === 'SUCCESS') {
+        const created = res.data ?? res.user ?? null;
+        if (created && created.userId) {
+          setUsers((prev) => (Array.isArray(prev) ? [...prev, created] : [created]));
+        } else {
+          const refreshed = await fetchAdminMembers();
+          const usersList = Array.isArray(refreshed)
+            ? refreshed
+            : (Array.isArray(refreshed?.data) ? refreshed.data : []);
+          setUsers(usersList);
+        }
+        setNewUser({ loginId: '', password: '', email: '', univ: '', roles: 'user' });
+        alert('신규 유저가 생성되었습니다.');
+      } else {
+        alert(res?.message || '생성 실패');
+      }
+    } catch (e) {
+      alert('생성 요청 실패 (권한/중복/유효성 오류일 수 있습니다)');
+    }
+  };
 
   // ===== Team tools =====
   const handleCreateTeam = async () => {
@@ -291,6 +289,13 @@ const handleCreateUser = async () => {
         <button onClick={() => setTab('problems')} style={{ marginLeft: 8 }}>
           Problem List
         </button>
+        <button onClick={() => setTab('payment')} style={{ marginLeft: 8 }}>
+          Payment
+        </button>
+        <button onClick={() => setTab('timer')} style={{ marginLeft: 8 }}>
+          Time Set
+        </button>
+
       </div>
 
       {/* ================= Users Tab ================= */}
@@ -338,6 +343,7 @@ const handleCreateUser = async () => {
               <button onClick={handleAddMember}>추가</button>
             </div>
           </div>
+
           {/* Create new user */}
           <div
             style={{
@@ -678,6 +684,54 @@ const handleCreateUser = async () => {
               ))}
             </tbody>
           </table>
+        </section>
+      )}
+
+      {/* ================= Payment Tab ================= */}
+      {tab === 'payment' && (
+        <section>
+          <PaymentProcessor />
+        </section>
+      )}
+
+      {/* ================= Timer Tab ================= */}
+      {tab === 'timer' && (
+        <section>
+          <h2 style={{ color: 'black' }}>Set Contest Time</h2>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+              padding: 12,
+              border: '1px solid #000',
+              borderRadius: 8,
+              marginBottom: 12,
+              background: '#fafafa',
+            }}
+          >
+            <div>
+              <h3 style={{ color: 'black', marginTop: 0 }}>시작 시간</h3>
+              <input
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <button onClick={handleSetStartTime}>시작 시간 설정</button>
+            </div>
+            <div>
+              <h3 style={{ color: 'black', marginTop: 0 }}>종료 시간</h3>
+              <input
+                type="datetime-local"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <button onClick={handleSetEndTime}>종료 시간 설정</button>
+            </div>
+          </div>
         </section>
       )}
     </div>
