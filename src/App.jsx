@@ -112,7 +112,7 @@ function App() {
   // }, []);
 
   // Private Route: 대회 시작 전에는 타이머 페이지로 이동, 종료 후 홈으로 이동 (adminPage 제외)
-  const PrivateRoute = ({ element }) => {
+  const PrivateRoute = ({ element, requireContestStarted = false }) => {
     const location = useLocation();
     const isAdminPage = location.pathname.startsWith("/adminPage");
 
@@ -120,7 +120,7 @@ function App() {
       return <Loading />;
     }
 
-    if (isContestEnded && !isAdminPage) {
+    if (isContestEnded && !isAdminPage && requireContestStarted) {
       if (!alertShown) {
         alert("대회가 종료되었습니다!");
         setAlertShown(true);
@@ -128,7 +128,7 @@ function App() {
       return <Navigate to="/" replace />;
     }
 
-    if (!isContestStarted) {
+    if (requireContestStarted && !isContestStarted) {
       if (!alertShown) {
         alert("대회 시간이 아닙니다!");
         setAlertShown(true);
@@ -159,7 +159,9 @@ function App() {
             <Route
               path="/challenge"
               // element={<Challenge />}
-              element={<PrivateRoute element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
+              element={<PrivateRoute 
+                requireContestStarted={true} // 챌린지 접근 제한
+                element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
             />
             <Route path="/problem/:id" element={<PrivateRoute element={<ProblemDetail />} />} />
             {/* 미리보기: /problem?mock 로 접속 (파라미터 없는 /problem 경로) */}
