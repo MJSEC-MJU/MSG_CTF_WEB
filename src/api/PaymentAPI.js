@@ -2,7 +2,7 @@ import { Axios } from "./Axios";
 
 /**
  * QR 발급용 토큰 생성 API 호출
- * GET /api/payment/qr-token
+ * POST /api/payment/qr-token
  * @returns {Promise<Object>} 결제 토큰 정보
  * {
  *   paymentTokenId: number,
@@ -14,7 +14,7 @@ import { Axios } from "./Axios";
  */
 export const fetchPaymentQRToken = async () => {
   try {
-    const response = await Axios.get("/payment/qr-token");
+    const response = await Axios.post("/payment/qr-token");
 
     if (response.data?.code === "SUCCESS" && response.data?.data) {
       return response.data.data;
