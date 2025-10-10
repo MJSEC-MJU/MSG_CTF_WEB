@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchTeamProfileRows } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
+import { fetchPaymentQRToken } from "../api/PaymentAPI"; // 결제 QR 토큰 API
 // import { fetchProblems } from "../api/ChallengeAllAPI"; // 🔒 팀단위 정리 전까지 미사용
 import Loading from "../components/Loading";
 import "./MyPage.css";
@@ -162,30 +163,63 @@ const MyPage = () => {
     setQrLoading(true);
     setQrError(false);
     try {
-      const payload = buildLocalQRPayload(300);
+      if (MOCK) {
+        // Mock 모드: 로컬 QR 생성
+        const payload = buildLocalQRPayload(300);
+        setQrData(payload.qrData);
+        setQrExpireAt(payload.expireAt);
 
-      setQrData(payload.qrData);
-      setQrExpireAt(payload.expireAt);
+        const now = new Date();
+        const expire = new Date(payload.expireAt);
+        const leftSec = Math.max(0, Math.floor((expire.getTime() - now.getTime()) / 1000));
+        setTimeLeft(leftSec);
 
-      const now = new Date();
-      const expire = new Date(payload.expireAt);
-      const leftSec = Math.max(0, Math.floor((expire.getTime() - now.getTime()) / 1000));
-      setTimeLeft(leftSec);
+        if (tickRef.current) clearInterval(tickRef.current);
+        tickRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              clearInterval(tickRef.current);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
 
-      if (tickRef.current) clearInterval(tickRef.current);
-      tickRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(tickRef.current);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+        if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = setTimeout(issueQR, (leftSec + 0.5) * 1000);
+      } else {
+        // 실제 API 호출
+        const data = await fetchPaymentQRToken();
 
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = setTimeout(issueQR, (leftSec + 0.5) * 1000);
-    } catch {
+        // QR 데이터 생성: pay+ctf://checkout?token={token}&exp={expiry}
+        const qrPayload = `pay+ctf://checkout?token=${data.token}&exp=${data.expiry}`;
+        setQrData(qrPayload);
+        setQrExpireAt(data.expiry);
+
+        // 남은 시간 계산
+        const now = new Date();
+        const expire = new Date(data.expiry);
+        const leftSec = Math.max(0, Math.floor((expire.getTime() - now.getTime()) / 1000));
+        setTimeLeft(leftSec);
+
+        // 카운트다운 타이머 시작
+        if (tickRef.current) clearInterval(tickRef.current);
+        tickRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              clearInterval(tickRef.current);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        // 만료 시 자동 재발급
+        if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = setTimeout(issueQR, (leftSec + 0.5) * 1000);
+      }
+    } catch (err) {
+      console.error("QR 토큰 발급 실패:", err);
       setQrError(true);
     } finally {
       setQrLoading(false);
