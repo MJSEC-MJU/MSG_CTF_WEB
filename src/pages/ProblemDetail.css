@@ -259,4 +259,92 @@
 button:hover {
   opacity: 1;
 }
+/* ====== 고정 레이아웃 세팅 (데이터 길이 무관) ====== */
 
+/* 히어로: 높이 고정, 제목 2줄 클램프 */
+.pd-hero {
+  height: 320px; /* 이미 있었지만 고정 강조 */
+}
+.pd-hero-title {
+  line-height: 1.25;
+  max-height: calc(1.25em * 2);          /* 2줄 높이 */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;                  /* 2줄로 자르기 */
+  text-overflow: ellipsis;
+}
+
+/* 메인 카드: 전체 높이 고정 + 설명 영역만 스크롤 */
+.pd-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 550px;                      /* 데스크톱 기준 고정 높이 */
+}
+
+/* 두 번째 섹션(설명)만 유동, 나머지는 고정 */
+.pd-main .pd-section:nth-of-type(2) {
+  flex: 1 1 auto;                         /* 설명 영역이 남는 높이를 차지 */
+  min-height: 240px;                      /* 너무 작아지지 않도록 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 설명 텍스트는 섹션 내부 높이를 꽉 채우고 넘치면 스크롤 */
+.pd-description {
+  flex: 1 1 auto;
+  overflow: auto;                         /* 길면 스크롤 */
+  padding-right: 4px;                     /* 스크롤바 겹침 방지 약간의 여백 */
+}
+
+/* 우측 사이드 패널: 높이 고정 + 내부 스크롤 */
+.pd-side {
+  align-self: start;
+  height: 270px;                          /* max-height -> height 로 고정 */
+  overflow: hidden;                       /* 컨테이너 자체는 고정 */
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* 플래그 입력 행이 한 줄 높이를 유지하도록 */
+.flag-submit {
+  flex: 0 0 auto;
+}
+.flag-submit input {
+  width: 500px;                           /* 이미 고정이지만 재확인 */
+  max-width: 100%;                        /* 모바일 수축 허용 */
+  white-space: nowrap;                    /* 한 줄 유지 */
+  overflow: hidden;
+  text-overflow: ellipsis;                /* 너무 길면 … 처리 */
+}
+
+/* Solvers 텍스트 등 메타도 한 줄 고정 */
+.pd-solved {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 버튼 높이·폭은 이미 고정. 브랜드 일관성 유지용 재확인 */
+.submit-btn,
+.back-btn,
+.download-btn {
+  min-width: 120px;
+  height: 55px;
+}
+
+/* 반응형: 태블릿/모바일에서 전체 높이를 약간 줄여 화면 적응 */
+@media (max-width: 1024px) {
+  .pd-main {
+    min-height: 560px;
+  }
+}
+@media (max-width: 640px) {
+  .pd-main {
+    min-height: 480px;
+  }
+  .flag-submit input {
+    width: 100%;
+  }
+}
