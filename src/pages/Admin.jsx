@@ -4,12 +4,11 @@ import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
 import { fetchAdminMembers, deleteUser as removeUser, updateUser, addUser } from '../api/AdminUserAPI';
 import { fetchTeamProfileRows, createTeam, addTeamMember } from '../api/TeamAPI';
 import { updateProblem } from '../api/ProblemUpdateAPI';
-import { useContestTime } from "../TimerComponents";
 import PaymentProcessor from '../components/PaymentProcessor';
 
 const Admin = () => {
   // ===== UI state =====
-  const [tab, setTab] = useState('users'); // 'users' | 'problems' | 'payment' | 'timer'
+  const [tab, setTab] = useState('users'); // 'users' | 'problems' | 'payment'
 
   // ===== Users & Teams =====
   const [users, setUsers] = useState([]);
@@ -34,10 +33,6 @@ const Admin = () => {
   const [showEditProblemForm, setShowEditProblemForm] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
 
-  // ===== Timer =====
-  const { setContestStartTime, setContestEndTime } = useContestTime();
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -292,10 +287,6 @@ const Admin = () => {
         <button onClick={() => setTab('payment')} style={{ marginLeft: 8 }}>
           Payment
         </button>
-        <button onClick={() => setTab('timer')} style={{ marginLeft: 8 }}>
-          Time Set
-        </button>
-
       </div>
 
       {/* ================= Users Tab ================= */}
@@ -691,47 +682,6 @@ const Admin = () => {
       {tab === 'payment' && (
         <section>
           <PaymentProcessor />
-        </section>
-      )}
-
-      {/* ================= Timer Tab ================= */}
-      {tab === 'timer' && (
-        <section>
-          <h2 style={{ color: 'black' }}>Set Contest Time</h2>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-              padding: 12,
-              border: '1px solid #000',
-              borderRadius: 8,
-              marginBottom: 12,
-              background: '#fafafa',
-            }}
-          >
-            <div>
-              <h3 style={{ color: 'black', marginTop: 0 }}>시작 시간</h3>
-              <input
-                type="datetime-local"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
-              />
-              <button onClick={handleSetStartTime}>시작 시간 설정</button>
-            </div>
-            <div>
-              <h3 style={{ color: 'black', marginTop: 0 }}>종료 시간</h3>
-              <input
-                type="datetime-local"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
-              />
-              <button onClick={handleSetEndTime}>종료 시간 설정</button>
-            </div>
-          </div>
         </section>
       )}
     </div>
