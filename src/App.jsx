@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -36,33 +36,20 @@ function App() {
   const { contestStartTime, contestEndTime } = useContestTime();
   const [isContestStarted, setIsContestStarted] = useState(null);
   const [isContestEnded, setIsContestEnded] = useState(false);
-  const [alertShown, setAlertShown] = useState(false); // alert 중복 방지
+  const alertRef = useRef({
+    contestNotStarted: false,
+    contestEnded: false,
+  }); // alert 중복 방지
 
-  // useEffect(() => {
-  //   if (!contestStartTime || !contestEndTime) return;
-
-  //   const syncTime = async () => {
-  //     const response = await fetch("https://worldtimeapi.org/api/timezone/Asia/Seoul");
-  //     const data = await response.json();
-  //     const now = new Date(data.datetime).getTime();
-
-  //     const start = new Date(contestStartTime).getTime();
-  //     const end = new Date(contestEndTime).getTime();
-
-  //     setIsContestStarted(now >= start);
-  //     setIsContestEnded(now >= end);
-  //   };
-
-  //   syncTime();
-  //   const interval = setInterval(syncTime, 10000);
-  //   return () => clearInterval(interval);
-  // }, [contestStartTime, contestEndTime]);
-
+  // 실제 서버
   useEffect(() => {
     if (!contestStartTime || !contestEndTime) return;
 
-    const syncTime = () => {
-      const now = Date.now();
+    const syncTime = async () => {
+      const response = await fetch("https://worldtimeapi.org/api/timezone/Asia/Seoul");
+      const data = await response.json();
+      const now = new Date(data.datetime).getTime();
+
       const start = new Date(contestStartTime).getTime();
       const end = new Date(contestEndTime).getTime();
 
@@ -71,9 +58,27 @@ function App() {
     };
 
     syncTime();
-    const interval = setInterval(syncTime, 1000); // 1초마다 확인
+    const interval = setInterval(syncTime, 10000);
     return () => clearInterval(interval);
   }, [contestStartTime, contestEndTime]);
+
+  // 로컬 테스트
+  // useEffect(() => {
+  //   if (!contestStartTime || !contestEndTime) return;
+
+  //   const syncTime = () => {
+  //     const now = Date.now();
+  //     const start = new Date(contestStartTime).getTime();
+  //     const end = new Date(contestEndTime).getTime();
+
+  //     setIsContestStarted(now >= start);
+  //     setIsContestEnded(now >= end);
+  //   };
+
+  //   syncTime();
+  //   const interval = setInterval(syncTime, 1000); // 1초마다 확인
+  //   return () => clearInterval(interval);
+  // }, [contestStartTime, contestEndTime]);
 
 
 
@@ -115,23 +120,24 @@ function App() {
   const PrivateRoute = ({ element, requireContestStarted = false }) => {
     const location = useLocation();
     const isAdminPage = location.pathname.startsWith("/adminPage");
+    const isMyPage = location.pathname.startsWith("/mypage");
 
     if (isContestStarted === null) {
       return <Loading />;
     }
 
     if (isContestEnded && !isAdminPage && requireContestStarted) {
-      if (!alertShown) {
+      if (!alertRef.current.contestEnded) {
         alert("대회가 종료되었습니다!");
-        setAlertShown(true);
+        alertRef.current.contestEnded = true;
       }
       return <Navigate to="/" replace />;
     }
 
-    if (requireContestStarted && !isContestStarted) {
-      if (!alertShown) {
+    if (!isContestStarted && !isMyPage) {
+      if (!alertRef.current.contestNotStarted) {
         alert("대회 시간이 아닙니다!");
-        setAlertShown(true);
+        alertRef.current.contestNotStarted = true;;
       }
       return <Navigate to="/timer" state={{ from: location.pathname }} />;
     }
