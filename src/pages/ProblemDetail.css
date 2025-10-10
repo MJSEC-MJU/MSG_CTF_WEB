@@ -10,7 +10,6 @@
   --gap: 24px;               /* 컬럼 간격 */
   --side-width: 320px;       /* 오른쪽 사이드 가로 */
   --main-width: calc(var(--page-width) - var(--side-width) - var(--gap));
-  scrollbar-gutter: stable both-edges;   /* 스크롤바로 인한 흔들림 방지(지원 브라우저) */
 }
 
 /* 페이지 배경/기본 색상 */
