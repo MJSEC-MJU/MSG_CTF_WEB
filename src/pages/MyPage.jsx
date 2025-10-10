@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchTeamProfileRows } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
-import { fetchPaymentQRToken } from "../api/PaymentAPI"; // 결제 QR 토큰 API
+import { fetchPaymentQRToken, buildPaymentQRString } from "../api/PaymentAPI"; // ✅ 결제 QR 토큰 + 스킴 빌더
 // import { fetchProblems } from "../api/ChallengeAllAPI"; // 🔒 팀단위 정리 전까지 미사용
 import Loading from "../components/Loading";
 import "./MyPage.css";
@@ -22,12 +22,30 @@ const uuidLike = () => {
     .join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10, 16).join("")}`;
 };
 
-// 🚨 실제 배포시 buildLocalQRPayload() 대신 백엔드 API 응답을 사용하세요.
-const buildLocalQRPayload = (lifetimeSec = 300) => {
+/**
+ * 내 loginId 추정:
+ * - ?loginId= 파라미터(테스트/개발 편의)
+ * - localStorage('loginId')
+ * 실제 배포에서는 백엔드가 fetchPaymentQRToken 응답에 loginId를 넣어주므로 그걸 우선 사용
+ */
+const resolveLoginIdFallback = () => {
+  const qs = new URLSearchParams(window.location.search);
+  const fromQuery = qs.get("loginId");
+  const fromStorage = localStorage.getItem("loginId");
+  return (fromQuery || fromStorage || "").trim();
+};
+
+// 🚨 실제 배포시 buildLocalQRPayload()는 Mock에서만 사용하세요.
+const buildLocalQRPayload = (lifetimeSec = 300, loginId = "mockUser") => {
   const now = new Date();
   const expire = new Date(now.getTime() + lifetimeSec * 1000);
   const token = uuidLike();
-  const qrData = `pay+ctf://checkout?token=${token}&exp=${expire.toISOString()}`;
+  // ✅ 통일된 스킴 생성기 사용 (loginId 포함)
+  const qrData = buildPaymentQRString({
+    token,
+    expiry: expire.toISOString(),
+    loginId,
+  });
   return { qrData, expireAt: expire.toISOString() };
 };
 
@@ -164,8 +182,9 @@ const MyPage = () => {
     setQrError(false);
     try {
       if (MOCK) {
-        // Mock 모드: 로컬 QR 생성
-        const payload = buildLocalQRPayload(300);
+        // Mock 모드: 로컬 QR 생성 (loginId 포함)
+        const fallbackLogin = resolveLoginIdFallback() || "mockUser";
+        const payload = buildLocalQRPayload(300, fallbackLogin);
         setQrData(payload.qrData);
         setQrExpireAt(payload.expireAt);
 
@@ -191,8 +210,18 @@ const MyPage = () => {
         // 실제 API 호출
         const data = await fetchPaymentQRToken();
 
-        // QR 데이터 생성: pay+ctf://checkout?token={token}&exp={expiry}
-        const qrPayload = `pay+ctf://checkout?token=${data.token}&exp=${data.expiry}`;
+        // ✅ loginId 우선순위: 서버 응답 → (개발 보조) 쿼리/로컬스토리지
+        const loginIdCandidate = data?.loginId ?? resolveLoginIdFallback();
+        const loginId = typeof loginIdCandidate === "string" ? loginIdCandidate.trim() : "";
+
+        // ✅ QR 데이터 생성: pay+ctf://checkout?token=...&exp=...&loginId=...
+        const qrPayload = buildPaymentQRString({
+          token: data.token,
+          expiry: data.expiry,
+          // loginId가 없으면 매개변수에서 생략됨(서버에서 토큰↔소유자 검증 권장)
+          loginId: loginId || undefined,
+        });
+
         setQrData(qrPayload);
         setQrExpireAt(data.expiry);
 
@@ -302,7 +331,7 @@ const MyPage = () => {
             </div>
           </div>
 
-          {/* 우측: 결제 QR 패널 (문구/버튼 없음) */}
+          {/* 우측: 결제 QR 패널 */}
           <aside className="profile-qr">
             <div className="qr-body">
               <div className="qr-image">
