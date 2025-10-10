@@ -1,3 +1,18 @@
+
+/* 전역: 패딩/보더를 폭에 포함 */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* 고정 폭 변수 */
+:root {
+  --page-width: 1200px;      /* 전체 가로 고정 폭 */
+  --gap: 24px;               /* 컬럼 간격 */
+  --side-width: 320px;       /* 오른쪽 사이드 가로 */
+  --main-width: calc(var(--page-width) - var(--side-width) - var(--gap));
+  scrollbar-gutter: stable both-edges;   /* 스크롤바로 인한 흔들림 방지(지원 브라우저) */
+}
+
 /* 페이지 배경/기본 색상 */
 .pd-page {
   min-height: 100vh;
@@ -5,18 +20,23 @@
   color: #111;
 }
 
-/* 히어로 */
+/* ===========================
+   히어로 (가로/세로 고정 + 오버레이)
+=========================== */
 .pd-hero {
   position: relative;
-  height: 320px;           /* 고정 높이 제거 */
-  overflow: hidden;       /* 필요시 유지 */
+  width: 100%;
+  max-width: var(--page-width);
+  height: 320px;
+  margin: 0 auto;            /* 중앙 정렬 */
+  overflow: hidden;
   --hero-y: 50%;
 }
 .pd-hero-img {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;                /* 크롭 허용 */
+  object-fit: cover;          /* 크롭 허용 */
   object-position: 50% var(--hero-y);
 }
 .pd-hero-overlay {
@@ -35,8 +55,8 @@
   right: 0;
   bottom: 0;
 
-  /* ✅ 1500 고정폭(데스크톱), 모바일에서는 줄어듦 */
-  width: min(1500px, 100%);
+  width: 100%;
+  max-width: var(--page-width);
   margin: 0 auto;
   padding: 0 24px 24px;
   text-align: left;
@@ -46,16 +66,19 @@
   gap: 8px;
   align-items: center;
 }
+
+/* 카테고리 뱃지: 확대 + 정확한 가운데 정렬 */
 .pd-hero-badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  height: 40px;
-  width: 100px;
-  padding: 0 33px;
+  justify-content: center;
+  width: 160px;               /* 가로 확대 */
+  height: 48px;               /* 세로 확대 */
+  padding: 0;
   border-radius: 9999px;
-  font-size: 15px;
-  font-weight: 600;  
-  text-align: center; 
+  font-size: 16px;            /* 글자 키움 */
+  font-weight: 700;
+  text-align: center;
   background: rgba(255, 255, 255, 0.85);
   color: #333;
 }
@@ -63,14 +86,24 @@
   background: #fef3c7;
   color: #92400e;
 }
+
 .pd-hero-title {
   margin-top: 8px;
   font-size: 32px;
   font-weight: 600;
   color: #fff;
+
+  /* 제목 2줄 클램프 */
+  line-height: 1.25;
+  max-height: calc(1.25em * 2);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
 }
 
-/* ✅ 히어로 별점 */
+/* 히어로 별점 */
 .pd-hero-stars {
   display: inline-flex;
   align-items: center;
@@ -96,26 +129,26 @@
   opacity: 0.9;
 }
 
-/* 컨테이너/그리드 */
+/* ===========================
+   컨테이너/그리드 (가로 고정)
+=========================== */
 .pd-container {
-  /* ✅ 1500 고정폭(데스크톱), 모바일에서는 줄어듦 */
-  width: min(1500px, 100%);
+  width: 100%;
+  max-width: var(--page-width);
   margin: 32px auto;
   padding: 0 24px 96px;
 }
 .pd-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-}
-@media (min-width: 768px) {
-  .pd-grid {
-    grid-template-columns: 2fr 1fr; /* 왼쪽 메인 : 오른쪽 사이드(작게) */
-  }
+  grid-template-columns: minmax(0, var(--main-width)) minmax(0, var(--side-width)); /* 고정 2컬럼 */
+  gap: var(--gap);
 }
 
-/* 카드 공통 */
+/* ===========================
+   카드 공통
+=========================== */
 .pd-card {
+  width: 100%;
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -136,16 +169,44 @@
 .pd-solved {
   font-size: 14px;
   color: #4b5563;
+
+  /* 한 줄 고정 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 본문 설명 */
+/* ===========================
+   본문 설명 (길어도 레이아웃 고정)
+=========================== */
 .pd-description {
   color: #374151;
   line-height: 1.6;
   white-space: pre-line;
+
+  /* 섹션 내부 높이 채우고 넘치면 스크롤 */
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-right: 4px; /* 스크롤바 여백 */
 }
 
-/* Link 버튼 (모던) */
+/* 메인 카드: 전체 높이 고정 + 설명 영역만 스크롤 */
+.pd-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 550px;      /* 데스크톱 기준 고정 높이 */
+}
+/* 두 번째 섹션(설명)만 유동, 나머지는 고정 */
+.pd-main .pd-section:nth-of-type(2) {
+  flex: 1 1 auto;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===========================
+   Link 버튼 (모던)
+=========================== */
 .link-btn-modern {
   display: inline-flex;
   align-items: center;
@@ -166,16 +227,21 @@
   background-color: #d14900;
   color: #fff;
 }
-
-/* ✅ 사이드에서 전체폭으로 보이게 */
+/* 사이드에서 전체폭으로 보이게 */
 .link-btn-modern.block {
   width: 100%;
 }
 
-/* 우측 사이드 패널(작게) */
+/* ===========================
+   우측 사이드 (가로/세로 고정 + 내부 스크롤)
+=========================== */
 .pd-side {
   align-self: start;
-  max-height: 260px;
+  width: var(--side-width);  /* 가로 고정 */
+  height: 270px;             /* 세로 고정 */
+  overflow: hidden;          /* 컨테이너 고정 */
+  display: flex;
+  flex-direction: column;
 }
 .pd-side-title {
   font-size: 16px;
@@ -194,8 +260,15 @@
 .link-btn-modern + .pd-download {
   margin-top: 12px;
 }
+/* 사이드 내부 내용이 길면 섹션에서 스크롤 */
+.pd-side .pd-section {
+  flex: 1 1 auto;
+  overflow: auto;
+}
 
-/* 다운로드 단일 버튼 */
+/* ===========================
+   다운로드 버튼
+=========================== */
 .pd-download {
   width: 100%;
   display: inline-flex;
@@ -212,19 +285,26 @@
   cursor: pointer;
 }
 
-
-/* 제출/뒤로가기/입력 스타일 */
+/* ===========================
+   제출/뒤로가기/입력 스타일
+=========================== */
 .flag-submit {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex: 0 0 auto;          /* 한 줄 영역 고정 */
 }
 .flag-submit input {
-  width: 500px;
+  width: 500px;            /* 가로 고정 */
+  max-width: 500px;
   padding: 20px;
   border-radius: 12px;
   border: 1px solid #ddd;
   font-size: 14px;
+
+  white-space: nowrap;     /* 한 줄 유지 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 길면 … */
 }
 .submit-btn,
 .back-btn,
@@ -259,4 +339,23 @@
 button:hover {
   opacity: 1;
 }
+
+/* ===========================
+   반응형 (선택 사항)
+   - “가로 고정” 요구와 상충하지 않도록 높이만 조정
+=========================== */
+@media (max-width: 1024px) {
+  .pd-main {
+    min-height: 560px;
+  }
+}
+@media (max-width: 640px) {
+  .pd-main {
+    min-height: 480px;
+  }
+  .flag-submit input {
+    width: 500px;  /* 가로 고정 유지 */
+  }
+}
+
 
