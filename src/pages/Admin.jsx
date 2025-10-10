@@ -4,6 +4,7 @@ import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
 import { fetchAdminMembers, deleteUser as removeUser, updateUser, addUser } from '../api/AdminUserAPI';
 import { fetchTeamProfileRows, createTeam, addTeamMember } from '../api/TeamAPI';
 import { updateProblem } from '../api/ProblemUpdateAPI';
+import { useContestTime } from "../TimerComponents";
 
 const Admin = () => {
   // ===== UI state =====
@@ -31,6 +32,12 @@ const Admin = () => {
   const [editingProblem, setEditingProblem] = useState(null);
   const [showEditProblemForm, setShowEditProblemForm] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
+
+  // ===== Timer =====
+  const { setContestStartTime, setContestEndTime } = useContestTime();
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+
 
   const [formData, setFormData] = useState({
     title: '',
@@ -268,6 +275,17 @@ const handleCreateUser = async () => {
     }
   };
 
+  // ===== Timer =====
+  const handleSetStartTime = () => {
+    setContestStartTime(startTime);
+    alert("시작 시간이 설정되었습니다!");
+  };
+
+  const handleSetEndTime = () => {
+    setContestEndTime(endTime);
+    alert("종료 시간이 설정되었습니다!");
+  };
+
   // ===== Shared form helpers =====
   const onUserInput = (e) => {
     const { name, value } = e.target;
@@ -282,6 +300,8 @@ const handleCreateUser = async () => {
 
   const onFile = (e) => setFormData((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
 
+
+
   return (
     <div style={{ padding: 16 }}>
       <h1 style={{ color: 'black' }}>Admin Page</h1>
@@ -290,6 +310,9 @@ const handleCreateUser = async () => {
         <button onClick={() => setTab('users')}>User List</button>
         <button onClick={() => setTab('problems')} style={{ marginLeft: 8 }}>
           Problem List
+        </button>
+        <button onClick={() => setTab('timer')} style={{ marginLeft: 8 }}>
+          Time Set
         </button>
       </div>
 
@@ -678,6 +701,48 @@ const handleCreateUser = async () => {
               ))}
             </tbody>
           </table>
+        </section>
+      )}
+
+      {/* ================= Timer Tab ================= */}
+      {tab === 'timer' && (
+        <section>
+          <h2 style={{ color: 'black' }}>Set Contest Time</h2>
+          
+          {/* Timer tools */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+              padding: 12,
+              border: '1px solid #000',
+              borderRadius: 8,
+              marginBottom: 12,
+              background: '#fafafa',
+            }}
+          >
+            <div>
+              <h3 style={{ color: 'black', marginTop: 0 }}>시작 시간</h3>
+              <input
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <button onClick={handleSetStartTime}>시작 시간 설정</button>
+                  </div>
+            <div>
+              <h3 style={{ color: 'black', marginTop: 0 }}>종료 시간</h3>
+              <input
+                type="datetime-local"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <button onClick={handleSetEndTime}>종료 시간 설정</button>
+            </div>
+          </div>
         </section>
       )}
     </div>
