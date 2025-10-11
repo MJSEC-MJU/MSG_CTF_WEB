@@ -1,7 +1,10 @@
+import { Axios } from './Axios';
+import Cookies from 'js-cookie';
+
 export async function fetchServerTime() {
   try {
     const token = Cookies.get("accessToken");  // 토큰 가져오기
-    const response = await Axios.get(`api/server-time`, {
+    const response = await Axios.get(`/server-time`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
