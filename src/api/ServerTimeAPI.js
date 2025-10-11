@@ -2,7 +2,7 @@ import { Axios } from "./Axios";
 
 export async function fetchServerTime() {
   try {
-    const { data } = await Axios.get(`/server-time`);
+    const { data } = await fetch(`/server-time`);
     return data;
   } catch (e) {
     console.error('[ServerTimeAPI] fetchServerTime failed:', e);
