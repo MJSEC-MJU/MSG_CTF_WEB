@@ -22,6 +22,7 @@ import Loading from "./components/Loading";
 import TimerPage from "./pages/TimerPage";
 import ProblemDetailMock from './pages/ProblemDetailMock';
 import { useContestTime } from "./TimerComponents";
+import { fetchServerTime } from "./api/ServerTimeAPI";
 
 
 // const CONTEST_START_TIME = new Date("2025-10-08T08:22:00Z").getTime(); // UTC 기준
@@ -42,25 +43,38 @@ function App() {
   }); // alert 중복 방지
 
   // 실제 서버
-  useEffect(() => {
-    if (!contestStartTime || !contestEndTime) return;
+useEffect(() => {
+  if (!contestStartTime || !contestEndTime) return;
 
-    const syncTime = async () => {
-      const response = await fetch("https://worldtimeapi.org/api/timezone/Asia/Seoul");
-      const data = await response.json();
-      const now = new Date(data.datetime).getTime();
+  const syncTime = async () => {
+    try {
+      const data = await fetchServerTime();
+
+      // ✅ 서버 반환 구조: { serverTime: "2025-10-11T23:15:42.123" }
+      // LocalDateTime은 timezone 정보가 없으므로 서버가 KST라면 그대로 사용 가능
+      const now = new Date(data.serverTime).getTime();
 
       const start = new Date(contestStartTime).getTime();
       const end = new Date(contestEndTime).getTime();
 
       setIsContestStarted(now >= start);
       setIsContestEnded(now >= end);
-    };
+    } catch (e) {
+      console.error("[App] 서버 시간 동기화 실패, 로컬 시간 사용:", e);
 
-    syncTime();
-    const interval = setInterval(syncTime, 10000);
-    return () => clearInterval(interval);
-  }, [contestStartTime, contestEndTime]);
+      const now = Date.now();
+      const start = new Date(contestStartTime).getTime();
+      const end = new Date(contestEndTime).getTime();
+
+      setIsContestStarted(now >= start);
+      setIsContestEnded(now >= end);
+    }
+  };
+
+  syncTime();
+  const interval = setInterval(syncTime, 10000);
+  return () => clearInterval(interval);
+}, [contestStartTime, contestEndTime]);
 
   // 로컬 테스트
   // useEffect(() => {
