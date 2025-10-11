@@ -1,5 +1,3 @@
-import { Axios } from "./Axios";
-
 export async function fetchServerTime() {
   try {
     const { data } = await fetch(`/server-time`);
