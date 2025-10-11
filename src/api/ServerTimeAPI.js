@@ -1,6 +1,6 @@
 export async function fetchServerTime() {
   try {
-    const { data } = await fetch(`/server-time`);
+    const { data } = await fetch(`/api/server-time`);
     console.log(data);
     return data;
   } catch (e) {
