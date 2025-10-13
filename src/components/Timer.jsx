@@ -1,76 +1,85 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
-import { fetchContestTime } from "../api/ContestTimeAPI";
+// src/components/Timer.jsx (기존 ContestTimeProvider 대체)
+import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { fetchContestTime } from '../api/ContestTimeAPI';
 
-const ContestTimeContext = createContext();
-
-// 서버에서 시간을 가져오는 간격 (5분)
-const REFRESH_INTERVAL = 5 * 60 * 1000;
+const ContestTimeContext = createContext(null);
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5분
 
 export function ContestTimeProvider({ children }) {
-  const [contestStartTime, setContestStartTime] = useState("");
-  const [contestEndTime, setContestEndTime] = useState("");
+  const [startMs, setStartMs] = useState(null);
+  const [endMs, setEndMs] = useState(null);
+  const [skewMs, setSkewMs] = useState(0); // serverNow = Date.now() + skewMs
   const [isLoading, setIsLoading] = useState(true);
-  const intervalRef = useRef(null);
 
-  // 서버에서 대회 시간 가져오기
-  const loadContestTime = useCallback(async () => {
+  const refreshTimer = useRef(null);
+  const tickTimer = useRef(null);
+
+  const load = useCallback(async () => {
     try {
       const data = await fetchContestTime();
-      if (data?.startTime) setContestStartTime(data.startTime);
-      if (data?.endTime) setContestEndTime(data.endTime);
-      // currentServerTime은 state로 관리하지 않음 (불필요한 리렌더링 방지)
-      return data; // 필요한 곳에서 직접 사용
-    } catch (e) {
-      console.warn('[Timer] Failed to fetch contest time from server:', e);
-      return null;
+      // "yyyy-MM-dd HH:mm:ss" → ISO
+      const parse = (s) => Date.parse(s.includes(' ') ? s.replace(' ', 'T') : s);
+
+      const s = parse(data.startTime);
+      const e = parse(data.endTime);
+      const nowServer = parse(data.currentTime);
+
+      if (!Number.isNaN(s)) setStartMs(s);
+      if (!Number.isNaN(e)) setEndMs(e);
+
+      // 서버-클라이언트 시각차 보정
+      const clientNow = Date.now();
+      if (!Number.isNaN(nowServer)) setSkewMs(nowServer - clientNow);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  // 초기 로드 및 주기적 갱신
   useEffect(() => {
-    // 초기 로드
-    (async () => {
-      await loadContestTime();
-      setIsLoading(false);
-    })();
+    // 최초 로드
+    load();
 
-    // 주기적으로 서버에서 시간 갱신 (5분마다)
-    intervalRef.current = setInterval(() => {
-      loadContestTime();
-    }, REFRESH_INTERVAL);
+    // 5분마다 서버와 동기화 (한 곳에서만)
+    refreshTimer.current = setInterval(load, REFRESH_INTERVAL);
 
-    // Cleanup
+    // 초당 1회 틱 → UI만 갱신(네트워크 호출 아님)
+    tickTimer.current = setInterval(() => {
+      // 아무 것도 안 해도 상태가 필요하면 useState로 더미 tick 해도 됨.
+      // 여기선 소비측이 serverNow()를 매 렌더마다 계산하게 두고,
+      // 1초 틱으로 강제 리렌더를 유도하려면 아래처럼:
+      setSkewMs((v) => v); // no-op set → 리렌더 유도 (가볍게 유지)
+    }, 1000);
+
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      clearInterval(refreshTimer.current);
+      clearInterval(tickTimer.current);
     };
-  }, [loadContestTime]);
+  }, [load]);
 
-  // 관리자가 시간을 수동으로 변경할 때 사용 (즉시 반영 및 다시 로드)
-  const setContestStartTimeManual = useCallback((time) => {
-    setContestStartTime(time);
-    // 서버 업데이트 후 다시 로드
-    setTimeout(() => loadContestTime(), 1000);
-  }, [loadContestTime]);
+  const serverNow = useCallback(() => Date.now() + skewMs, [skewMs]);
 
-  const setContestEndTimeManual = useCallback((time) => {
-    setContestEndTime(time);
-    // 서버 업데이트 후 다시 로드
-    setTimeout(() => loadContestTime(), 1000);
-  }, [loadContestTime]);
+  const isContestStarted = useMemo(() => {
+    if (startMs == null) return null;
+    return serverNow() >= startMs;
+  }, [startMs, serverNow]);
+
+  const isContestEnded = useMemo(() => {
+    if (endMs == null) return false;
+    return serverNow() >= endMs;
+  }, [endMs, serverNow]);
+
+  const value = useMemo(() => ({
+    contestStartTime: startMs,      // ms
+    contestEndTime: endMs,          // ms
+    isContestStarted,               // boolean | null (초기 null)
+    isContestEnded,                 // boolean
+    serverNow,                      // () => ms
+    refreshContestTime: load,
+    isLoading,
+  }), [startMs, endMs, isContestStarted, isContestEnded, serverNow, load, isLoading]);
 
   return (
-    <ContestTimeContext.Provider
-      value={{
-        contestStartTime,
-        contestEndTime,
-        setContestStartTime: setContestStartTimeManual,
-        setContestEndTime: setContestEndTimeManual,
-        isLoading,
-        refreshContestTime: loadContestTime, // 수동 갱신용
-      }}
-    >
+    <ContestTimeContext.Provider value={value}>
       {children}
     </ContestTimeContext.Provider>
   );
