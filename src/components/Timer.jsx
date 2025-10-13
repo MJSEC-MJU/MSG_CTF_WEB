@@ -1,28 +1,76 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import { fetchContestTime } from "../api/ContestTimeAPI";
 
 const ContestTimeContext = createContext();
 
-export function ContestTimeProvider({ children }) {
-  const [contestStartTime, setContestStartTime] = useState(() => {
-    return localStorage.getItem("contestStartTime") || "";
-  });
-  const [contestEndTime, setContestEndTime] = useState(() => {
-    return localStorage.getItem("contestEndTime") || "";
-  });
+// 서버에서 시간을 가져오는 간격 (5분)
+const REFRESH_INTERVAL = 5 * 60 * 1000;
 
-  // localStorage에 자동 저장
+export function ContestTimeProvider({ children }) {
+  const [contestStartTime, setContestStartTime] = useState("");
+  const [contestEndTime, setContestEndTime] = useState("");
+  const [currentServerTime, setCurrentServerTime] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const intervalRef = useRef(null);
+
+  // 서버에서 대회 시간 가져오기
+  const loadContestTime = useCallback(async () => {
+    try {
+      const data = await fetchContestTime();
+      if (data?.startTime) setContestStartTime(data.startTime);
+      if (data?.endTime) setContestEndTime(data.endTime);
+      if (data?.currentTime) setCurrentServerTime(data.currentTime);
+      return true;
+    } catch (e) {
+      console.warn('[Timer] Failed to fetch contest time from server:', e);
+      return false;
+    }
+  }, []);
+
+  // 초기 로드 및 주기적 갱신
   useEffect(() => {
-    if (contestStartTime) localStorage.setItem("contestStartTime", contestStartTime);
-    if (contestEndTime) localStorage.setItem("contestEndTime", contestEndTime);
-  }, [contestStartTime, contestEndTime]);
+    // 초기 로드
+    (async () => {
+      await loadContestTime();
+      setIsLoading(false);
+    })();
+
+    // 주기적으로 서버에서 시간 갱신 (5분마다)
+    intervalRef.current = setInterval(() => {
+      loadContestTime();
+    }, REFRESH_INTERVAL);
+
+    // Cleanup
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [loadContestTime]);
+
+  // 관리자가 시간을 수동으로 변경할 때 사용 (즉시 반영 및 다시 로드)
+  const setContestStartTimeManual = useCallback((time) => {
+    setContestStartTime(time);
+    // 서버 업데이트 후 다시 로드
+    setTimeout(() => loadContestTime(), 1000);
+  }, [loadContestTime]);
+
+  const setContestEndTimeManual = useCallback((time) => {
+    setContestEndTime(time);
+    // 서버 업데이트 후 다시 로드
+    setTimeout(() => loadContestTime(), 1000);
+  }, [loadContestTime]);
 
   return (
     <ContestTimeContext.Provider
       value={{
         contestStartTime,
         contestEndTime,
-        setContestStartTime,
-        setContestEndTime,
+        currentServerTime,
+        setContestStartTime: setContestStartTimeManual,
+        setContestEndTime: setContestEndTimeManual,
+        isLoading,
+        refreshContestTime: loadContestTime, // 수동 갱신용
       }}
     >
       {children}
