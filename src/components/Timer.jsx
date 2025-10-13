@@ -9,7 +9,6 @@ const REFRESH_INTERVAL = 5 * 60 * 1000;
 export function ContestTimeProvider({ children }) {
   const [contestStartTime, setContestStartTime] = useState("");
   const [contestEndTime, setContestEndTime] = useState("");
-  const [currentServerTime, setCurrentServerTime] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const intervalRef = useRef(null);
 
@@ -19,11 +18,11 @@ export function ContestTimeProvider({ children }) {
       const data = await fetchContestTime();
       if (data?.startTime) setContestStartTime(data.startTime);
       if (data?.endTime) setContestEndTime(data.endTime);
-      if (data?.currentTime) setCurrentServerTime(data.currentTime);
-      return true;
+      // currentServerTime은 state로 관리하지 않음 (불필요한 리렌더링 방지)
+      return data; // 필요한 곳에서 직접 사용
     } catch (e) {
       console.warn('[Timer] Failed to fetch contest time from server:', e);
-      return false;
+      return null;
     }
   }, []);
 
@@ -66,7 +65,6 @@ export function ContestTimeProvider({ children }) {
       value={{
         contestStartTime,
         contestEndTime,
-        currentServerTime,
         setContestStartTime: setContestStartTimeManual,
         setContestEndTime: setContestEndTimeManual,
         isLoading,
