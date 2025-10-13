@@ -225,10 +225,28 @@ const MyPage = () => {
         setQrData(qrPayload);
         setQrExpireAt(data.expiry);
 
-        // 남은 시간 계산
-        const now = new Date();
-        const expire = new Date(data.expiry);
-        const leftSec = Math.max(0, Math.floor((expire.getTime() - now.getTime()) / 1000));
+        // 남은 시간 계산 (서버 시간 기준)
+        // createdAt은 서버의 현재 시간, expiry는 만료 시간
+        const createdAtStr = typeof data.createdAt === 'string' && data.createdAt.includes(' ')
+          ? data.createdAt.replace(' ', 'T')
+          : data.createdAt;
+        const expiryStr = typeof data.expiry === 'string' && data.expiry.includes(' ')
+          ? data.expiry.replace(' ', 'T')
+          : data.expiry;
+
+        const serverNow = new Date(createdAtStr);
+        const expire = new Date(expiryStr);
+
+        // 유효하지 않은 날짜인 경우 기본값 5분 사용
+        let leftSec;
+        if (isNaN(serverNow.getTime()) || isNaN(expire.getTime())) {
+          console.warn('[MyPage] Invalid date format, using 5 minutes default');
+          leftSec = 300; // 5분
+        } else {
+          leftSec = Math.max(0, Math.floor((expire.getTime() - serverNow.getTime()) / 1000));
+        }
+
+        console.log('[MyPage] Server time:', createdAtStr, 'Expiry:', expiryStr, 'Time left:', leftSec, 'seconds');
         setTimeLeft(leftSec);
 
         // 카운트다운 타이머 시작
@@ -243,9 +261,13 @@ const MyPage = () => {
           });
         }, 1000);
 
-        // 만료 시 자동 재발급
+        // 만료 시 자동 재발급 (최소 10초 이상일 때만)
         if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-        refreshTimerRef.current = setTimeout(() => issueQR(), (leftSec + 0.5) * 1000);
+        if (leftSec > 10) {
+          refreshTimerRef.current = setTimeout(() => issueQR(), (leftSec + 0.5) * 1000);
+        } else {
+          console.warn('[MyPage] QR expiry time too short, not scheduling auto-refresh');
+        }
       }
     } catch (err) {
       console.error("QR 토큰 발급 실패:", err);
@@ -261,7 +283,8 @@ const MyPage = () => {
       if (tickRef.current) clearInterval(tickRef.current);
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     };
-  }, [issueQR]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 초기 마운트 시 한 번만 실행
 
   const formatMMSS = (sec) => {
     const m = String(Math.floor(sec / 60)).padStart(2, "0");
