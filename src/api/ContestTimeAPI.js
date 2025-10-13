@@ -1,59 +1,18 @@
-// src/api/ContestTimeAPI.js
-import axios from 'axios';
+import { Axios } from './Axios';
 
-const BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
-
-/**
- * 대회 시간 조회 (공개 API)
- * GET /api/contest-time
- * @returns {Promise<{startTime: string, endTime: string, currentTime: string}>}
- */
+/** 대회 시간 조회 (공개) */
 export async function fetchContestTime() {
-  try {
-    const res = await axios.get(`${BASE}/api/contest-time`, {
-      withCredentials: false,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      timeout: 8000,
-    });
-    return res.data;
-  } catch (e) {
-    console.error('[ContestTimeAPI] fetchContestTime failed:', e);
-    throw e;
-  }
+  const { data } = await Axios.get('/contest-time'); // baseURL이 /api
+  return data;
 }
 
-/**
- * 대회 시간 설정 (관리자 전용)
- * PUT /api/admin/contest-time
- * @param {string} startTime - 대회 시작 시간 (yyyy-MM-dd HH:mm:ss)
- * @param {string} endTime - 대회 종료 시간 (yyyy-MM-dd HH:mm:ss)
- * @returns {Promise<{message: string, data: object}>}
- */
+/** 대회 시간 설정 (관리자 전용) */
 export async function updateContestTime(startTime, endTime) {
-  try {
-    const token = localStorage.getItem('accessToken');
-
-    const res = await axios.put(
-      `${BASE}/api/admin/contest-time`,
-      {
-        startTime,
-        endTime,
-      },
-      {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        timeout: 8000,
-      }
-    );
-    return res.data;
-  } catch (e) {
-    console.error('[ContestTimeAPI] updateContestTime failed:', e);
-    throw e;
-  }
+  // 헤더 인증 흐름을 쓰므로 별도 Authorization 설정 금지(인터셉터가 처리)
+  // 날짜 포맷은 서버 기대값에 맞춰 주세요:
+  // - ISO 권장: '2025-10-14T01:29:00'
+  // - 공백 포맷을 계속 쓸 경우: 서버 DTO에 @JsonFormat("yyyy-MM-dd HH:mm:ss") 필요
+  const payload = { startTime, endTime };
+  const { data } = await Axios.put('/admin/contest-time', payload);
+  return data;
 }
