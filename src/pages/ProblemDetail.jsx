@@ -123,7 +123,7 @@ const ProblemDetail = () => {
             <div className="pd-section flag-submit">
               {isCorrect ? (
                 <div className="pd-label success" role="status" aria-live="polite">
-                  풀은 문제입니다
+                  이미 제출한 플래그입니다.
                 </div>
               ) : (
                 <>

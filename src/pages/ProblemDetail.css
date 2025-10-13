@@ -291,7 +291,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  flex: 0 0 auto;          /* 한 줄 영역 고정 */
+  flex-wrap: wrap;
 }
 .flag-submit input {
   width: 500px;            /* 가로 고정 */
@@ -340,14 +340,11 @@ button:hover {
 }
 /* ===== 제출 결과 라벨 ===== */
 .pd-label {
-  margin-top: 10px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  width: 100%;                 /* ✅ 한 줄 전체 차지 */
+  display: inline-flex;        /* 기존 유지 */
+  justify-content: center;     /* ✅ 수평 가운데 */
+  text-align: center;          /* 텍스트도 가운데 */
+  margin-top: 10px;            /* 버튼/입력칸과 간격 */
 }
 
 .pd-label.success {
