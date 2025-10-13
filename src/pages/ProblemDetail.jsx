@@ -15,6 +15,9 @@ const ProblemDetail = () => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 새로 추가: 제출 피드백 상태 ('idle' | 'wrong')
+  const [submitStatus, setSubmitStatus] = useState('idle');
+
   useEffect(() => {
     const loadProblem = async () => {
       try {
@@ -42,18 +45,22 @@ const ProblemDetail = () => {
     setIsSubmitting(true);
     setTimeout(() => setIsSubmitting(false), 1000);
 
+    // 제출 전에 이전 오류 라벨 초기화
+    setSubmitStatus('idle');
+
     const result = await submitFlag(id, flag);
 
     if (result.data === 'Correct') {
-      alert('정답입니다!');
+      // 정답: 입력칸 대신 초록 라벨
       setIsCorrect(true);
-      localStorage.setItem(`isCorrect-${id}`, 'true'); // 정답 상태 저장
+      localStorage.setItem(`isCorrect-${id}`, 'true');
     } else if (result.data === 'Wrong') {
-      alert('오답입니다. 다시 시도해보세요!');
+      // 오답: 입력칸 아래 빨간 라벨
+      setSubmitStatus('wrong');
     } else if (result.data === 'Submitted') {
-      alert('이미 정답을 제출했습니다!');
+      // 이미 정답 제출: 입력칸 대신 초록 라벨
       setIsCorrect(true);
-      localStorage.setItem(`isCorrect-${id}`, 'true'); // 정답 상태 저장
+      localStorage.setItem(`isCorrect-${id}`, 'true');
     } else if (result.data === 'Wait') {
       alert('30초 동안 제출할 수 없습니다!');
     } else if (result.error) {
@@ -66,7 +73,6 @@ const ProblemDetail = () => {
 
   const heroImage = '/assets/hamburger.png'; //나중에 카테고리별로
 
-  // 별점(0~5 정수)을 표시하고 싶다면 problem.difficulty 사용 (없으면 표시 안 함)
   const diffNum = (() => {
     const n = Math.round(Number(problem?.difficulty));
     return Number.isFinite(n) ? Math.max(0, Math.min(5, n)) : null;
@@ -103,7 +109,7 @@ const ProblemDetail = () => {
       {/* 본문: 좌측 메인 / 우측 사이드 */}
       <div className="pd-container">
         <div className="pd-grid">
-          {/* 좌측: 설명 + (Link 자리 → 플래그 제출) + 뒤로가기 */}
+          {/* 좌측: 설명 + 플래그 제출/라벨 + 뒤로가기 */}
           <section className="pd-card pd-main">
             <div className="pd-section pd-main-header">
               <div className="pd-solved">{problem.solvers}명이 해결함</div>
@@ -113,25 +119,39 @@ const ProblemDetail = () => {
               <p className="pd-description">{problem.description}</p>
             </div>
 
-            {/* ✅ Link 버튼 있던 자리에 플래그 입력/제출 배치 (기존 로직 그대로) */}
-            {!isCorrect && (
-              <div className="pd-section flag-submit">
-                <input
-                  type="text"
-                  placeholder="FLAG 입력"
-                  value={flag}
-                  onChange={(e) => setFlag(e.target.value)}
-                />
-                <button
-                  className="submit-btn"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
-                >
-                  <b>제출</b>
-                </button>
-              </div>
-            )}
+            {/* 제출 영역 */}
+            <div className="pd-section flag-submit">
+              {isCorrect ? (
+                <div className="pd-label success" role="status" aria-live="polite">
+                  풀은 문제입니다
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    placeholder="FLAG 입력"
+                    value={flag}
+                    onChange={(e) => {
+                      setFlag(e.target.value);
+                      if (submitStatus !== 'idle') setSubmitStatus('idle'); // 타이핑 시작하면 오류 라벨 숨김
+                    }}
+                  />
+                  <button
+                    className="submit-btn"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                  >
+                    <b>제출</b>
+                  </button>
+                  {submitStatus === 'wrong' && (
+                    <div className="pd-label error" role="alert" aria-live="assertive">
+                      오답입니다.
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
 
             <div className="pd-section">
               <button className="back-btn" onClick={() => navigate(-1)}>
@@ -140,7 +160,7 @@ const ProblemDetail = () => {
             </div>
           </section>
 
-          {/* 우측: 제출 제한 + 파일 다운로드(단일 버튼) + ✅ Link 버튼 이동 */}
+          {/* 우측: 제출 제한 + 파일 다운로드 + 링크 */}
           <aside className="pd-card pd-side">
             <div className="pd-section">
               <h3 className="pd-side-title">추가 정보</h3>
@@ -149,7 +169,6 @@ const ProblemDetail = () => {
                 <div className="pd-info-value">30초 쿨다운</div>
               </div>
 
-              {/* Link 버튼: 사이드에 배치 */}
               {problem?.url && (
                 <a
                   href={problem.url}
@@ -161,19 +180,12 @@ const ProblemDetail = () => {
                 </a>
               )}
 
-              {/* 파일 다운로드 버튼 */}
               <button
                 className="download-btn pd-download"
                 onClick={() => downloadFile(id)}
                 aria-label="파일 다운로드"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path d="M3 14.5A1.5 1.5 0 0 0 4.5 16h11a1.5 1.5 0 0 0 1.5-1.5V12h-2v2h-10v-2H3v2.5zM10 3a1 1 0 0 1 1 1v6.586l1.293-1.293 1.414 1.414L10 14.414 6.293 10.707l1.414-1.414L9 10.586V4a 1 1 0 0 1 1-1z" />
                 </svg>
                 파일 다운로드
@@ -187,6 +199,7 @@ const ProblemDetail = () => {
 };
 
 export default ProblemDetail;
+
 
 
 
