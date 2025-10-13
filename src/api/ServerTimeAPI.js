@@ -10,8 +10,10 @@ export async function fetchServerTime() {
       withCredentials: false,
       headers: {
         Accept: 'application/json',
+        'Cache-Control': 'no-cache',
       },
       timeout: 8000,
+      transitional: { silentJSONParsing: false },
     });
     // 컨트롤러 구조: { serverTime: "2025-10-12T02:34:56.789" }
     return res.data; // 필요하면 res.data.serverTime만 반환해도 됨
