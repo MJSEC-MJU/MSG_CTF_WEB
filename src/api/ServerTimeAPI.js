@@ -10,6 +10,7 @@ export async function fetchServerTime() {
       withCredentials: false,
       headers: {
         Accept: 'application/json',
+        Origin: 'https://msgctf.kr',
         'Cache-Control': 'no-cache',
       },
       timeout: 8000,
