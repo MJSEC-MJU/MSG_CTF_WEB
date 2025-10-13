@@ -209,15 +209,15 @@ const MyPage = () => {
       } else {
         // 실제 API 호출
         const data = await fetchPaymentQRToken();
-
+        const box = data?.data ?? data;
         // ✅ loginId 우선순위: 서버 응답 → (개발 보조) 쿼리/로컬스토리지
         const loginIdCandidate = data?.loginId ?? resolveLoginIdFallback();
         const loginId = typeof loginIdCandidate === "string" ? loginIdCandidate.trim() : "";
 
         // ✅ QR 데이터 생성: pay+ctf://checkout?token=...&exp=...&loginId=...
         const qrPayload = buildPaymentQRString({
-          token: data.token,
-          expiry: data.expiry,
+          token: box.token,
+          expiry: box.expiry,
           // loginId가 없으면 매개변수에서 생략됨(서버에서 토큰↔소유자 검증 권장)
           loginId: loginId || undefined,
         });
@@ -227,7 +227,7 @@ const MyPage = () => {
 
         // 남은 시간 계산
         const now = new Date();
-        const expire = new Date(data.expiry);
+        const expire = new Date(box.expiry);
         const leftSec = Math.max(0, Math.floor((expire.getTime() - now.getTime()) / 1000));
         setTimeLeft(leftSec);
 
