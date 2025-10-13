@@ -6,6 +6,7 @@ import { fetchTeamProfileRows, createTeam, addTeamMember } from '../api/TeamAPI'
 import { updateProblem } from '../api/ProblemUpdateAPI';
 import PaymentProcessor from '../components/PaymentProcessor';
 import { useContestTime } from "../components/Timer";
+import { fetchContestTime, updateContestTime } from '../api/ContestTimeAPI';
 
 const Admin = () => {
   // ===== UI state =====
@@ -29,9 +30,10 @@ const Admin = () => {
   const [memberEmailToAdd, setMemberEmailToAdd] = useState('');
 
   // ===== Timer =====
-  const { setContestStartTime, setContestEndTime } = useContestTime();
+  const { refreshContestTime } = useContestTime();
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [currentServerTime, setCurrentServerTime] = useState('');
 
   // ===== Problems =====
   const [problems, setProblems] = useState([]);
@@ -73,10 +75,11 @@ const Admin = () => {
   // ===== Effects: initial data load =====
   useEffect(() => {
     (async () => {
-      const [m, p, t] = await Promise.allSettled([
+      const [m, p, t, ct] = await Promise.allSettled([
         fetchAdminMembers(),
         fetchProblems(),
         fetchTeamProfileRows(),
+        fetchContestTime(),
       ]);
 
       if (m.status === 'fulfilled') {
@@ -102,6 +105,15 @@ const Admin = () => {
       } else {
         console.error('[Admin] fetchTeamProfileRows failed:', t.reason);
         setTeamRows([]); // 실패해도 비워두고 진행
+      }
+
+      if (ct.status === 'fulfilled') {
+        const contestTimeResp = ct.value;
+        if (contestTimeResp?.startTime) setStartTime(convertToDatetimeLocal(contestTimeResp.startTime));
+        if (contestTimeResp?.endTime) setEndTime(convertToDatetimeLocal(contestTimeResp.endTime));
+        if (contestTimeResp?.currentTime) setCurrentServerTime(contestTimeResp.currentTime);
+      } else {
+        console.error('[Admin] fetchContestTime failed:', ct.reason);
       }
     })();
   }, []);
@@ -268,14 +280,41 @@ const Admin = () => {
   };
 
   // ===== Timer =====
-  const handleSetStartTime = () => {
-    setContestStartTime(startTime);
-    alert("시작 시간이 설정되었습니다!");
+  const handleSetContestTime = async () => {
+    if (!startTime || !endTime) {
+      alert('시작 시간과 종료 시간을 모두 입력해주세요.');
+      return;
+    }
+
+    // datetime-local 형식(yyyy-MM-ddTHH:mm)을 서버 형식(yyyy-MM-dd HH:mm:ss)으로 변환
+    const formattedStartTime = startTime.replace('T', ' ') + ':00';
+    const formattedEndTime = endTime.replace('T', ' ') + ':00';
+
+    try {
+      const res = await updateContestTime(formattedStartTime, formattedEndTime);
+      if (res?.message || res?.code === 'SUCCESS') {
+        alert(res?.message || '대회 시간이 설정되었습니다!');
+        // 서버에서 최신 시간 다시 가져오기
+        await refreshContestTime();
+        // 로컬 state도 업데이트
+        const latestData = await fetchContestTime();
+        if (latestData?.startTime) setStartTime(convertToDatetimeLocal(latestData.startTime));
+        if (latestData?.endTime) setEndTime(convertToDatetimeLocal(latestData.endTime));
+        if (latestData?.currentTime) setCurrentServerTime(latestData.currentTime);
+      } else {
+        alert('대회 시간 설정에 실패했습니다.');
+      }
+    } catch (e) {
+      console.error('대회 시간 설정 실패:', e);
+      alert('대회 시간 설정 요청 실패 (권한 또는 형식 오류일 수 있습니다)');
+    }
   };
 
-  const handleSetEndTime = () => {
-    setContestEndTime(endTime);
-    alert("종료 시간이 설정되었습니다!");
+  // 서버에서 받은 시간 형식(yyyy-MM-dd HH:mm:ss)을 datetime-local 형식(yyyy-MM-ddTHH:mm)으로 변환
+  const convertToDatetimeLocal = (serverTime) => {
+    if (!serverTime) return '';
+    // "2025-03-29 10:00:00" -> "2025-03-29T10:00"
+    return serverTime.slice(0, 16).replace(' ', 'T');
   };
 
   // ===== Shared form helpers =====
@@ -709,13 +748,27 @@ const Admin = () => {
       {tab === 'timer' && (
         <section>
           <h2 style={{ color: 'black' }}>Set Contest Time</h2>
-          
+
+          {/* Current server time display */}
+          {currentServerTime && (
+            <div
+              style={{
+                padding: 12,
+                border: '1px solid #4CAF50',
+                borderRadius: 8,
+                marginBottom: 12,
+                background: '#E8F5E9',
+              }}
+            >
+              <p style={{ color: 'black', margin: 0 }}>
+                <strong>현재 서버 시간:</strong> {currentServerTime}
+              </p>
+            </div>
+          )}
+
           {/* Timer tools */}
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
               padding: 12,
               border: '1px solid #000',
               borderRadius: 8,
@@ -723,26 +776,64 @@ const Admin = () => {
               background: '#fafafa',
             }}
           >
-            <div>
+            <div style={{ marginBottom: 12 }}>
               <h3 style={{ color: 'black', marginTop: 0 }}>시작 시간</h3>
               <input
                 type="datetime-local"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
+                style={{ padding: 8, width: '100%', fontSize: 14 }}
               />
-              <button onClick={handleSetStartTime}>시작 시간 설정</button>
-                  </div>
-            <div>
+              <p style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+                형식: yyyy-MM-dd HH:mm (예: 2025-03-29 10:00)
+              </p>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
               <h3 style={{ color: 'black', marginTop: 0 }}>종료 시간</h3>
               <input
                 type="datetime-local"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
+                style={{ padding: 8, width: '100%', fontSize: 14 }}
               />
-              <button onClick={handleSetEndTime}>종료 시간 설정</button>
+              <p style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+                형식: yyyy-MM-dd HH:mm (예: 2025-03-29 22:00)
+              </p>
             </div>
+
+            <button
+              onClick={handleSetContestTime}
+              style={{
+                padding: '10px 20px',
+                fontSize: 16,
+                fontWeight: 'bold',
+                backgroundColor: '#2196F3',
+                color: 'white',
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer'
+              }}
+            >
+              대회 시간 설정
+            </button>
+          </div>
+
+          <div
+            style={{
+              padding: 12,
+              border: '1px solid #FF9800',
+              borderRadius: 8,
+              background: '#FFF3E0',
+            }}
+          >
+            <h4 style={{ color: 'black', marginTop: 0 }}>주의사항</h4>
+            <ul style={{ color: '#333', margin: 0, paddingLeft: 20 }}>
+              <li>시작 시간은 종료 시간보다 이전이어야 합니다.</li>
+              <li>새로운 설정이 생성되면 기존의 활성화된 설정은 자동으로 비활성화됩니다.</li>
+              <li>모든 시간은 <strong>Asia/Seoul (KST, UTC+09:00)</strong> 타임존 기준입니다.</li>
+              <li>관리자 권한(ROLE_ADMIN)이 필요합니다.</li>
+            </ul>
           </div>
         </section>
       )}
