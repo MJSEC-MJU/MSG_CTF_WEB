@@ -73,15 +73,33 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
         });
 
         // 팀별 누적 합산
+        // Object.values(individualRanking).forEach((user) => {
+        //   for (let i = 1; i < timeLabels.length; i++) {
+        //     if (user.scores[i] === 0) {
+        //       user.scores[i] = user.scores[i - 1] ?? 0;
+        //     } else {
+        //       user.scores[i] += user.scores[i - 1] ?? 0;
+        //     }
+        //   }
+        // });
+
+        // 시작 지점에 따른 그래프 처리
+        // 팀별 누적 합산
         Object.values(individualRanking).forEach((user) => {
-          for (let i = 1; i < timeLabels.length; i++) {
-            if (user.scores[i] === 0) {
-              user.scores[i] = user.scores[i - 1] ?? 0;
+          let firstSolved = false;
+          for (let i = 0; i < timeLabels.length; i++) {
+            if (user.scores[i] === 0 && !firstSolved) {
+              user.scores[i] = null; // 아직 문제를 안 푼 상태는 null로 표시
             } else {
-              user.scores[i] += user.scores[i - 1] ?? 0;
+              firstSolved = true;
+              if (i > 0 && user.scores[i] !== null) {
+                // 이전까지의 누적 합산
+                user.scores[i] += user.scores[i - 1] ?? 0;
+              }
             }
           }
         });
+
 
         // 개인 랭킹 정렬: 점수가 높은 순으로 정렬하고, 동일한 경우 마지막 제출 시간이 빠른 순으로 정렬
         const sortIndividuals = Object.values(individualRanking)
