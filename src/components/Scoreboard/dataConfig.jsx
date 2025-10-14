@@ -83,7 +83,7 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
         const individualRanking = {};
 
         parsedData.forEach((item) => {
-          const userId = item.userId;
+          const userId = item.loginId;
           const timeLabel = item.solvedTime.slice(0, 19);
           const timeIndex = timeLabels.indexOf(timeLabel);
 
