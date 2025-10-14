@@ -1,34 +1,3 @@
-// export const options = {
-//   responsive: true,
-//   maintainAspectRatio: false,
-//   plugins: {
-//     legend: {
-//       position: 'top',
-//       labels: { color: '#FFFFFF', font: { size: 14 } },
-//     },
-//   },
-//   scales: {
-//     x: {
-//       ticks: { color: '#FFFFFF', font: { size: 12 } },
-//       grid: { color: 'rgba(255, 255, 255, 0.2)' },
-//     },
-//     y: {
-//       ticks: { color: '#FFFFFF', font: { size: 12 } },
-//       grid: { color: 'rgba(255, 255, 255, 0.2)' },
-//     },
-//   },
-// };
-
-// const individualColors = [
-//   'rgba(54, 162, 235, 1)',
-//   'rgba(255, 99, 132, 1)',
-//   'rgba(99, 255, 182, 1)'
-// ];
-// const universityColors = [
-//   'rgba(153, 102, 255, 1)',
-//   'rgba(255, 159, 64, 1)',
-//   'rgba(255, 88, 116, 1)'
-// ];
 
     const colors = [
       "rgba(255, 99, 132, 1)",
@@ -138,7 +107,7 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
           fill: false,
           tension: 0.3,
           data: timeLabels.map((t, i) => ({
-            x: t, // ISO 형식 시간
+            x: new Date(t), // ISO 형식 시간
             y: user.scores[i], // 누적 점수
           })),
         }));
@@ -167,27 +136,6 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
   // 1시간마다 재연결
   reconnectInterval = setInterval(connectSSE, 60 * 60 * 1000);
 };
-
-
-// export const options = {
-//   responsive: true,
-//   plugins: {
-//     legend: { position: "top", labels: { color: "#ffffff" } },
-//     title: { display: true, text: "Score Progression", color: "#ffffff" },
-//   },
-//   scales: {
-//     x: {
-//       type: "time",
-//       time: { parser: "isoDateTime", unit: "hour", displayFormats: { hour: "HH:mm" } },
-//       ticks: { color: "#ffffff" },
-//       grid: { color: "rgba(255,255,255,0.2)" },
-//     },
-//     y: {
-//       ticks: { color: "#ffffff" },
-//       grid: { color: "rgba(255,255,255,0.2)" },
-//     },
-//   },
-// };
 
 // ✅ 수정: time.parser를 ISO 문자열 형식으로 지정
 export const options = {
