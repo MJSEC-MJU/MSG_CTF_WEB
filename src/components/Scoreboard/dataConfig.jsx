@@ -136,8 +136,9 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
           color: colors[index % colors.length],
           scores: timeLabels.map((t, i) => ({
             time: t,
-            value: user.scores[i] ?? 0,
+            value: user.scores[i] ?? null,
           })),
+          spanGaps: false,
         }));
 
         const finalData = [
