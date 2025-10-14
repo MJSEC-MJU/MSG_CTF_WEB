@@ -106,8 +106,8 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
           fill: false,
           tension: 0.3,
           data: timeLabels.map((t, i) => ({
-            x: t, // ISO 형식 시간
-            y: user.scores[i], // 누적 점수
+            time: t, // ISO 형식 시간
+            value: user.scores[i], // 누적 점수
           })),
         }));
         const finalData = [
