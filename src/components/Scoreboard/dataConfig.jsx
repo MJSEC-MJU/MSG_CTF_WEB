@@ -99,19 +99,17 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
           user.color = colors[index%colors.length]; 
         });
 
-        const chartDatasets = sortIndividuals.map((user) => ({
-          label: user.id,
-          borderColor: user.color,
-          backgroundColor: user.color,
-          fill: false,
-          tension: 0.3,
-          data: timeLabels.map((t, i) => ({
-            time: t, // ISO 형식 시간
-            value: user.scores[i], // 누적 점수
+        const chartDatasets = sortIndividuals.map((user, index) => ({
+          id: user.id,
+          color: colors[index % colors.length],
+          scores: timeLabels.map((t, i) => ({
+            time: t,
+            value: user.scores[i] ?? 0,
           })),
         }));
+
         const finalData = [
-          { title: 'Individual Ranking', data: chartDatasets, labels: timeLabels },
+          { title: 'Individual Ranking', data: chartDatasets },
         ];
 
         setDatasetsConfig(finalData);
