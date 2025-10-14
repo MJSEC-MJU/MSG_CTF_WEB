@@ -185,6 +185,7 @@ export const options = {
       grid: { color: "rgba(255,255,255,0.2)" },
     },
     y: {
+      beginAtZero: true,
       ticks: { color: "#ffffff" },
       grid: { color: "rgba(255,255,255,0.2)" },
     },
