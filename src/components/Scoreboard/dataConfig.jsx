@@ -61,7 +61,7 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
             individualRanking[userId] = {
               id: userId,
               scores: Array(timeLabels.length).fill(0),
-              color: individualColors[Object.keys(individualRanking).length % individualColors.length],
+              // color: colors[Object.keys(individualRanking).length % colors.length],
               lastSubmissionTime: timeLabel, // 최초 제출 시간 기록
             };
           } else {
@@ -111,7 +111,6 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
             y: user.scores[i], // 누적 점수
           })),
         }));
-
         const finalData = [
           { title: 'Individual Ranking', data: chartDatasets, labels: timeLabels },
         ];
@@ -120,7 +119,7 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
         setLoading(false);
         console.log('업데이트된 datasetsConfig:', finalData);
       } catch (err) {
-        //console.error('데이터 처리 중 오류 발생:', err.message);
+        console.error('데이터 처리 중 오류 발생:', err.message);
       }
     });
 
