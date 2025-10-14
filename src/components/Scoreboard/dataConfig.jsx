@@ -85,17 +85,31 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
 
         // 시작 지점에 따른 그래프 처리
         // 팀별 누적 합산
+        // ✅ 팀별 누적 합산 및 '처음 문제 푼 시점부터만 표시'
         Object.values(individualRanking).forEach((user) => {
-          let firstSolved = false;
+          let firstSolvedIndex = -1;
+          
+          // 첫 문제 푼 인덱스 찾기
           for (let i = 0; i < timeLabels.length; i++) {
-            if (user.scores[i] === 0 && !firstSolved) {
-              user.scores[i] = null; // 아직 문제를 안 푼 상태는 null로 표시
-            } else {
-              firstSolved = true;
-              if (i > 0 && user.scores[i] !== null) {
-                // 이전까지의 누적 합산
-                user.scores[i] += user.scores[i - 1] ?? 0;
-              }
+            if (user.scores[i] > 0) {
+              firstSolvedIndex = i;
+              break;
+            }
+          }
+
+          // 아직 문제를 한 번도 안 푼 경우 → 전부 null
+          if (firstSolvedIndex === -1) {
+            user.scores = Array(timeLabels.length).fill(null);
+            return;
+          }
+
+          // 첫 풀이 이전은 null, 이후부터 누적 합산
+          for (let i = 0; i < timeLabels.length; i++) {
+            if (i < firstSolvedIndex) {
+              user.scores[i] = null; // 첫 풀이 전은 데이터 없음
+            } else if (i > firstSolvedIndex) {
+              // 이전 값 누적 (이전이 null이면 0으로 간주)
+              user.scores[i] += user.scores[i - 1] ?? 0;
             }
           }
         });
