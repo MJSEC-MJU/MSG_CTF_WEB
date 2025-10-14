@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import Cookies from 'js-cookie';
-import Logo from '../assets/MsgLogo.svg';
+import Logo from '../assets/MsgLogo.png';
 import loginIcon from '../assets/Login.png';
 import logoutIcon from '../assets/Logout.png';
 import profileIcon from '../assets/profile.png';
@@ -102,7 +102,6 @@ const backgroundAnimation = keyframes`
   0% { background-position: 0 0; }
   100% { background-position: -30px -30px; }
 `;
-const blink = keyframes` 50% { opacity: 0; }`;
 
 const HeaderWrapper = styled.div`
   position: fixed;
@@ -147,11 +146,10 @@ const LogoWrap = styled(Link)`
 `;
 
 const LogoIcon = styled.img`
-  width: 120px;
-  height: 50px;
+  width: 140px;
+  height: 70px;
   object-fit: contain;
   display: block;
-  animation: ${blink} 1s steps(2, start) infinite;
 
   @media (max-width: 768px) {
     width: 100px;
