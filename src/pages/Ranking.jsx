@@ -1,55 +1,102 @@
-import { useState, useEffect } from 'react';
-import './Ranking.css';
+// src/pages/Ranking.jsx
+import { useEffect, useRef, useState } from "react";
+import "./Ranking.css";
+import Loading from "../components/Loading";
 
-import Loading from '../components/Loading';
+// .env의 VITE_API_URL 사용
+const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+const STREAM_URL = `${API_BASE}/api/leaderboard/stream`;
 
 const Ranking = () => {
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 더미 데이터 (SSE 대신 임시로 테스트용)
-const dummyScores = [
-  { id: 1, userId: "playerOne", totalPoint: 1520 },
-  { id: 2, userId: "cyberKing", totalPoint: 1480 },
-  { id: 3, userId: "hackerPro", totalPoint: 1455 },
-  { id: 4, userId: "matrixNeo", totalPoint: 1402 },
-  { id: 5, userId: "codeMaster", totalPoint: 1389 },
-  { id: 6, userId: "darkKnight", totalPoint: 1370 },
-  { id: 7, userId: "greenArrow", totalPoint: 1355 },
-  { id: 8, userId: "silverFox", totalPoint: 1348 },
-  { id: 9, userId: "quantumAI", totalPoint: 1330 },
-  { id: 10, userId: "binaryHero", totalPoint: 1325 },
-  { id: 11, userId: "cryptoNinja", totalPoint: 1308 },
-  { id: 12, userId: "fireDragon", totalPoint: 1290 },
-  { id: 13, userId: "ghostHunter", totalPoint: 1282 },
-  { id: 14, userId: "stormBreaker", totalPoint: 1275 },
-  { id: 15, userId: "ironShield", totalPoint: 1266 },
-  { id: 16, userId: "shadowWolf", totalPoint: 1255 },
-  { id: 17, userId: "bluePhoenix", totalPoint: 1248 },
-  { id: 18, userId: "digitalSamurai", totalPoint: 1242 },
-  { id: 19, userId: "netRunner", totalPoint: 1235 },
-  { id: 20, userId: "starDust", totalPoint: 1220 },
-];
+  const esRef = useRef(null);
+  const reconnectTimerRef = useRef(null);
+  const hourlyTimerRef = useRef(null);
 
-    useEffect(() => {
-    // 🔹 SSE 대신 더미 데이터 사용
-    setScores(dummyScores);
-    setLoading(false);
+  const cleanup = () => {
+    if (esRef.current) {
+      try { esRef.current.close(); } catch {}
+      esRef.current = null;
+    }
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+  };
+
+  const parsePayloadToArray = (raw) => {
+    if (!raw) return [];
+    let text = String(raw).trim();
+    // 혹시 서버가 "data:[{...}]" 형태로 보낼 때 대비
+    if (text.startsWith("data:")) text = text.slice(5).trim();
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed?.data)) return parsed.data;
+      return [];
+    } catch {
+      return [];
+    }
+  };
+
+  const connect = () => {
+    cleanup(); // 기존 연결 정리 후 재연결
+    const es = new EventSource(STREAM_URL);
+    esRef.current = es;
+
+    es.onopen = () => {
+      if (loading) setLoading(false);
+    };
+
+    es.onmessage = (event) => {
+      const next = parsePayloadToArray(event.data);
+      if (Array.isArray(next)) setScores(next);
+    };
+
+    es.onerror = () => {
+      cleanup();
+      // 에러 발생 시 3초 후 재연결
+      reconnectTimerRef.current = setTimeout(connect, 3000);
+    };
+  };
+
+  useEffect(() => {
+    // 최초 연결
+    connect();
+
+    // 첫 이벤트가 오래 안 오더라도 스피너는 5초 후 내려줌
+    const safety = setTimeout(() => setLoading(false), 5000);
+
+    // 🔁 1시간마다 강제 재연결
+    hourlyTimerRef.current = setInterval(() => {
+      connect();
+    }, 60 * 60 * 1000);
+
+    return () => {
+      cleanup();
+      clearTimeout(safety);
+      if (hourlyTimerRef.current) {
+        clearInterval(hourlyTimerRef.current);
+        hourlyTimerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
-  const displayScores = scores.map((score, index) => {
-    const rank = index + 1;
+  const displayScores = scores.map((row, index) => {
+    const rank = row.rank ?? index + 1;
     return (
-      <div className="card" key={score.id}>
+      <div className="card" key={row.teamId ?? `${row.teamName}-${rank}`}>
         <div className={`rank ${rank <= 3 ? "top3" : ""}`}>
           <span className={`rank-number ${rank <= 3 ? "top3" : ""}`}>{rank}</span>
-          <span className="user">{score.userId}</span>
+          <span className="user">{row.teamName}</span>
         </div>
-        <span className={`score ${rank <= 3 ? "top3" : ""}`}>{score.totalPoint}</span>
+        <span className={`score ${rank <= 3 ? "top3" : ""}`}>{row.totalPoint}</span>
       </div>
     );
-  }); 
+  });
 
   if (loading) {
     return (
@@ -65,12 +112,12 @@ const dummyScores = [
     <div className="responsive-wrapper">
       <div className="ranking-wrapper">
         <h2 className="title">Ranking</h2>
-        <div className="list">
-          {displayScores}
-        </div>
+        <div className="list">{displayScores}</div>
       </div>
     </div>
   );
 };
 
 export default Ranking;
+
+
