@@ -1,4 +1,3 @@
-
     const colors = [
       "rgba(255, 99, 132, 1)",
       "rgba(54, 162, 235, 1)",
@@ -107,7 +106,7 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
           fill: false,
           tension: 0.3,
           data: timeLabels.map((t, i) => ({
-            x: new Date(t), // ISO 형식 시간
+            x: t, // ISO 형식 시간
             y: user.scores[i], // 누적 점수
           })),
         }));
