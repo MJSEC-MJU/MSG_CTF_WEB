@@ -74,6 +74,8 @@ const ContentBlock = ({ dataset }) => {
         grid: { color: 'rgba(255,255,255,0.2)' },
       },
       y: {
+        beginAtZero: true,
+        min: 0,
         ticks: {
           color: '#333',
           stepSize: 100,
