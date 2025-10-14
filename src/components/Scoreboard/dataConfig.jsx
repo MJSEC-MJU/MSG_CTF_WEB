@@ -125,14 +125,26 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
             if (a.lastSubmissionTime > b.lastSubmissionTime) return 1;
             return 0;
           })
-          .slice(0, 3);
+          // .slice(0, 3);
 
         sortIndividuals.forEach((user, index) => {
           user.color = colors[index%colors.length]; 
         });
 
+        const chartDatasets = sortIndividuals.map((user) => ({
+          label: user.id,
+          borderColor: user.color,
+          backgroundColor: user.color,
+          fill: false,
+          tension: 0.3,
+          data: timeLabels.map((t, i) => ({
+            x: t, // ISO 형식 시간
+            y: user.scores[i], // 누적 점수
+          })),
+        }));
+
         const finalData = [
-          { title: 'Individual Ranking', data: sortIndividuals, labels: timeLabels },
+          { title: 'Individual Ranking', data: chartDatasets, labels: timeLabels },
         ];
 
         setDatasetsConfig(finalData);
@@ -157,6 +169,27 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
 };
 
 
+// export const options = {
+//   responsive: true,
+//   plugins: {
+//     legend: { position: "top", labels: { color: "#ffffff" } },
+//     title: { display: true, text: "Score Progression", color: "#ffffff" },
+//   },
+//   scales: {
+//     x: {
+//       type: "time",
+//       time: { parser: "isoDateTime", unit: "hour", displayFormats: { hour: "HH:mm" } },
+//       ticks: { color: "#ffffff" },
+//       grid: { color: "rgba(255,255,255,0.2)" },
+//     },
+//     y: {
+//       ticks: { color: "#ffffff" },
+//       grid: { color: "rgba(255,255,255,0.2)" },
+//     },
+//   },
+// };
+
+// ✅ 수정: time.parser를 ISO 문자열 형식으로 지정
 export const options = {
   responsive: true,
   plugins: {
@@ -166,7 +199,11 @@ export const options = {
   scales: {
     x: {
       type: "time",
-      time: { parser: "isoDateTime", unit: "hour", displayFormats: { hour: "HH:mm" } },
+      time: {
+        parser: "YYYY-MM-DDTHH:mm:ss", // ✅ 수정
+        unit: "minute", // ✅ hour → minute로 변경 (더 세밀한 시간 표시)
+        displayFormats: { minute: "HH:mm" },
+      },
       ticks: { color: "#ffffff" },
       grid: { color: "rgba(255,255,255,0.2)" },
     },
