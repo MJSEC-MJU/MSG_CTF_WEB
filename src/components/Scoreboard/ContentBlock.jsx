@@ -67,7 +67,17 @@ const ContentBlock = ({ dataset }) => {
           unit: 'minute',
           stepSize: 30,
           tooltipFormat: 'HH:mm',
-          displayFormats: { hour: 'HH:mm' },
+          displayFormats: {
+            minute: 'HH시',        // X축에 00시, 01시, 13시 형식으로 표시
+            hour: 'HH시',          // 시간 단위일 때도 동일하게 표시
+          },
+        },
+        adapters: {
+          date: {
+            locale: {
+              code: 'ko',          // 한국어 로케일
+            },
+          },
         },
         ticks: {
           color: '#333',
