@@ -1,165 +1,214 @@
+/* =========================
+   Admin.css (full)
+   - 밝은 카드 + 진한 텍스트
+   - 컴팩트 폼/테이블
+   - 상단 헤더와 겹침 방지
+   ========================= */
+
 :root{
-  --surface:#fff;
-  --surface-muted:#f7f8fa;
-  --border:#e5e7eb;
-  --text:#111827;
-  --muted:#6b7280;
-  --accent:#2563eb;
-  --accent-2:#1d4ed8;
+  --header-h:64px;
+
+  /* 다크 배경 */
+  --bg:#0b1220;
+  --bg-2:#12182a;
+
+  /* 라이트 패널(카드) */
+  --panel:#f6f8fc;
+  --panel-2:#eef2fb;
+
+  /* 테두리/섀도우 */
+  --border:#d5dbea;
+  --border-2:#c8d1e4;
+  --shadow:0 1px 2px rgba(14,23,42,.06), 0 8px 24px rgba(14,23,42,.08);
+
+  /* 텍스트 */
+  --text:#0b1220;
+  --text-muted:#475569;
+
+  /* 입력 */
+  --input-bg:#fff;
+  --input-br:#c8d1e4;
+  --input-focus:#3b82f6;
+
+  /* 탭/버튼 */
+  --tab-bg:#11182b;
+  --tab-br:#1e2742;
+  --accent:#3b82f6;
+  --accent-2:#2563eb;
   --danger:#ef4444;
+
   --radius:12px;
-  --shadow:0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+  --radius-sm:8px;
 }
 
-*{box-sizing:border-box}
+/* Reset */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
+   "Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.6;
+}
 
-.admin{color:var(--text)}
-.admin h1,.admin h2,.admin h3{margin:0 0 .75rem}
-.admin h2{margin-top:1.25rem}
+/* (선택) 고정 헤더가 있다면 이 클래스와 높이를 맞춰 사용 */
+.app-header{
+  position:fixed;left:0;right:0;top:0;height:var(--header-h);
+  display:flex;align-items:center;gap:12px;padding:0 20px;
+  background:rgba(15,22,41,.9);backdrop-filter:blur(8px);
+  border-bottom:1px solid #1f2944;z-index:1000;
+}
 
-.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem}
+/* 컨테이너: 헤더와 겹침 방지 */
+.admin{
+  max-width:1200px;margin:0 auto;
+  padding:calc(var(--header-h) + 24px) 20px 32px !important;
+}
+
+/* 제목 */
+.admin h1{
+  font-size:2rem;font-weight:800;letter-spacing:-.01em;
+  color:#e8edf9;margin:0 0 1rem;
+}
+.admin h2{
+  font-size:1.25rem;font-weight:700;margin:1rem 0 .75rem;
+  color:#e8edf9;
+}
+.admin h3,.admin .card__title{
+  font-size:1rem;font-weight:700;color:var(--text);
+}
+
+/* ---------------- Tabs ---------------- */
+.tabs{
+  display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;
+}
 .tabs button{
-  padding:.5rem .75rem;border:1px solid var(--border);background:var(--surface);
-  border-radius:.5rem;cursor:pointer;color:var(--text)
+  appearance:none;cursor:pointer;
+  padding:.6rem 1rem;border-radius:999px;
+  background:var(--tab-bg);color:#c8d1ea;border:1px solid var(--tab-br);
+  font-weight:700;letter-spacing:.02em;transition:.15s;
 }
+.tabs button:hover{filter:brightness(1.1)}
 .tabs button[aria-current="page"]{
-  background:var(--surface-muted);border-color:#cbd5e1;font-weight:600
+  background:var(--accent);border-color:var(--accent);color:#fff;
+  box-shadow:0 4px 14px rgba(59,130,246,.25);
 }
 
+/* ---------------- Card ---------------- */
 .card{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:1rem;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:16px;margin-bottom:12px;
 }
-.card--edit{margin-top:.75rem}
+.card__title{
+  background:transparent;border-bottom:1px solid #e0e5f2;
+  padding:0 0 10px 0;margin-bottom:10px;
+}
 
-.card__title{font-size:1.125rem;margin-bottom:.5rem}
+/* 어둡게 써야 하는 카드(공지/서버시간 등)는 .card--dark 부여 */
+.card--dark{
+  background:var(--bg-2);border-color:#242d49;color:#e9eefb;
+}
+.card--dark .card__title{color:#e9eefb;border-color:#2a3556}
 
-.form{display:flex;flex-direction:column;gap:1rem}
+/* ---------------- Form ---------------- */
+.form{display:flex;flex-direction:column;gap:8px}
 .form-grid{
-  display:grid;gap:.75rem;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  display:grid;gap:10px;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
 }
-@media (max-width:900px){ .form-grid{grid-template-columns:1fr} }
+.field{display:flex;flex-direction:column;gap:6px}
+.label{font-size:.9rem;font-weight:700;color:var(--text)}
+.hint{font-size:.8rem;color:var(--text-muted)}
 
-.field{display:flex;flex-direction:column;gap:.4rem}
-.label{
-  font-size:.9rem;color:var(--muted);font-weight:600;
-}
 .input,.select,.textarea{
-  width:100%;padding:.6rem .7rem;border:1px solid var(--border);
-  border-radius:.6rem;background:var(--surface);color:var(--text);
+  width:100%;padding:.7rem .9rem;border-radius:var(--radius-sm);
+  background:var(--input-bg);color:var(--text);
+  border:1px solid var(--input-br);font-size:.95rem;transition:.15s;
 }
+.input::placeholder,.textarea::placeholder{color:#7a869c}
 .textarea{min-height:110px;resize:vertical}
 .input:focus,.select:focus,.textarea:focus{
   outline:none;border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(37,99,235,.15);
+  box-shadow:0 0 0 4px rgba(59,130,246,.18);
 }
 
-.hint{font-size:.75rem;color:var(--muted);margin-top:-.25rem}
+/* 카드 내 액션행은 오른쪽 정렬(컴팩트) */
+.actions{display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;margin-top:.25rem}
 
-.actions{
-  display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;margin-top:.25rem;
-}
+/* ---------------- Buttons ---------------- */
 .btn{
-  appearance:none;border:1px solid var(--border);background:var(--surface);
-  padding:.55rem .9rem;border-radius:.6rem;cursor:pointer;color:var(--text)
+  appearance:none;cursor:pointer;
+  padding:.6rem 1.1rem;border-radius:10px;border:1px solid var(--border-2);
+  background:#e9eef9;color:var(--text);font-weight:800;transition:.15s;
 }
-.btn--primary{
-  background:var(--accent);border-color:var(--accent);color:#fff;
-}
+.btn:hover{background:#dfe6f7;border-color:#cfd7ec}
+.btn:active{transform:translateY(1px)}
+.btn--primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn--primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
 .btn--danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn--danger:hover{background:#dc2626;border-color:#dc2626}
 
+/* ---------------- Table ---------------- */
 .table{
-  width:100%;border-collapse:collapse;border:1px solid var(--border);
-  background:var(--surface);border-radius:var(--radius);overflow:hidden
+  width:100%;border-collapse:collapse;border:1px solid #1f2944;
+  background:#0f1629;border-radius:12px;overflow:hidden;
+  box-shadow:0 6px 18px rgba(8,12,24,.35);
 }
-.table th,.table td{border:1px solid var(--border);padding:.6rem;text-align:center}
-.table thead th{background:var(--surface-muted);color:#0f172a;font-weight:700}
-.table tbody tr:hover{background:#fafafa}
+.table thead th{
+  background:#0c1222;color:#e9eefb;font-weight:900;font-size:.8rem;
+  letter-spacing:.12em;text-transform:uppercase;text-align:center;
+  padding:.9rem .6rem;border-bottom:1px solid #1f2944;
+}
+.table th,.table td{
+  padding:.9rem .6rem;text-align:center;vertical-align:middle;
+  border-bottom:1px solid #1f2944;color:#dbe6ff;
+}
+.table tbody tr:nth-child(even){background:#0e1425}
+.table tbody tr:hover{background:#111a30}
+
+/* ---------------- Badges ---------------- */
 .badge{
-  display:inline-block;padding:.15rem .5rem;border-radius:999px;
-  background:var(--surface-muted);border:1px solid var(--border);font-size:.75rem;color:#0f172a;
-}
-/* ====== (Add-on) Readability & Layout ====== */
-.admin {
-  max-width: 1180px;
-  margin: 0 auto;
-  line-height: 1.55;
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  display:inline-block;padding:.25rem .6rem;border-radius:999px;
+  background:#eef2fb;border:1px solid var(--border);color:var(--text);
+  font-size:.8rem;font-weight:700;
 }
 
-/* 더 긴 텍스트/해시/URL 줄바꿈 */
-.table td, .table th { word-break: break-word; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+/* -------- Section–specific small tweaks -------- */
 
-/* placeholder 살짝 연해 보이게 */
-.input::placeholder, .textarea::placeholder { color: #9ca3af; }
-
-/* 버튼 상태 보강 */
-.btn:hover { filter: brightness(0.98); }
-.btn:active { transform: translateY(1px); }
-.btn:disabled,
-.btn[disabled] {
-  opacity: .6;
-  cursor: not-allowed;
+/* Users: 첫 카드(신규 유저 추가) 좀 더 넓은 그리드 */
+.admin section:first-of-type .card .form.form-grid{
+  grid-template-columns:repeat(2,minmax(260px,1fr));
 }
-
-/* 위협 동작(삭제 등) 대비 : danger 콘트라스트 강화 */
-.btn--danger:hover { background: #dc2626; border-color: #dc2626; }
-
-/* 포커스 가시성(키보드 사용자) */
-:where(.btn,.input,.select,.textarea):focus-visible {
-  outline: 2px solid transparent;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.35);
-}
-
-/* 폼 에러/성공 상태 유틸 */
-.input--error, .textarea--error, .select--error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,.15); }
-.input--ok,    .textarea--ok,    .select--ok    { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.15); }
-.msg--error { color: #b91c1c; font-size: .85rem; }
-.msg--ok    { color: #15803d; font-size: .85rem; }
-
-/* 테이블: 스크롤 컨테이너 + 헤더 고정 옵션 */
-.table-wrap {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: auto;
-  max-height: 60vh; /* 필요시 조정 */
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-.table { border: 0; border-radius: 0; }
-.table thead th { position: sticky; top: 0; z-index: 1; }
-
-/* 긴 폼에서 섹션 간격 유틸 */
-.stack > * + * { margin-top: .75rem; }
-
-/* 탭 버튼 터치 타깃 확대(모바일) */
-.tabs button { min-height: 40px; }
-
-/* 모션 줄이기 선호 존중 */
-@media (prefers-reduced-motion: reduce) {
-  .btn:active { transform: none; }
-  * { scroll-behavior: auto !important; }
-}
-
-/* (선택) 다크 지원 초석 — 시스템 다크에 맞춰 살짝 톤 다운 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface:#0b1020;
-    --surface-muted:#0e1428;
-    --border:#1f2a44;
-    --text:#e5e7eb;
-    --muted:#9aa4b2;
-    --accent:#3b82f6;
-    --accent-2:#2563eb;
-    --shadow: none;
+@media (max-width:900px){
+  .admin section:first-of-type .card .form.form-grid{
+    grid-template-columns:1fr;
   }
-  .table tbody tr:hover { background: #111735; }
+}
+
+/* Timer: 서버시간/주의사항 카드는 어둡게 */
+.admin section:has(h2:contains("Set Contest Time")) .card:first-of-type,
+.admin section:has(h2:contains("Set Contest Time")) .card:last-of-type{
+  /* 브라우저 지원이 불안하면 카드에 card--dark 클래스를 명시적으로 넣어도 됨 */
+  background:var(--bg-2);border-color:#242d49;color:#e9eefb;
+}
+.admin section:has(h2:contains("Set Contest Time")) .card:first-of-type strong{
+  color:#fff;
+}
+
+/* Signature 폼: 버튼이 한 줄에 잘 붙도록 */
+.card .form.form-grid + .actions{margin-top:0}
+
+/* ---------------- Scrollbar ---------------- */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#1f2944;border-radius:6px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#2a3556}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width:768px){
+  .admin{padding:calc(var(--header-h) + 16px) 16px 20px !important}
+  .tabs button{padding:.5rem .9rem}
 }
