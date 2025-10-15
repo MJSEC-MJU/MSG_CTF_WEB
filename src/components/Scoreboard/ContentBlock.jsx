@@ -64,7 +64,8 @@ const ContentBlock = ({ dataset }) => {
       x: {
         type: 'time',
         time: {
-          unit: 'hour',
+          unit: 'minute',
+          stepSize: 30,
           tooltipFormat: 'HH:mm',
           displayFormats: { hour: 'HH:mm' },
         },
