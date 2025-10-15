@@ -106,13 +106,13 @@ function Home() {
         <div className="RuleInner">
           <h1 id="rule-title">RULE</h1>
           <p className="RuleLead">
-            아래 규칙을 준수하여 플레이해 주십시오. 공정하고 즐거운 환경 유지를 위한 약속입니다.
+            아래 규칙을 준수하여 플레이해주세요. 공정하고 즐거운 환경 유지를 위한 약속입니다.
           </p>
           <ul className="RuleList">
-            <li>비인가 자동화/봇 사용 금지</li>
-            <li>취약점은 공개 전 운영팀에 사전 공유</li>
-            <li>타 참가자 진행 방해 및 데이터 삭제/변조 금지</li>
-            <li>문제 힌트/풀이 공유 금지(대회 종료 전)</li>
+            <li> 플래그 형식은<strong>MSG&#123; &#125;</strong>입니다.</li>
+            <li>제출이 틀렸을 경우 패널티가 부여됩니다. (3회 이상 틀릴 경우 추가 시간패널티)</li>
+            <li>Dos 공격은 절대 금지입니다.</li>
+            <li>다른 팀과 문제 힌트/풀이 공유 금지(대회 종료 전)</li>
           </ul>
         </div>
       </section>
