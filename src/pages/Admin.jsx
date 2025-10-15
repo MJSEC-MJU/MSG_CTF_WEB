@@ -57,7 +57,6 @@ const Admin = () => {
 
   // ===== Problems =====
   const [problems, setProblems] = useState([]);
-  thead
   const [editingProblem, setEditingProblem] = useState(null);
   const [showEditProblemForm, setShowEditProblemForm] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
@@ -370,7 +369,7 @@ const Admin = () => {
         const latestData = await fetchContestTime();
         if (latestData?.startTime) setStartTime(convertToDatetimeLocal(latestData.startTime));
         if (latestData?.endTime) setEndTime(convertToDatetimeLocal(latestData.endTime));
-        if (latestData?.currentTime) setCurrentServerTime(latestData.currentTime));
+        if (latestData?.currentTime) setCurrentServerTime(latestData.currentTime);
       } else {
         alert('대회 시간 설정에 실패했습니다.');
       }
@@ -906,18 +905,18 @@ const Admin = () => {
 
       {/* ================= Timer Tab ================= */}
       {tab === 'timer' && (
-        <section className="section--timer">
-          <h2 style={{ gridColumn: '1 / -1' }}>Set Contest Time</h2>
+        <section>
+          <h2>Set Contest Time</h2>
 
-          {/* 1) 현재 서버 시간 (항상 렌더링하여 레이아웃 안정) */}
-          <div className="card card--dark">
-            <h3 className="card__title">현재 서버 시간</h3>
-            <div className="form">
-              <p style={{ margin: 0 }}>{currentServerTime || '—'}</p>
+          {currentServerTime && (
+            <div className="card">
+              <h3 className="card__title">현재 서버 시간</h3>
+              <div className="form">
+                <p style={{ margin: 0 }}>{currentServerTime}</p>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* 2) 설정 폼 */}
           <div className="card">
             <div className="form form-grid">
               <div className="field">
@@ -938,8 +937,7 @@ const Admin = () => {
             </div>
           </div>
 
-          {/* 3) 주의사항 */}
-          <div className="card card--dark">
+          <div className="card">
             <h3 className="card__title">주의사항</h3>
             <div className="form">
               <ul style={{ margin: 0, paddingLeft: 20 }}>
