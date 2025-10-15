@@ -1,4 +1,8 @@
 // src/pages/Admin.jsx
+// - Admin 페이지 전체
+// - Signature Codes(관리자) 탭 포함
+// - SIGNATURE 문제 추가/수정 시 clubName(팀명) 필수 입력 처리
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { createProblem } from '../api/CreateProblemAPI';
 import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
@@ -9,12 +13,12 @@ import PaymentProcessor from '../components/PaymentProcessor';
 import { useContestTime } from "../components/Timer";
 import { fetchContestTime, updateContestTime } from '../api/ContestTimeAPI';
 
-// ── Signature Admin API ─────────────────────────────────────────────
+// ── Signature Admin API (엔드포인트는 별도 파일에서 구현) ─────────────────────
 import {
   adminBulkUpsert,
   adminImportCSV,
   adminExportCSV,
-  adminGetPool,
+  adminGetPool,          // NOTE: 내부 구현에서 /api/admin/signature/codes/pool/{challengeId} 사용
   adminGenerate,
   adminReassign,
   adminDeleteOne,
@@ -57,6 +61,7 @@ const Admin = () => {
   const [showEditProblemForm, setShowEditProblemForm] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
 
+  // 문제 생성/수정 폼 상태
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -71,6 +76,7 @@ const Admin = () => {
     category: '',
     date: '',
     time: '',
+    clubName: '', // ✅ SIGNATURE 전용 (필수)
   });
 
   // ===== Signature Admin (state) =====
@@ -301,14 +307,27 @@ const Admin = () => {
       title: problem.title ?? '',
       points: problem.points ?? '',
       category: problem.category ?? '',
+      clubName: problem.clubName ?? '', // ✅ SIGNATURE 편집 시 보존
     }));
   };
 
   const handleSaveProblem = async () => {
     if (!editingProblem) return alert('수정할 문제를 선택하세요.');
+    // ✅ 방어: SIGNATURE면 clubName 필수
+    if (formData.category === 'SIGNATURE' && !String(formData.clubName || '').trim()) {
+      alert('SIGNATURE 카테고리는 clubName(팀명)이 필수입니다.');
+      return;
+    }
+
+    // 백엔드는 multipart/form-data로 업데이트 받는 구조라고 가정
     const fd = new FormData();
-    fd.append('challenge', new Blob([JSON.stringify(formData)], { type: 'application/json' }));
+    const payload = {
+      ...formData,
+    };
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    fd.append('challenge', blob);
     if (formData.file) fd.append('file', formData.file);
+
     try {
       const res = await updateProblem(editingProblem.challengeId, fd);
       if (res?.code === 'SUCCESS') {
@@ -353,7 +372,7 @@ const Admin = () => {
     }
   };
 
-  // 서버에서 받은 시간 형식(yyyy-MM-dd HH:mm:ss)을 datetime-local 형식(yyyy-MM-ddTHH:mm)으로 변환
+  // 서버(yyyy-MM-dd HH:mm:ss) → datetime-local(yyyy-MM-ddTHH:mm)
   const convertToDatetimeLocal = (serverTime) => {
     if (!serverTime) return '';
     return serverTime.slice(0, 16).replace(' ', 'T');
@@ -408,6 +427,7 @@ const Admin = () => {
     if (!id) return alert('challengeId를 입력하세요.');
     try {
       setSigLoading(true);
+      // NOTE: 내부 구현이 /api/admin/signature/codes/pool/{id} 를 호출하도록 수정되어 있어야 함
       const res = await adminGetPool(id);
       setSigPool({ challengeId: res.challengeId, items: res.items || [] });
     } catch {
@@ -625,7 +645,7 @@ const Admin = () => {
             </div>
           )}
 
-          {/* Users table (팀 관련 열 제거) */}
+          {/* Users table */}
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
             <thead>
               <tr>
@@ -670,7 +690,7 @@ const Admin = () => {
         </section>
       )}
 
-      {/* ================= Teams Tab (신규) ================= */}
+      {/* ================= Teams Tab ================= */}
       {tab === 'teams' && (
         <section>
           <h2 style={{ color: 'black' }}>Team List</h2>
@@ -783,6 +803,19 @@ const Admin = () => {
                 <input type="file" name="file" onChange={onFile} />
                 <label>Category:</label>
                 <input type="text" name="category" value={formData.category} onChange={onProblemInput} />
+                {/* ✅ SIGNATURE 편집 시 clubName 입력 */}
+                {formData.category === 'SIGNATURE' && (
+                  <>
+                    <label>Club Name (팀명) — SIGNATURE 필수</label>
+                    <input
+                      type="text"
+                      name="clubName"
+                      value={formData.clubName}
+                      onChange={onProblemInput}
+                      placeholder="예) alpha"
+                    />
+                  </>
+                )}
                 <button type="button" onClick={handleSaveProblem}>
                   Save
                 </button>
@@ -798,11 +831,16 @@ const Admin = () => {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
+                // ✅ 방어: SIGNATURE면 clubName 필수
+                if (formData.category === 'SIGNATURE' && !String(formData.clubName || '').trim()) {
+                  alert('SIGNATURE 카테고리는 clubName(팀명)이 필수입니다.');
+                  return;
+                }
                 try {
                   const res = await createProblem(formData);
                   alert(res?.message || '생성 완료');
-                } catch {
-                  alert('문제 생성 실패');
+                } catch (err) {
+                  alert(err?.message || '문제 생성 실패');
                 }
               }}
               style={{ marginTop: 20 }}
@@ -873,6 +911,21 @@ const Admin = () => {
                   <option value="SIGNATURE">SIGNATURE</option>
                 </select>
               </div>
+              {/* ✅ SIGNATURE 전용 clubName 입력칸 */}
+              {formData.category === 'SIGNATURE' && (
+                <div>
+                  <label style={{ color: 'black' }}>Club Name (팀명) — SIGNATURE 필수</label>
+                  <input
+                    type="text"
+                    name="clubName"
+                    value={formData.clubName}
+                    onChange={onProblemInput}
+                    required
+                    style={{ width: '100%', padding: 10, marginBottom: 10 }}
+                    placeholder="예) alpha"
+                  />
+                </div>
+              )}
               <div style={{ marginTop: 20 }}>
                 <button type="submit" style={{ marginRight: 10 }}>
                   저장
