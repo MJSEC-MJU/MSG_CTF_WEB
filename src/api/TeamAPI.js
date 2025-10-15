@@ -1,7 +1,7 @@
 import { Axios } from "./Axios";
 export async function fetchTeamProfileRows() {
    try {
-     const { data } = await Axios.get(`/team/all`);
+     const { data } = await Axios.get(`admin/team/all`);
      const p = data?.data;
      if (!p) return [];
      const members = Array.isArray(p.memberEmail)
