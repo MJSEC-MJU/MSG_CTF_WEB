@@ -544,11 +544,11 @@ const Admin = () => {
             </div>
           </div>
 
-          {/* Team rows table (UserList에서 분리된 열) */}
+          {/* Teams Tab 내 표 렌더 부분만 교체/수정 */}
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
             <thead>
               <tr>
-                {['Team Name', 'Member Email', 'Team Mileage', 'Team Total'].map((h) => (
+                {['Team Name', 'Member Email', 'Team Mileage', 'Team Total',].map((h) => (
                   <th key={h} style={{ padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' }}>
                     {h}
                   </th>
@@ -557,9 +557,15 @@ const Admin = () => {
             </thead>
             <tbody>
               {(Array.isArray(teamRows) ? teamRows : []).map((row, idx) => (
-                <tr key={`${row.teamName}-${row.memberEmail || row.userEmail || idx}`}>
+                <tr key={`${row.teamName}-${idx}`}>
                   <td style={cell}>{row.teamName ?? '-'}</td>
-                  <td style={cell}>{row.memberEmail || row.userEmail || '-'}</td>
+                  <td style={cell}>
+                    {Array.isArray(row.memberEmails) && row.memberEmails.length
+                      ? row.memberEmails.map((em, i) => (
+                          <div key={i} style={{ lineHeight: 1.2 }}>{em}</div>
+                        ))
+                      : '-'}
+                  </td>
                   <td style={cell}>{row.teamMileage ?? 0}</td>
                   <td style={cell}>{row.teamTotalPoint ?? 0}</td>
                 </tr>
