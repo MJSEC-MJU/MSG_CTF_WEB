@@ -278,6 +278,44 @@ const Admin = () => {
     }
   };
 
+  // ===== Teams =====
+  const handleCreateTeam = async () => {
+    const name = teamNameForCreate.trim();
+    if (!name) return alert('팀 이름을 입력하세요.');
+    try {
+      const res = await createTeam(name);
+      if (res?.code === 'SUCCESS') {
+        alert('팀이 생성되었습니다.');
+        setTeamNameForCreate('');
+        const latestRows = await fetchTeamProfileRows();
+        setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+      } else {
+        alert(res?.message || '팀 생성 실패');
+      }
+    } catch {
+      alert('팀 생성 요청 실패 (이미 존재하거나 권한 오류일 수 있습니다)');
+    }
+  };
+
+  const handleAddMember = async () => {
+    const team = teamNameForAdd.trim();
+    const email = memberEmailToAdd.trim();
+    if (!team || !email) return alert('팀 이름과 이메일을 모두 입력하세요.');
+    try {
+      const res = await addTeamMember(team, email);
+      if (res?.code === 'SUCCESS') {
+        alert('팀원 추가 완료');
+        setMemberEmailToAdd('');
+        const latestRows = await fetchTeamProfileRows();
+        setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+      } else {
+        alert(res?.message || '팀원 추가 실패');
+      }
+    } catch {
+      alert('팀원 추가 요청 실패 (존재하지 않는 팀/이메일일 수 있습니다)');
+    }
+  };
+
   // ===== Problems =====
   const handleDeleteProblem = async (challengeId) => {
     if (!window.confirm('정말로 삭제하시겠습니까?')) return;
@@ -905,18 +943,18 @@ const Admin = () => {
 
       {/* ================= Timer Tab ================= */}
       {tab === 'timer' && (
-        <section>
-          <h2>Set Contest Time</h2>
+        <section className="section--timer">
+          <h2 style={{ gridColumn: '1 / -1' }}>Set Contest Time</h2>
 
-          {currentServerTime && (
-            <div className="card">
-              <h3 className="card__title">현재 서버 시간</h3>
-              <div className="form">
-                <p style={{ margin: 0 }}>{currentServerTime}</p>
-              </div>
+          {/* 1) 현재 서버 시간 */}
+          <div className="card card--dark">
+            <h3 className="card__title">현재 서버 시간</h3>
+            <div className="form">
+              <p style={{ margin: 0 }}>{currentServerTime || '—'}</p>
             </div>
-          )}
+          </div>
 
+          {/* 2) 설정 폼 */}
           <div className="card">
             <div className="form form-grid">
               <div className="field">
@@ -937,7 +975,8 @@ const Admin = () => {
             </div>
           </div>
 
-          <div className="card">
+          {/* 3) 주의사항 */}
+          <div className="card card--dark">
             <h3 className="card__title">주의사항</h3>
             <div className="form">
               <ul style={{ margin: 0, paddingLeft: 20 }}>
