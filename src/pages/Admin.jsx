@@ -1,7 +1,7 @@
 // src/pages/Admin.jsx
 // - Admin 페이지 전체
 // - Signature Codes(관리자) 탭 포함
-// - SIGNATURE 문제 추가/수정 시 clubName(팀명) 필수 입력 처리
+// - SIGNATURE 문제 추가/수정 시 club(팀명) 필수 입력 처리
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { createProblem } from '../api/CreateProblemAPI';
@@ -13,12 +13,12 @@ import PaymentProcessor from '../components/PaymentProcessor';
 import { useContestTime } from "../components/Timer";
 import { fetchContestTime, updateContestTime } from '../api/ContestTimeAPI';
 
-// ── Signature Admin API (엔드포인트는 별도 파일에서 구현) ─────────────────────
+// ── Signature Admin API ─────────────────────────────────────────────
 import {
   adminBulkUpsert,
   adminImportCSV,
   adminExportCSV,
-  adminGetPool,          // NOTE: 내부 구현에서 /api/admin/signature/codes/pool/{challengeId} 사용
+  adminGetPool,          // 내부 구현에서 /api/admin/signature/codes/pool/{challengeId} 사용
   adminGenerate,
   adminReassign,
   adminDeleteOne,
@@ -76,7 +76,7 @@ const Admin = () => {
     category: '',
     date: '',
     time: '',
-    clubName: '', // ✅ SIGNATURE 전용 (필수)
+    club: '', // ✅ SIGNATURE 전용 (필수, DTO 필드명과 일치)
   });
 
   // ===== Signature Admin (state) =====
@@ -307,25 +307,60 @@ const Admin = () => {
       title: problem.title ?? '',
       points: problem.points ?? '',
       category: problem.category ?? '',
-      clubName: problem.clubName ?? '', // ✅ SIGNATURE 편집 시 보존
+      club: problem.club ?? problem.clubName ?? '', // ✅ 서버가 clubName으로 돌려줘도 대응
+      startTime: problem.startTime ? convertToDatetimeLocal(problem.startTime) : '',
+      endTime: problem.endTime ? convertToDatetimeLocal(problem.endTime) : '',
+      description: problem.description ?? '',
+      flag: problem.flag ?? '',
+      minPoints: problem.minPoints ?? '',
+      initialPoints: problem.initialPoints ?? '',
+      url: problem.url ?? '',
+      file: null,
     }));
+  };
+
+  // 서버 → input(datetime-local)
+  const convertToDatetimeLocal = (serverTime) => {
+    if (!serverTime) return '';
+    // 'YYYY-MM-DD HH:mm[:ss]' → 'YYYY-MM-DDTHH:mm'
+    const base = serverTime.replace('T', ' ').slice(0, 16);
+    return base.replace(' ', 'T');
+  };
+
+  // input(datetime-local) → 서버 형식
+  const toServerDateTime = (val) => {
+    if (!val) return '';
+    let s = val.replace('T', ' ');
+    // HH:mm만 있으면 초 붙이기
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
+    return s;
   };
 
   const handleSaveProblem = async () => {
     if (!editingProblem) return alert('수정할 문제를 선택하세요.');
-    // ✅ 방어: SIGNATURE면 clubName 필수
-    if (formData.category === 'SIGNATURE' && !String(formData.clubName || '').trim()) {
-      alert('SIGNATURE 카테고리는 clubName(팀명)이 필수입니다.');
+    // ✅ SIGNATURE면 club 필수
+    if (formData.category === 'SIGNATURE' && !String(formData.club || '').trim()) {
+      alert('SIGNATURE 카테고리는 club(팀명)이 필수입니다.');
       return;
     }
 
-    // 백엔드는 multipart/form-data로 업데이트 받는 구조라고 가정
-    const fd = new FormData();
+    // 업데이트 payload는 DTO 필드만 담아 깔끔하게 보냄
     const payload = {
-      ...formData,
+      title: formData.title,
+      description: formData.description,
+      flag: formData.flag,
+      points: formData.points,
+      minPoints: formData.minPoints,
+      initialPoints: formData.initialPoints || formData.points,
+      startTime: toServerDateTime(formData.startTime),
+      endTime: toServerDateTime(formData.endTime),
+      url: formData.url,
+      category: formData.category,
+      ...(formData.category === 'SIGNATURE' ? { club: String(formData.club).trim() } : {}),
     };
-    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-    fd.append('challenge', blob);
+
+    const fd = new FormData();
+    fd.append('challenge', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
     if (formData.file) fd.append('file', formData.file);
 
     try {
@@ -333,7 +368,9 @@ const Admin = () => {
       if (res?.code === 'SUCCESS') {
         setProblems((prev) =>
           (Array.isArray(prev)
-            ? prev.map((p) => (p.challengeId === editingProblem.challengeId ? { ...p, ...formData } : p))
+            ? prev.map((p) =>
+                p.challengeId === editingProblem.challengeId ? { ...p, ...payload } : p
+              )
             : [])
         );
         setEditingProblem(null);
@@ -370,12 +407,6 @@ const Admin = () => {
       console.error('대회 시간 설정 실패:', e);
       alert('대회 시간 설정 요청 실패 (권한 또는 형식 오류일 수 있습니다)');
     }
-  };
-
-  // 서버(yyyy-MM-dd HH:mm:ss) → datetime-local(yyyy-MM-ddTHH:mm)
-  const convertToDatetimeLocal = (serverTime) => {
-    if (!serverTime) return '';
-    return serverTime.slice(0, 16).replace(' ', 'T');
   };
 
   // ===== Signature Admin Handlers =====
@@ -427,7 +458,6 @@ const Admin = () => {
     if (!id) return alert('challengeId를 입력하세요.');
     try {
       setSigLoading(true);
-      // NOTE: 내부 구현이 /api/admin/signature/codes/pool/{id} 를 호출하도록 수정되어 있어야 함
       const res = await adminGetPool(id);
       setSigPool({ challengeId: res.challengeId, items: res.items || [] });
     } catch {
@@ -803,14 +833,14 @@ const Admin = () => {
                 <input type="file" name="file" onChange={onFile} />
                 <label>Category:</label>
                 <input type="text" name="category" value={formData.category} onChange={onProblemInput} />
-                {/* ✅ SIGNATURE 편집 시 clubName 입력 */}
+                {/* ✅ SIGNATURE 편집 시 club 입력 */}
                 {formData.category === 'SIGNATURE' && (
                   <>
-                    <label>Club Name (팀명) — SIGNATURE 필수</label>
+                    <label>Club (팀명) — SIGNATURE 필수</label>
                     <input
                       type="text"
-                      name="clubName"
-                      value={formData.clubName}
+                      name="club"
+                      value={formData.club}
                       onChange={onProblemInput}
                       placeholder="예) alpha"
                     />
@@ -831,13 +861,13 @@ const Admin = () => {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                // ✅ 방어: SIGNATURE면 clubName 필수
-                if (formData.category === 'SIGNATURE' && !String(formData.clubName || '').trim()) {
-                  alert('SIGNATURE 카테고리는 clubName(팀명)이 필수입니다.');
+                // ✅ SIGNATURE면 club 필수
+                if (formData.category === 'SIGNATURE' && !String(formData.club || '').trim()) {
+                  alert('SIGNATURE 카테고리는 club(팀명)이 필수입니다.');
                   return;
                 }
                 try {
-                  const res = await createProblem(formData);
+                  const res = await createProblem(formData); // CreateProblemAPI에서 club 필드 처리
                   alert(res?.message || '생성 완료');
                 } catch (err) {
                   alert(err?.message || '문제 생성 실패');
@@ -911,14 +941,14 @@ const Admin = () => {
                   <option value="SIGNATURE">SIGNATURE</option>
                 </select>
               </div>
-              {/* ✅ SIGNATURE 전용 clubName 입력칸 */}
+              {/* ✅ SIGNATURE 전용 club 입력칸 */}
               {formData.category === 'SIGNATURE' && (
                 <div>
-                  <label style={{ color: 'black' }}>Club Name (팀명) — SIGNATURE 필수</label>
+                  <label style={{ color: 'black' }}>Club (팀명) — SIGNATURE 필수</label>
                   <input
                     type="text"
-                    name="clubName"
-                    value={formData.clubName}
+                    name="club"
+                    value={formData.club}
                     onChange={onProblemInput}
                     required
                     style={{ width: '100%', padding: 10, marginBottom: 10 }}

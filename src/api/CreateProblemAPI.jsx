@@ -1,6 +1,6 @@
 // src/api/CreateProblemAPI.js
 // - 문제 생성 API 호출 모듈
-// - SIGNATURE 카테고리일 경우 clubName(=teamName) 필수 포함
+// - SIGNATURE 카테고리일 경우 club(팀명) 필수 포함
 
 import { Axios } from './Axios';
 
@@ -14,7 +14,11 @@ export const createProblem = async (formData) => {
     if (formData.file) {
       data.append('file', formData.file);
     } else {
-      const defaultFile = new File([""], "You don't need to download.zip", { type: "application/zip" });
+      const defaultFile = new File(
+        [''],
+        "You don't need to download.zip",
+        { type: 'application/zip' }
+      );
       data.append('file', defaultFile);
     }
 
@@ -25,33 +29,32 @@ export const createProblem = async (formData) => {
       flag: formData.flag,
       points: formData.points,
       minPoints: formData.minPoints,
-      initialPoints: formData.initialPoints || formData.points, // 값 없으면 points 사용
+      initialPoints: formData.initialPoints || formData.points, // 없으면 points 사용
       startTime: `${formData.date} ${formData.time}:00`,
       endTime: `${formData.date} ${formData.time}:00`,
       url: formData.url,
       category: formData.category,
     };
 
-    // 3) SIGNATURE 전용: clubName(=teamName) 필수
+    // 3) SIGNATURE 전용: club 필수
     if (formData.category === 'SIGNATURE') {
-      const club = (formData.clubName || '').trim();
+      const club = (formData.club || formData.clubName || '').trim();
       if (!club) {
-        throw new Error('SIGNATURE 카테고리는 clubName(팀명)이 필수입니다.');
+        throw new Error('SIGNATURE 카테고리는 club(팀명)이 필수입니다.');
       }
-      // 서버 스펙이 clubName 또는 teamName 중 무엇인지 확실치 않으면 둘 다 넣어 호환성 확보
-      challengeData.clubName = club;
-      challengeData.teamName = club;
+      challengeData.club = club; // ← DTO 필드명에 맞춤
     }
 
     // 4) JSON 파트 추가
-    const challengeBlob = new Blob([JSON.stringify(challengeData)], { type: 'application/json' });
+    const challengeBlob = new Blob([JSON.stringify(challengeData)], {
+      type: 'application/json',
+    });
     data.append('challenge', challengeBlob);
 
-    // 5) 요청 (Axios 인터셉터가 Authorization 자동 부착)
+    // 5) 요청 (Axios 인터셉터가 FormData면 Content-Type 자동 처리)
     const response = await Axios.post(API_URL, data);
     return response.data;
   } catch (error) {
-    // 상위에서 처리할 수 있도록 throw
     throw error;
   }
 };
