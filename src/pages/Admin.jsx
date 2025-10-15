@@ -76,7 +76,7 @@ const Admin = () => {
     category: '',
     date: '',
     time: '',
-    club: '', // ✅ SIGNATURE 전용 (필수, DTO 필드명과 일치)
+    club: '', // ✅ SIGNATURE 전용
   });
 
   // ===== Signature Admin (state) =====
@@ -106,7 +106,7 @@ const Admin = () => {
 
   const [sigLoading, setSigLoading] = useState(false);
 
-  // ===== (optional) Derived: map member email -> best team row =====
+  // ===== Derived =====
   const teamByMemberEmail = useMemo(() => {
     const map = new Map();
     const rows = Array.isArray(teamRows) ? teamRows : [];
@@ -121,7 +121,7 @@ const Admin = () => {
     return map;
   }, [teamRows]);
 
-  // ===== Effects: initial data load =====
+  // ===== Effects =====
   useEffect(() => {
     (async () => {
       const [m, p, t, ct] = await Promise.allSettled([
@@ -153,7 +153,7 @@ const Admin = () => {
         setTeamRows(Array.isArray(teamRowsResp) ? teamRowsResp : []);
       } else {
         console.error('[Admin] fetchTeamProfileRows failed:', t.reason);
-        setTeamRows([]); // 실패해도 비워두고 진행
+        setTeamRows([]);
       }
 
       if (ct.status === 'fulfilled') {
@@ -167,46 +167,41 @@ const Admin = () => {
     })();
   }, []);
 
-  // ===== Users =====
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm('정말 삭제하시겠습니까?')) return;
-    try {
-      const res = await removeUser(userId);
-      if (res?.code === 'SUCCESS') {
-        setUsers((prev) => (Array.isArray(prev) ? prev.filter((u) => u.userId !== userId) : []));
-        alert('회원 삭제 성공');
-      } else {
-        alert(res?.message || '삭제 실패');
-      }
-    } catch (e) {
-      alert('삭제 요청 실패');
-    }
-  };
-
-  const handleSaveUser = async () => {
-    if (!editingUser) return alert('수정할 사용자를 선택하세요.');
-    try {
-      const payload = {
-        email: editingUser.email,
-        univ: editingUser.univ,
-        loginId: editingUser.loginId,
-        role: editingUser.role,
-      };
-      const updated = await updateUser(editingUser.userId, payload);
-      const updatedObj = updated?.data ?? updated;
-      setUsers((prev) => (Array.isArray(prev) ? prev.map((u) => (u.userId === updatedObj.userId ? updatedObj : u)) : []));
-      setEditingUser(null);
-      alert('사용자 정보가 수정되었습니다.');
-    } catch (e) {
-      alert('수정에 실패했습니다.');
-    }
-  };
-
+  // ===== Helpers =====
   const onNewUserInput = (e) => {
     const { name, value } = e.target;
     setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
+  const onUserInput = (e) => {
+    const { name, value } = e.target;
+    if (!editingUser) return;
+    setEditingUser((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onProblemInput = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onFile = (e) => setFormData((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
+
+  // 서버 → input(datetime-local)
+  const convertToDatetimeLocal = (serverTime) => {
+    if (!serverTime) return '';
+    const base = serverTime.replace('T', ' ').slice(0, 16);
+    return base.replace(' ', 'T');
+  };
+
+  // input(datetime-local) → 서버 형식
+  const toServerDateTime = (val) => {
+    if (!val) return '';
+    let s = val.replace('T', ' ');
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
+    return s;
+  };
+
+  // ===== Users =====
   const handleCreateUser = async () => {
     const rolesArr = newUser.roles
       .split(',')
@@ -244,46 +239,42 @@ const Admin = () => {
       } else {
         alert(res?.message || '생성 실패');
       }
-    } catch (e) {
+    } catch {
       alert('생성 요청 실패 (권한/중복/유효성 오류일 수 있습니다)');
     }
   };
 
-  // ===== Team tools =====
-  const handleCreateTeam = async () => {
-    const name = teamNameForCreate.trim();
-    if (!name) return alert('팀 이름을 입력하세요.');
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
     try {
-      const res = await createTeam(name);
+      const res = await removeUser(userId);
       if (res?.code === 'SUCCESS') {
-        alert('팀이 생성되었습니다.');
-        setTeamNameForCreate('');
-        const latestRows = await fetchTeamProfileRows();
-        setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+        setUsers((prev) => (Array.isArray(prev) ? prev.filter((u) => u.userId !== userId) : []));
+        alert('회원 삭제 성공');
       } else {
-        alert(res?.message || '팀 생성 실패');
+        alert(res?.message || '삭제 실패');
       }
-    } catch (e) {
-      alert('팀 생성 요청 실패 (이미 존재하거나 권한 오류일 수 있습니다)');
+    } catch {
+      alert('삭제 요청 실패');
     }
   };
 
-  const handleAddMember = async () => {
-    const team = teamNameForAdd.trim();
-    const email = memberEmailToAdd.trim();
-    if (!team || !email) return alert('팀 이름과 이메일을 모두 입력하세요.');
+  const handleSaveUser = async () => {
+    if (!editingUser) return alert('수정할 사용자를 선택하세요.');
     try {
-      const res = await addTeamMember(team, email);
-      if (res?.code === 'SUCCESS') {
-        alert('팀원 추가 완료');
-        setMemberEmailToAdd('');
-        const latestRows = await fetchTeamProfileRows();
-        setTeamRows(Array.isArray(latestRows) ? latestRows : []);
-      } else {
-        alert(res?.message || '팀원 추가 실패');
-      }
-    } catch (e) {
-      alert('팀원 추가 요청 실패 (존재하지 않는 팀/이메일일 수 있습니다)');
+      const payload = {
+        email: editingUser.email,
+        univ: editingUser.univ,
+        loginId: editingUser.loginId,
+        role: editingUser.role,
+      };
+      const updated = await updateUser(editingUser.userId, payload);
+      const updatedObj = updated?.data ?? updated;
+      setUsers((prev) => (Array.isArray(prev) ? prev.map((u) => (u.userId === updatedObj.userId ? updatedObj : u)) : []));
+      setEditingUser(null);
+      alert('사용자 정보가 수정되었습니다.');
+    } catch {
+      alert('수정에 실패했습니다.');
     }
   };
 
@@ -319,21 +310,6 @@ const Admin = () => {
     }));
   };
 
-  // 서버 → input(datetime-local)
-  const convertToDatetimeLocal = (serverTime) => {
-    if (!serverTime) return '';
-    const base = serverTime.replace('T', ' ').slice(0, 16);
-    return base.replace(' ', 'T');
-  };
-
-  // input(datetime-local) → 서버 형식
-  const toServerDateTime = (val) => {
-    if (!val) return '';
-    let s = val.replace('T', ' ');
-    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
-    return s;
-  };
-
   const handleSaveProblem = async () => {
     if (!editingProblem) return alert('수정할 문제를 선택하세요.');
     if (formData.category === 'SIGNATURE' && !String(formData.club || '').trim()) {
@@ -364,16 +340,14 @@ const Admin = () => {
       if (res?.code === 'SUCCESS') {
         setProblems((prev) =>
           (Array.isArray(prev)
-            ? prev.map((p) =>
-                p.challengeId === editingProblem.challengeId ? { ...p, ...payload } : p
-              )
-            : [])
+            ? prev.map((p) => (p.challengeId === editingProblem.challengeId ? { ...p, ...payload } : p))
+            : []),
         );
         setEditingProblem(null);
         setShowEditProblemForm(false);
       }
       alert(res?.message || '문제 수정 결과 확인');
-    } catch (e) {
+    } catch {
       alert('문제 수정 실패');
     }
   };
@@ -533,22 +507,8 @@ const Admin = () => {
     } finally { setSigLoading(false); }
   };
 
-  // ===== Shared form helpers =====
-  const onUserInput = (e) => {
-    const { name, value } = e.target;
-    if (!editingUser) return;
-    setEditingUser((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const onProblemInput = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const onFile = (e) => setFormData((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
-
   return (
-    <div className="admin" style={{ padding: 16 }}>
+    <div className="admin">
       <h1>Admin Page</h1>
 
       <div className="tabs">
@@ -566,7 +526,7 @@ const Admin = () => {
           <h2>Users</h2>
 
           {/* Create new user */}
-          <div className="card" style={{ marginBottom: 12 }}>
+          <div className="card">
             <h3 className="card__title">신규 유저 추가</h3>
             <div className="form form-grid">
               <div className="field">
@@ -599,7 +559,7 @@ const Admin = () => {
 
           {/* Edit panel */}
           {editingUser && (
-            <div className="card" style={{ marginBottom: 12 }}>
+            <div className="card">
               <h3 className="card__title">Edit User</h3>
               <div className="form form-grid">
                 <div className="field">
@@ -663,7 +623,7 @@ const Admin = () => {
         <section>
           <h2>Team List</h2>
 
-          <div className="card" style={{ marginBottom: 12 }}>
+          <div className="card">
             <h3 className="card__title">팀 생성</h3>
             <div className="form">
               <div className="field">
@@ -675,7 +635,7 @@ const Admin = () => {
             </div>
           </div>
 
-          <div className="card" style={{ marginBottom: 12 }}>
+          <div className="card">
             <h3 className="card__title">팀원 추가</h3>
             <div className="form form-grid">
               <div className="field">
@@ -949,15 +909,16 @@ const Admin = () => {
           <h2>Set Contest Time</h2>
 
           {currentServerTime && (
-            <div className="card" style={{ marginBottom: 12 }}>
-              <p style={{ margin: 0 }}>
-                <strong>현재 서버 시간:</strong> {currentServerTime}
-              </p>
+            <div className="card">
+              <h3 className="card__title">현재 서버 시간</h3>
+              <div className="form">
+                <p style={{ margin: 0 }}>{currentServerTime}</p>
+              </div>
             </div>
           )}
 
-          <div className="card" style={{ marginBottom: 12 }}>
-            <div className="form">
+          <div className="card">
+            <div className="form form-grid">
               <div className="field">
                 <label className="label">시작 시간</label>
                 <input className="input" type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
@@ -969,21 +930,23 @@ const Admin = () => {
                 <input className="input" type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
                 <p className="hint">형식: yyyy-MM-dd HH:mm (예: 2025-03-29 22:00)</p>
               </div>
+            </div>
 
-              <div className="actions">
-                <button className="btn btn--primary" onClick={handleSetContestTime}>대회 시간 설정</button>
-              </div>
+            <div className="actions">
+              <button className="btn btn--primary" onClick={handleSetContestTime}>대회 시간 설정</button>
             </div>
           </div>
 
           <div className="card">
-            <h4 className="card__title">주의사항</h4>
-            <ul style={{ margin: 0, paddingLeft: 20 }}>
-              <li>시작 시간은 종료 시간보다 이전이어야 합니다.</li>
-              <li>새로운 설정이 생성되면 기존의 활성화된 설정은 자동으로 비활성화됩니다.</li>
-              <li>모든 시간은 <strong>Asia/Seoul (KST, UTC+09:00)</strong> 타임존 기준입니다.</li>
-              <li>관리자 권한(ROLE_ADMIN)이 필요합니다.</li>
-            </ul>
+            <h3 className="card__title">주의사항</h3>
+            <div className="form">
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                <li>시작 시간은 종료 시간보다 이전이어야 합니다.</li>
+                <li>새로운 설정이 생성되면 기존의 활성화된 설정은 자동으로 비활성화됩니다.</li>
+                <li>모든 시간은 <strong>Asia/Seoul (KST, UTC+09:00)</strong> 타임존 기준입니다.</li>
+                <li>관리자 권한(ROLE_ADMIN)이 필요합니다.</li>
+              </ul>
+            </div>
           </div>
         </section>
       )}
@@ -992,12 +955,14 @@ const Admin = () => {
       {tab === 'signature' && (
         <section>
           <h2>Signature Codes (Admin)</h2>
-          {sigLoading && <p style={{ color: '#444' }}>처리 중…</p>}
+          {sigLoading && <p className="hint">처리 중…</p>}
 
           {/* 1) Bulk Upsert */}
           <div className="card">
             <h3 className="card__title">1) 코드 일괄 업서트 (JSON)</h3>
-            <textarea className="textarea" value={sigBulkText} onChange={(e) => setSigBulkText(e.target.value)} />
+            <div className="form">
+              <textarea className="textarea" value={sigBulkText} onChange={(e) => setSigBulkText(e.target.value)} />
+            </div>
             <div className="actions">
               <button className="btn btn--primary" onClick={onSigBulkUpsert}>업서트</button>
             </div>
@@ -1023,7 +988,7 @@ const Admin = () => {
               <div className="field">
                 <input className="input" placeholder="challengeId" value={sigPoolChallengeId} onChange={(e) => setSigPoolChallengeId(e.target.value)} />
               </div>
-              <div className="actions">
+              <div className="actions" style={{ alignItems: 'end' }}>
                 <button className="btn btn--primary" onClick={onSigLoadPool}>조회</button>
               </div>
             </div>
@@ -1062,7 +1027,7 @@ const Admin = () => {
               <button className="btn btn--primary" onClick={onSigGenerate}>생성</button>
             </div>
             {genResult && (
-              <div style={{ marginTop: 8 }}>
+              <div className="form" style={{ paddingTop: 0 }}>
                 <div>created: {genResult.created}</div>
                 {Array.isArray(genResult.codes) && genResult.codes.length > 0 && (
                   <details style={{ marginTop: 6 }}>
