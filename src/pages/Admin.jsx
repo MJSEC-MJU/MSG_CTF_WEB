@@ -10,11 +10,13 @@ import { fetchContestTime, updateContestTime } from '../api/ContestTimeAPI';
 
 const Admin = () => {
   // ===== UI state =====
-  const [tab, setTab] = useState('users'); // 'users' | 'problems' | 'payment'
+  // users | teams | problems | payment | timer
+  const [tab, setTab] = useState('users');
 
   // ===== Users & Teams =====
   const [users, setUsers] = useState([]);
   const [teamRows, setTeamRows] = useState([]); // normalized rows from team profile
+
   const [editingUser, setEditingUser] = useState(null);
   const [newUser, setNewUser] = useState({
     loginId: '',
@@ -57,7 +59,7 @@ const Admin = () => {
     time: '',
   });
 
-  // ===== Derived: map member email -> team row =====
+  // ===== (optional) Derived: map member email -> best team row =====
   const teamByMemberEmail = useMemo(() => {
     const map = new Map();
     const rows = Array.isArray(teamRows) ? teamRows : [];
@@ -269,7 +271,11 @@ const Admin = () => {
     try {
       const res = await updateProblem(editingProblem.challengeId, fd);
       if (res?.code === 'SUCCESS') {
-        setProblems((prev) => (Array.isArray(prev) ? prev.map((p) => (p.challengeId === editingProblem.challengeId ? { ...p, ...formData } : p)) : []));
+        setProblems((prev) =>
+          (Array.isArray(prev)
+            ? prev.map((p) => (p.challengeId === editingProblem.challengeId ? { ...p, ...formData } : p))
+            : [])
+        );
         setEditingProblem(null);
         setShowEditProblemForm(false);
       }
@@ -285,8 +291,6 @@ const Admin = () => {
       alert('시작 시간과 종료 시간을 모두 입력해주세요.');
       return;
     }
-
-    // datetime-local 형식(yyyy-MM-ddTHH:mm)을 서버 형식(yyyy-MM-dd HH:mm:ss)으로 변환
     const formattedStartTime = startTime.replace('T', ' ') + ':00';
     const formattedEndTime = endTime.replace('T', ' ') + ':00';
 
@@ -294,9 +298,7 @@ const Admin = () => {
       const res = await updateContestTime(formattedStartTime, formattedEndTime);
       if (res?.message || res?.code === 'SUCCESS') {
         alert(res?.message || '대회 시간이 설정되었습니다!');
-        // 서버에서 최신 시간 다시 가져오기
         await refreshContestTime();
-        // 로컬 state도 업데이트
         const latestData = await fetchContestTime();
         if (latestData?.startTime) setStartTime(convertToDatetimeLocal(latestData.startTime));
         if (latestData?.endTime) setEndTime(convertToDatetimeLocal(latestData.endTime));
@@ -313,7 +315,6 @@ const Admin = () => {
   // 서버에서 받은 시간 형식(yyyy-MM-dd HH:mm:ss)을 datetime-local 형식(yyyy-MM-ddTHH:mm)으로 변환
   const convertToDatetimeLocal = (serverTime) => {
     if (!serverTime) return '';
-    // "2025-03-29 10:00:00" -> "2025-03-29T10:00"
     return serverTime.slice(0, 16).replace(' ', 'T');
   };
 
@@ -337,6 +338,9 @@ const Admin = () => {
 
       <div style={{ marginBottom: 12 }}>
         <button onClick={() => setTab('users')}>User List</button>
+        <button onClick={() => setTab('teams')} style={{ marginLeft: 8 }}>
+          Team List
+        </button>
         <button onClick={() => setTab('problems')} style={{ marginLeft: 8 }}>
           Problem List
         </button>
@@ -352,47 +356,6 @@ const Admin = () => {
       {tab === 'users' && (
         <section>
           <h2 style={{ color: 'black' }}>Users</h2>
-
-          {/* Team tools */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-              padding: 12,
-              border: '1px solid #000',
-              borderRadius: 8,
-              marginBottom: 12,
-              background: '#fafafa',
-            }}
-          >
-            <div>
-              <h3 style={{ color: 'black', marginTop: 0 }}>팀 생성</h3>
-              <input
-                placeholder="팀 이름"
-                value={teamNameForCreate}
-                onChange={(e) => setTeamNameForCreate(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
-              />
-              <button onClick={handleCreateTeam}>생성</button>
-            </div>
-            <div>
-              <h3 style={{ color: 'black', marginTop: 0 }}>팀원 추가</h3>
-              <input
-                placeholder="팀 이름"
-                value={teamNameForAdd}
-                onChange={(e) => setTeamNameForAdd(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
-              />
-              <input
-                placeholder="사용자 이메일"
-                value={memberEmailToAdd}
-                onChange={(e) => setMemberEmailToAdd(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
-              />
-              <button onClick={handleAddMember}>추가</button>
-            </div>
-          </div>
 
           {/* Create new user */}
           <div
@@ -490,7 +453,7 @@ const Admin = () => {
             </div>
           )}
 
-          {/* Users + Team columns */}
+          {/* Users table (팀 관련 열 제거) */}
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
             <thead>
               <tr>
@@ -501,11 +464,6 @@ const Admin = () => {
                   'Role',
                   'Point',
                   'Univ',
-                  'Team Name',
-                  'Member Email',
-                  'Team Mileage',
-                  'Team Total',
-                  'Team Solves',
                   'Created',
                   'Updated',
                   'Action',
@@ -517,50 +475,97 @@ const Admin = () => {
               </tr>
             </thead>
             <tbody>
-              {(Array.isArray(users) ? users : []).map((u) => {
-                const relatedMemberEmails = Array.from(
-                  new Set(
-                    (Array.isArray(teamRows) ? teamRows : [])
-                      .filter(r => r.memberEmail === u.email || r.userEmail === u.email)
-                      .map(r => r.memberEmail)
-                      .filter(Boolean)
-                  )
-                ).slice(0, 2);
-                const team = teamByMemberEmail.get(u.email) || null;
-                return (
-                  <tr key={u.userId}>
-                    <td style={cell}>{u.userId}</td>
-                    <td style={cell}>{u.email}</td>
-                    <td style={cell}>{u.loginId}</td>
-                    <td style={cell}>{u.role}</td>
-                    <td style={cell}>{u.totalPoint}</td>
-                    <td style={cell}>{u.univ}</td>
-                    <td style={cell}>{team?.teamName ?? '-'}</td>
-                    <td style={cell}>
-                      {relatedMemberEmails.length === 0 ? (
-                        '-' 
-                      ) : (
-                        relatedMemberEmails.map((em, i) => (
-                          <div key={i} style={{ lineHeight: 1.2 }}>{em}</div>
-                        ))
-                      )}
-                    </td>
-                    <td style={cell}>{team?.teamMileage ?? 0}</td>
-                    <td style={cell}>{team?.teamTotalPoint ?? 0}</td>
-                    <td style={cell}>{team?.teamSolvedCount ?? 0}</td>
-                    <td style={cell}>{u.createdAt?.slice(0, 19)}</td>
-                    <td style={cell}>{u.updatedAt?.slice(0, 19)}</td>
-                    <td style={cell}>
-                      <button style={{ margin: 5 }} onClick={() => handleDeleteUser(u.userId)}>
-                        Delete
-                      </button>
-                      <button style={{ margin: 5 }} onClick={() => setEditingUser(u)}>
-                        Change
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {(Array.isArray(users) ? users : []).map((u) => (
+                <tr key={u.userId}>
+                  <td style={cell}>{u.userId}</td>
+                  <td style={cell}>{u.email}</td>
+                  <td style={cell}>{u.loginId}</td>
+                  <td style={cell}>{u.role}</td>
+                  <td style={cell}>{u.totalPoint}</td>
+                  <td style={cell}>{u.univ}</td>
+                  <td style={cell}>{u.createdAt?.slice(0, 19)}</td>
+                  <td style={cell}>{u.updatedAt?.slice(0, 19)}</td>
+                  <td style={cell}>
+                    <button style={{ margin: 5 }} onClick={() => handleDeleteUser(u.userId)}>
+                      Delete
+                    </button>
+                    <button style={{ margin: 5 }} onClick={() => setEditingUser(u)}>
+                      Change
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+
+      {/* ================= Teams Tab (신규) ================= */}
+      {tab === 'teams' && (
+        <section>
+          <h2 style={{ color: 'black' }}>Team List</h2>
+
+          {/* Team tools (Users 탭에서 이동) */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+              padding: 12,
+              border: '1px solid #000',
+              borderRadius: 8,
+              marginBottom: 12,
+              background: '#fafafa',
+            }}
+          >
+            <div>
+              <h3 style={{ color: 'black', marginTop: 0 }}>팀 생성</h3>
+              <input
+                placeholder="팀 이름"
+                value={teamNameForCreate}
+                onChange={(e) => setTeamNameForCreate(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <button onClick={handleCreateTeam}>생성</button>
+            </div>
+            <div>
+              <h3 style={{ color: 'black', marginTop: 0 }}>팀원 추가</h3>
+              <input
+                placeholder="팀 이름"
+                value={teamNameForAdd}
+                onChange={(e) => setTeamNameForAdd(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <input
+                placeholder="사용자 이메일"
+                value={memberEmailToAdd}
+                onChange={(e) => setMemberEmailToAdd(e.target.value)}
+                style={{ padding: 6, marginRight: 8 }}
+              />
+              <button onClick={handleAddMember}>추가</button>
+            </div>
+          </div>
+
+          {/* Team rows table (UserList에서 분리된 열) */}
+          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
+            <thead>
+              <tr>
+                {['Team Name', 'Member Email', 'Team Mileage', 'Team Total', 'Team Solves'].map((h) => (
+                  <th key={h} style={{ padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(Array.isArray(teamRows) ? teamRows : []).map((row, idx) => (
+                <tr key={`${row.teamName}-${row.memberEmail || row.userEmail || idx}`}>
+                  <td style={cell}>{row.teamName ?? '-'}</td>
+                  <td style={cell}>{row.memberEmail || row.userEmail || '-'}</td>
+                  <td style={cell}>{row.teamMileage ?? 0}</td>
+                  <td style={cell}>{row.teamTotalPoint ?? 0}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </section>
@@ -844,3 +849,4 @@ const Admin = () => {
 const cell = { padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' };
 
 export default Admin;
+
