@@ -184,3 +184,62 @@
   background-color: #ccc;      /* 취소 버튼 색상 */
   color: #000;
 }
+.lock-badge {
+position: absolute;
+top: 8px;
+right: 8px;
+font-size: 0.75rem;
+padding: 2px 6px;
+border-radius: 6px;
+background: rgba(255, 0, 0, 0.18);
+border: 1px solid rgba(255, 0, 0, 0.35);
+color: #ff8b8b;
+}
+.signature-modal {
+position: fixed; inset: 0; background: rgba(0,0,0,.55);
+display: flex; align-items: center; justify-content: center;
+z-index: 1000;
+}
+.signature-form {
+width: min(92vw, 420px);
+background: #111;
+color: #eee;
+border: 1px solid #333;
+border-radius: 16px;
+padding: 20px 18px;
+box-shadow: 0 10px 30px rgba(0,0,0,.4);
+}
+.signature-form h3 { margin: 0 0 6px; }
+.signature-help { opacity: .7; margin: 0 0 14px; font-size: .9rem; }
+.signature-form input {
+width: 100%; height: 44px; border-radius: 10px; padding: 0 12px;
+background: #181818; color: #fff; border: 1px solid #333;
+}
+.signature-buttons { display: flex; gap: 10px; margin-top: 12px; }
+.signature-buttons button { height: 40px; flex: 1; border-radius: 10px; }
+.signature-msg { margin-top: 10px; font-size: .9rem; color: #ffb8b8; }
+/* 제출 버튼(빨간색) */
+.signature-buttons .submit-btn {
+  background: #e53935;        /* 빨강 */
+  color: #fff;
+  border: 1px solid #e53935;
+  border-radius: 10px;
+  height: 40px;
+  padding: 0 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .02s ease, filter .15s ease, opacity .15s ease;
+}
+
+.signature-buttons .submit-btn:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.signature-buttons .submit-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.signature-buttons .submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

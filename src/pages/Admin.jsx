@@ -1,3 +1,4 @@
+// src/pages/Admin.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { createProblem } from '../api/CreateProblemAPI';
 import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
@@ -8,9 +9,22 @@ import PaymentProcessor from '../components/PaymentProcessor';
 import { useContestTime } from "../components/Timer";
 import { fetchContestTime, updateContestTime } from '../api/ContestTimeAPI';
 
+// ── Signature Admin API ─────────────────────────────────────────────
+import {
+  adminBulkUpsert,
+  adminImportCSV,
+  adminExportCSV,
+  adminGetPool,
+  adminGenerate,
+  adminReassign,
+  adminDeleteOne,
+  adminPurgeChallenge,
+  adminForceUnlock,
+} from '../api/SignatureAdminAPI';
+
 const Admin = () => {
   // ===== UI state =====
-  // users | teams | problems | payment | timer
+  // users | teams | problems | payment | timer | signature
   const [tab, setTab] = useState('users');
 
   // ===== Users & Teams =====
@@ -58,6 +72,33 @@ const Admin = () => {
     date: '',
     time: '',
   });
+
+  // ===== Signature Admin (state) =====
+  const [sigBulkText, setSigBulkText] = useState('[\n  {"teamName":"alpha","challengeId":5,"code":"123456"}\n]');
+  const [sigImportFile, setSigImportFile] = useState(null);
+
+  const [sigPoolChallengeId, setSigPoolChallengeId] = useState('');
+  const [sigPool, setSigPool] = useState({ challengeId: null, items: [] });
+
+  const [genChallengeId, setGenChallengeId] = useState('');
+  const [genCount, setGenCount] = useState('');
+  const [genTeamName, setGenTeamName] = useState('');
+  const [genResult, setGenResult] = useState(null);
+
+  const [rsChallengeId, setRsChallengeId] = useState('');
+  const [rsCodeDigest, setRsCodeDigest] = useState('');
+  const [rsTeamName, setRsTeamName] = useState('');
+  const [rsResetConsumed, setRsResetConsumed] = useState(true);
+
+  const [delChallengeId, setDelChallengeId] = useState('');
+  const [delCodeDigest, setDelCodeDigest] = useState('');
+
+  const [purgeChallengeId, setPurgeChallengeId] = useState('');
+
+  const [fuTeamName, setFuTeamName] = useState('');
+  const [fuChallengeId, setFuChallengeId] = useState('');
+
+  const [sigLoading, setSigLoading] = useState(false);
 
   // ===== (optional) Derived: map member email -> best team row =====
   const teamByMemberEmail = useMemo(() => {
@@ -318,6 +359,134 @@ const Admin = () => {
     return serverTime.slice(0, 16).replace(' ', 'T');
   };
 
+  // ===== Signature Admin Handlers =====
+  const onSigBulkUpsert = async () => {
+    let arr;
+    try {
+      arr = JSON.parse(sigBulkText);
+      if (!Array.isArray(arr)) throw new Error('JSON 배열이어야 합니다.');
+    } catch (e) {
+      return alert('JSON 파싱 실패: ' + e.message);
+    }
+    try {
+      setSigLoading(true);
+      const res = await adminBulkUpsert(arr);
+      alert(res?.message || '업서트 완료');
+    } catch {
+      alert('업서트 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigImport = async () => {
+    if (!sigImportFile) return alert('CSV 파일을 선택하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminImportCSV(sigImportFile);
+      alert(res?.message || '임포트 완료');
+      setSigImportFile(null);
+    } catch {
+      alert('임포트 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigExport = async () => {
+    try {
+      setSigLoading(true);
+      const { blob, filename } = await adminExportCSV();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename || 'signature_codes.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('익스포트 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigLoadPool = async () => {
+    const id = parseInt(sigPoolChallengeId, 10);
+    if (!id) return alert('challengeId를 입력하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminGetPool(id);
+      setSigPool({ challengeId: res.challengeId, items: res.items || [] });
+    } catch {
+      alert('풀 조회 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigGenerate = async () => {
+    const cid = parseInt(genChallengeId, 10);
+    const cnt = parseInt(genCount, 10);
+    if (!cid || !cnt) return alert('challengeId와 count를 입력하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminGenerate({ challengeId: cid, count: cnt, teamName: genTeamName || undefined });
+      setGenResult(res);
+      alert(`${res?.created ?? 0}개 생성 완료`);
+    } catch {
+      alert('생성 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigReassign = async () => {
+    const cid = parseInt(rsChallengeId, 10);
+    if (!cid || !rsCodeDigest) return alert('challengeId와 codeDigest를 입력하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminReassign({
+        challengeId: cid,
+        codeDigest: rsCodeDigest.trim(),
+        teamName: rsTeamName || null,
+        resetConsumed: !!rsResetConsumed,
+      });
+      alert(res?.message || '재배정/초기화 완료');
+      if (sigPool.challengeId === cid) await onSigLoadPool();
+    } catch {
+      alert('재배정 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigDeleteOne = async () => {
+    const cid = parseInt(delChallengeId, 10);
+    if (!cid || !delCodeDigest) return alert('challengeId와 codeDigest를 입력하세요.');
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    try {
+      setSigLoading(true);
+      const res = await adminDeleteOne(cid, delCodeDigest.trim());
+      alert(res?.message || '삭제 완료');
+      if (sigPool.challengeId === cid) await onSigLoadPool();
+    } catch {
+      alert('삭제 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigPurge = async () => {
+    const cid = parseInt(purgeChallengeId, 10);
+    if (!cid) return alert('challengeId를 입력하세요.');
+    if (!window.confirm(`챌린지 ${cid}의 모든 코드를 삭제합니다. 계속할까요?`)) return;
+    try {
+      setSigLoading(true);
+      const res = await adminPurgeChallenge(cid);
+      alert(res?.message || '전체 삭제 완료');
+      if (sigPool.challengeId === cid) setSigPool({ challengeId: cid, items: [] });
+    } catch {
+      alert('전체 삭제 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigForceUnlock = async () => {
+    const cid = parseInt(fuChallengeId, 10);
+    if (!cid || !fuTeamName.trim()) return alert('teamName과 challengeId를 입력하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminForceUnlock({ teamName: fuTeamName.trim(), challengeId: cid });
+      alert(res?.message || '강제 언락 완료');
+    } catch {
+      alert('강제 언락 실패');
+    } finally { setSigLoading(false); }
+  };
+
   // ===== Shared form helpers =====
   const onUserInput = (e) => {
     const { name, value } = e.target;
@@ -349,6 +518,9 @@ const Admin = () => {
         </button>
         <button onClick={() => setTab('timer')} style={{ marginLeft: 8 }}>
           Set Time
+        </button>
+        <button onClick={() => setTab('signature')} style={{ marginLeft: 8 }}>
+          Signature
         </button>
       </div>
 
@@ -503,7 +675,7 @@ const Admin = () => {
         <section>
           <h2 style={{ color: 'black' }}>Team List</h2>
 
-          {/* Team tools (Users 탭에서 이동) */}
+          {/* Team tools */}
           <div
             style={{
               display: 'grid',
@@ -544,7 +716,7 @@ const Admin = () => {
             </div>
           </div>
 
-          {/* Teams Tab 내 표 렌더 부분만 교체/수정 */}
+          {/* Teams table */}
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
             <thead>
               <tr>
@@ -846,11 +1018,143 @@ const Admin = () => {
           </div>
         </section>
       )}
+
+      {/* ================= Signature Admin Tab ================= */}
+      {tab === 'signature' && (
+        <section>
+          <h2 style={{ color: 'black' }}>Signature Codes (Admin)</h2>
+          {sigLoading && <p style={{ color: '#444' }}>처리 중…</p>}
+
+          {/* 1) Bulk Upsert */}
+          <div style={box}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>1) 코드 일괄 업서트 (JSON)</h3>
+            <textarea
+              value={sigBulkText}
+              onChange={(e) => setSigBulkText(e.target.value)}
+              style={{ width: '100%', height: 120, color: 'black' }}
+            />
+            <button onClick={onSigBulkUpsert} style={{ marginTop: 8 }}>업서트</button>
+          </div>
+
+          {/* 2) Import / 3) Export */}
+          <div style={box}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>2) CSV 임포트 / 3) CSV 익스포트</h3>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => setSigImportFile(e.target.files?.[0] || null)}
+                style={{ color: 'black' }}
+              />
+              <button onClick={onSigImport}>임포트</button>
+              <button onClick={onSigExport} style={{ marginLeft: 'auto' }}>익스포트</button>
+            </div>
+            <p style={{ color: '#666', fontSize: 12, marginTop: 6 }}>
+              CSV 헤더: <code>teamName,challengeId,code</code>
+            </p>
+          </div>
+
+          {/* 4) Pool 조회 */}
+          <div style={box}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>4) 코드 풀 조회</h3>
+            <input
+              placeholder="challengeId"
+              value={sigPoolChallengeId}
+              onChange={(e) => setSigPoolChallengeId(e.target.value)}
+              style={{ padding: 6, marginRight: 8 }}
+            />
+            <button onClick={onSigLoadPool}>조회</button>
+
+            {sigPool?.items?.length > 0 ? (
+              <table style={{ width: '100%', marginTop: 10, borderCollapse: 'collapse', border: '1px solid black' }}>
+                <thead>
+                  <tr>{['ID','codeDigest','assignedTeamId','consumed','consumedAt'].map(h => (
+                    <th key={h} style={th}>{h}</th>
+                  ))}</tr>
+                </thead>
+                <tbody>
+                  {sigPool.items.map((it) => (
+                    <tr key={it.id}>
+                      <td style={td}>{it.id}</td>
+                      <td style={td} title={it.codeDigest}>{it.codeDigest}</td>
+                      <td style={td}>{it.assignedTeamId ?? '-'}</td>
+                      <td style={td}>{String(it.consumed)}</td>
+                      <td style={td}>{it.consumedAt ?? '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p style={{ color: '#444', marginTop: 8 }}>아이템이 없습니다.</p>
+            )}
+          </div>
+
+          {/* 5) Generate */}
+          <div style={box}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>5) 랜덤 코드 생성</h3>
+            <input placeholder="challengeId" value={genChallengeId} onChange={(e)=>setGenChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <input placeholder="count (1~10000)" value={genCount} onChange={(e)=>setGenCount(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <input placeholder="teamName (선택)" value={genTeamName} onChange={(e)=>setGenTeamName(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <button onClick={onSigGenerate}>생성</button>
+            {genResult && (
+              <div style={{ marginTop: 8, color: 'black' }}>
+                <div>created: {genResult.created}</div>
+                {Array.isArray(genResult.codes) && genResult.codes.length > 0 && (
+                  <details style={{ marginTop: 6 }}>
+                    <summary>생성된 코드 보기</summary>
+                    <pre style={{ whiteSpace: 'pre-wrap' }}>{genResult.codes.join(', ')}</pre>
+                  </details>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 6) Reassign / Reset */}
+          <div style={box}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>6) 코드 재배정 / 소비상태 초기화</h3>
+            <input placeholder="challengeId" value={rsChallengeId} onChange={(e)=>setRsChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <input placeholder="codeDigest (sha256 hex)" value={rsCodeDigest} onChange={(e)=>setRsCodeDigest(e.target.value)} style={{ padding:6, marginRight:8, width: 360 }} />
+            <input placeholder="teamName (비우면 배정해제)" value={rsTeamName} onChange={(e)=>setRsTeamName(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <label style={{ color: 'black' }}>
+              <input type="checkbox" checked={rsResetConsumed} onChange={(e)=>setRsResetConsumed(e.target.checked)} /> resetConsumed
+            </label>
+            <div><button onClick={onSigReassign} style={{ marginTop: 8 }}>재배정/초기화</button></div>
+          </div>
+
+          {/* 7) Delete one */}
+          <div style={box}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>7) 단건 삭제</h3>
+            <input placeholder="challengeId" value={delChallengeId} onChange={(e)=>setDelChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <input placeholder="codeDigest" value={delCodeDigest} onChange={(e)=>setDelCodeDigest(e.target.value)} style={{ padding:6, marginRight:8, width: 360 }} />
+            <button onClick={onSigDeleteOne}>삭제</button>
+          </div>
+
+          {/* 8) Purge */}
+          <div style={box}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>8) 챌린지 전체 코드 제거</h3>
+            <input placeholder="challengeId" value={purgeChallengeId} onChange={(e)=>setPurgeChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <button onClick={onSigPurge} style={{ background: '#f44336', color: '#fff' }}>전체 삭제</button>
+          </div>
+
+          {/* 9) Force Unlock */}
+          <div style={box}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>9) 강제 언락</h3>
+            <input placeholder="teamName" value={fuTeamName} onChange={(e)=>setFuTeamName(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <input placeholder="challengeId" value={fuChallengeId} onChange={(e)=>setFuChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
+            <button onClick={onSigForceUnlock}>강제 언락</button>
+            <p style={{ color: '#666', fontSize: 12, marginTop: 6 }}>
+              레코드가 없으면 생성합니다.
+            </p>
+          </div>
+        </section>
+      )}
     </div>
   );
 };
 
 const cell = { padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' };
+const box = { padding: 12, border: '1px solid #000', borderRadius: 8, marginBottom: 12, background: '#fafafa' };
+const th  = { padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' };
+const td  = { padding: 8,  textAlign: 'center', color: 'black', border: '1px solid black' };
 
 export default Admin;
-
