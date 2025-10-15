@@ -370,7 +370,7 @@ const Admin = () => {
         const latestData = await fetchContestTime();
         if (latestData?.startTime) setStartTime(convertToDatetimeLocal(latestData.startTime));
         if (latestData?.endTime) setEndTime(convertToDatetimeLocal(latestData.endTime));
-        if (latestData?.currentTime) setCurrentServerTime(latestData.currentTime));
+        if (latestData?.currentTime) setCurrentServerTime(latestData.currentTime);
       } else {
         alert('대회 시간 설정에 실패했습니다.');
       }
