@@ -462,7 +462,6 @@ const Admin = () => {
                   'Email',
                   'LoginId',
                   'Role',
-                  'Point',
                   'Univ',
                   'Created',
                   'Updated',
@@ -481,7 +480,6 @@ const Admin = () => {
                   <td style={cell}>{u.email}</td>
                   <td style={cell}>{u.loginId}</td>
                   <td style={cell}>{u.role}</td>
-                  <td style={cell}>{u.totalPoint}</td>
                   <td style={cell}>{u.univ}</td>
                   <td style={cell}>{u.createdAt?.slice(0, 19)}</td>
                   <td style={cell}>{u.updatedAt?.slice(0, 19)}</td>
@@ -550,7 +548,7 @@ const Admin = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
             <thead>
               <tr>
-                {['Team Name', 'Member Email', 'Team Mileage', 'Team Total', 'Team Solves'].map((h) => (
+                {['Team Name', 'Member Email', 'Team Mileage', 'Team Total'].map((h) => (
                   <th key={h} style={{ padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' }}>
                     {h}
                   </th>
