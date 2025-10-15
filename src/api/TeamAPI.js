@@ -1,36 +1,37 @@
 import { Axios } from "./Axios";
 export async function fetchTeamProfileRows() {
-  try {
     const { data } = await Axios.get('/admin/team/all');
 
-    // case A: data.data가 배열(여러 팀)
-    if (Array.isArray(data?.data)) {
-      return data.data.map((t) => ({
+    const list = Array.isArray(data?.data) ? data.data : [];
+
+    // 팀 1개에 memberEmails 배열 → 행 여러 개로 펼치기
+    const rows = list.flatMap((t) => {
+      // 호환성: memberEmails(복수) 우선, 그다음 memberEmail(단수/배열), 없으면 빈 배열
+      const emails =
+        Array.isArray(t.memberEmails) ? t.memberEmails
+        : Array.isArray(t.memberEmail) ? t.memberEmail
+        : (t.memberEmail ? [t.memberEmail] : []);
+
+      // 멤버가 없으면 memberEmail=null로 1행 만들어서 표시(‘-’로 렌더)
+      if (emails.length === 0) {
+        return [{
+          teamName: t.teamName ?? '-',
+          memberEmail: null,
+          teamMileage: t.teamMileage ?? 0,
+          teamTotalPoint: t.teamTotalPoint ?? 0,
+        }];
+      }
+
+      // 멤버가 있으면 멤버 수만큼 행 생성
+      return emails.map((email) => ({
         teamName: t.teamName ?? '-',
-        memberEmail: t.memberEmail ?? null,
+        memberEmail: email,
         teamMileage: t.teamMileage ?? 0,
         teamTotalPoint: t.teamTotalPoint ?? 0,
-        teamSolvedCount: t.teamSolvedCount ?? 0,
       }));
-    }
+    });
 
-    // case B: data.data가 단일 팀 객체 + memberEmail(배열/단일/없음)
-    const p = data?.data ?? {};
-    const members = Array.isArray(p.memberEmail)
-      ? p.memberEmail
-      : (p.memberEmail ? [p.memberEmail] : [null]);
-
-    return members.map((email) => ({
-      teamName: p.teamName ?? '-',
-      memberEmail: email,
-      teamMileage: p.teamMileage ?? 0,
-      teamTotalPoint: p.teamTotalPoint ?? 0,
-      teamSolvedCount: p.teamSolvedCount ?? 0,
-    }));
-  } catch (e) {
-    console.error('[TeamAPI] fetchTeamProfileRows failed:', e);
-    return [];
-  }
+    return rows;
 }
 
 export async function createTeam(teamName) {
