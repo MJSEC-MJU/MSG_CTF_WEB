@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchTeamProfileRows } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
+import { fetchTeamProfile } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
 import { fetchPaymentQRToken, buildPaymentQRString } from "../api/PaymentAPI"; // ✅ 결제 QR 토큰 + 스킴 빌더
 // import { fetchProblems } from "../api/ChallengeAllAPI"; // 🔒 팀단위 정리 전까지 미사용
 import Loading from "../components/Loading";
@@ -92,7 +92,7 @@ const MyPage = () => {
 
     (async () => {
       try {
-        const rows = await fetchTeamProfileRows(); // [{teamId,teamName,userEmail,memberEmail,teamMileage,teamTotalPoint,teamSolvedCount}, ...]
+        const rows = await fetchTeamProfile(); // [{teamId,teamName,userEmail,memberEmail,teamMileage,teamTotalPoint,teamSolvedCount}, ...]
         const list = Array.isArray(rows) ? rows : [];
         if (list.length === 0) {
           setProfileError(true);
