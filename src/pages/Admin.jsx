@@ -417,6 +417,134 @@ const Admin = () => {
     }
   };
 
+  // ===== Signature Admin Handlers =====
+  const onSigBulkUpsert = async () => {
+    let arr;
+    try {
+      arr = JSON.parse(sigBulkText);
+      if (!Array.isArray(arr)) throw new Error('JSON 배열이어야 합니다.');
+    } catch (e) {
+      return alert('JSON 파싱 실패: ' + e.message);
+    }
+    try {
+      setSigLoading(true);
+      const res = await adminBulkUpsert(arr);
+      alert(res?.message || '업서트 완료');
+    } catch {
+      alert('업서트 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigImport = async () => {
+    if (!sigImportFile) return alert('CSV 파일을 선택하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminImportCSV(sigImportFile);
+      alert(res?.message || '임포트 완료');
+      setSigImportFile(null);
+    } catch {
+      alert('임포트 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigExport = async () => {
+    try {
+      setSigLoading(true);
+      const { blob, filename } = await adminExportCSV();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename || 'signature_codes.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('익스포트 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigLoadPool = async () => {
+    const id = parseInt(sigPoolChallengeId, 10);
+    if (!id) return alert('challengeId를 입력하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminGetPool(id);
+      setSigPool({ challengeId: res.challengeId, items: res.items || [] });
+    } catch {
+      alert('풀 조회 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigGenerate = async () => {
+    const cid = parseInt(genChallengeId, 10);
+    const cnt = parseInt(genCount, 10);
+    if (!cid || !cnt) return alert('challengeId와 count를 입력하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminGenerate({ challengeId: cid, count: cnt, teamName: genTeamName || undefined });
+      setGenResult(res);
+      alert(`${res?.created ?? 0}개 생성 완료`);
+    } catch {
+      alert('생성 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigReassign = async () => {
+    const cid = parseInt(rsChallengeId, 10);
+    if (!cid || !rsCodeDigest) return alert('challengeId와 codeDigest를 입력하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminReassign({
+        challengeId: cid,
+        codeDigest: rsCodeDigest.trim(),
+        teamName: rsTeamName || null,
+        resetConsumed: !!rsResetConsumed,
+      });
+      alert(res?.message || '재배정/초기화 완료');
+      if (sigPool.challengeId === cid) await onSigLoadPool();
+    } catch {
+      alert('재배정 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigDeleteOne = async () => {
+    const cid = parseInt(delChallengeId, 10);
+    if (!cid || !delCodeDigest) return alert('challengeId와 codeDigest를 입력하세요.');
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    try {
+      setSigLoading(true);
+      const res = await adminDeleteOne(cid, delCodeDigest.trim());
+      alert(res?.message || '삭제 완료');
+      if (sigPool.challengeId === cid) await onSigLoadPool();
+    } catch {
+      alert('삭제 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigPurge = async () => {
+    const cid = parseInt(purgeChallengeId, 10);
+    if (!cid) return alert('challengeId를 입력하세요.');
+    if (!window.confirm(`챌린지 ${cid}의 모든 코드를 삭제합니다. 계속할까요?`)) return;
+    try {
+      setSigLoading(true);
+      const res = await adminPurgeChallenge(cid);
+      alert(res?.message || '전체 삭제 완료');
+      if (sigPool.challengeId === cid) setSigPool({ challengeId: cid, items: [] });
+    } catch {
+      alert('전체 삭제 실패');
+    } finally { setSigLoading(false); }
+  };
+
+  const onSigForceUnlock = async () => {
+    const cid = parseInt(fuChallengeId, 10);
+    if (!cid || !fuTeamName.trim()) return alert('teamName과 challengeId를 입력하세요.');
+    try {
+      setSigLoading(true);
+      const res = await adminForceUnlock({ teamName: fuTeamName.trim(), challengeId: cid });
+      alert(res?.message || '강제 언락 완료');
+    } catch {
+      alert('강제 언락 실패');
+    } finally { setSigLoading(false); }
+  };
+
   return (
     <div className="admin">
       <h1>Admin Page</h1>
