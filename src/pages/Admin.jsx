@@ -278,6 +278,44 @@ const Admin = () => {
     }
   };
 
+  // ===== Teams =====
+  const handleCreateTeam = async () => {
+    const name = teamNameForCreate.trim();
+    if (!name) return alert('팀 이름을 입력하세요.');
+    try {
+      const res = await createTeam(name);
+      if (res?.code === 'SUCCESS') {
+        alert('팀이 생성되었습니다.');
+        setTeamNameForCreate('');
+        const latestRows = await fetchTeamProfileRows();
+        setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+      } else {
+        alert(res?.message || '팀 생성 실패');
+      }
+    } catch {
+      alert('팀 생성 요청 실패 (이미 존재하거나 권한 오류일 수 있습니다)');
+    }
+  };
+
+  const handleAddMember = async () => {
+    const team = teamNameForAdd.trim();
+    const email = memberEmailToAdd.trim();
+    if (!team || !email) return alert('팀 이름과 이메일을 모두 입력하세요.');
+    try {
+      const res = await addTeamMember(team, email);
+      if (res?.code === 'SUCCESS') {
+        alert('팀원 추가 완료');
+        setMemberEmailToAdd('');
+        const latestRows = await fetchTeamProfileRows();
+        setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+      } else {
+        alert(res?.message || '팀원 추가 실패');
+      }
+    } catch {
+      alert('팀원 추가 요청 실패 (존재하지 않는 팀/이메일일 수 있습니다)');
+    }
+  };
+
   // ===== Problems =====
   const handleDeleteProblem = async (challengeId) => {
     if (!window.confirm('정말로 삭제하시겠습니까?')) return;
@@ -377,134 +415,6 @@ const Admin = () => {
       console.error('대회 시간 설정 실패:', e);
       alert('대회 시간 설정 요청 실패 (권한 또는 형식 오류일 수 있습니다)');
     }
-  };
-
-  // ===== Signature Admin Handlers =====
-  const onSigBulkUpsert = async () => {
-    let arr;
-    try {
-      arr = JSON.parse(sigBulkText);
-      if (!Array.isArray(arr)) throw new Error('JSON 배열이어야 합니다.');
-    } catch (e) {
-      return alert('JSON 파싱 실패: ' + e.message);
-    }
-    try {
-      setSigLoading(true);
-      const res = await adminBulkUpsert(arr);
-      alert(res?.message || '업서트 완료');
-    } catch {
-      alert('업서트 실패');
-    } finally { setSigLoading(false); }
-  };
-
-  const onSigImport = async () => {
-    if (!sigImportFile) return alert('CSV 파일을 선택하세요.');
-    try {
-      setSigLoading(true);
-      const res = await adminImportCSV(sigImportFile);
-      alert(res?.message || '임포트 완료');
-      setSigImportFile(null);
-    } catch {
-      alert('임포트 실패');
-    } finally { setSigLoading(false); }
-  };
-
-  const onSigExport = async () => {
-    try {
-      setSigLoading(true);
-      const { blob, filename } = await adminExportCSV();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename || 'signature_codes.csv';
-      document.body.appendChild(a); a.click(); a.remove();
-      URL.revokeObjectURL(url);
-    } catch {
-      alert('익스포트 실패');
-    } finally { setSigLoading(false); }
-  };
-
-  const onSigLoadPool = async () => {
-    const id = parseInt(sigPoolChallengeId, 10);
-    if (!id) return alert('challengeId를 입력하세요.');
-    try {
-      setSigLoading(true);
-      const res = await adminGetPool(id);
-      setSigPool({ challengeId: res.challengeId, items: res.items || [] });
-    } catch {
-      alert('풀 조회 실패');
-    } finally { setSigLoading(false); }
-  };
-
-  const onSigGenerate = async () => {
-    const cid = parseInt(genChallengeId, 10);
-    const cnt = parseInt(genCount, 10);
-    if (!cid || !cnt) return alert('challengeId와 count를 입력하세요.');
-    try {
-      setSigLoading(true);
-      const res = await adminGenerate({ challengeId: cid, count: cnt, teamName: genTeamName || undefined });
-      setGenResult(res);
-      alert(`${res?.created ?? 0}개 생성 완료`);
-    } catch {
-      alert('생성 실패');
-    } finally { setSigLoading(false); }
-  };
-
-  const onSigReassign = async () => {
-    const cid = parseInt(rsChallengeId, 10);
-    if (!cid || !rsCodeDigest) return alert('challengeId와 codeDigest를 입력하세요.');
-    try {
-      setSigLoading(true);
-      const res = await adminReassign({
-        challengeId: cid,
-        codeDigest: rsCodeDigest.trim(),
-        teamName: rsTeamName || null,
-        resetConsumed: !!rsResetConsumed,
-      });
-      alert(res?.message || '재배정/초기화 완료');
-      if (sigPool.challengeId === cid) await onSigLoadPool();
-    } catch {
-      alert('재배정 실패');
-    } finally { setSigLoading(false); }
-  };
-
-  const onSigDeleteOne = async () => {
-    const cid = parseInt(delChallengeId, 10);
-    if (!cid || !delCodeDigest) return alert('challengeId와 codeDigest를 입력하세요.');
-    if (!window.confirm('정말 삭제하시겠습니까?')) return;
-    try {
-      setSigLoading(true);
-      const res = await adminDeleteOne(cid, delCodeDigest.trim());
-      alert(res?.message || '삭제 완료');
-      if (sigPool.challengeId === cid) await onSigLoadPool();
-    } catch {
-      alert('삭제 실패');
-    } finally { setSigLoading(false); }
-  };
-
-  const onSigPurge = async () => {
-    const cid = parseInt(purgeChallengeId, 10);
-    if (!cid) return alert('challengeId를 입력하세요.');
-    if (!window.confirm(`챌린지 ${cid}의 모든 코드를 삭제합니다. 계속할까요?`)) return;
-    try {
-      setSigLoading(true);
-      const res = await adminPurgeChallenge(cid);
-      alert(res?.message || '전체 삭제 완료');
-      if (sigPool.challengeId === cid) setSigPool({ challengeId: cid, items: [] });
-    } catch {
-      alert('전체 삭제 실패');
-    } finally { setSigLoading(false); }
-  };
-
-  const onSigForceUnlock = async () => {
-    const cid = parseInt(fuChallengeId, 10);
-    if (!cid || !fuTeamName.trim()) return alert('teamName과 challengeId를 입력하세요.');
-    try {
-      setSigLoading(true);
-      const res = await adminForceUnlock({ teamName: fuTeamName.trim(), challengeId: cid });
-      alert(res?.message || '강제 언락 완료');
-    } catch {
-      alert('강제 언락 실패');
-    } finally { setSigLoading(false); }
   };
 
   return (
@@ -905,18 +815,18 @@ const Admin = () => {
 
       {/* ================= Timer Tab ================= */}
       {tab === 'timer' && (
-        <section>
-          <h2>Set Contest Time</h2>
+        <section className="section--timer">
+          <h2 style={{ gridColumn: '1 / -1' }}>Set Contest Time</h2>
 
-          {currentServerTime && (
-            <div className="card">
-              <h3 className="card__title">현재 서버 시간</h3>
-              <div className="form">
-                <p style={{ margin: 0 }}>{currentServerTime}</p>
-              </div>
+          {/* 1) 현재 서버 시간 */}
+          <div className="card card--dark">
+            <h3 className="card__title">현재 서버 시간</h3>
+            <div className="form">
+              <p style={{ margin: 0 }}>{currentServerTime || '—'}</p>
             </div>
-          )}
+          </div>
 
+          {/* 2) 설정 폼 */}
           <div className="card">
             <div className="form form-grid">
               <div className="field">
@@ -937,7 +847,8 @@ const Admin = () => {
             </div>
           </div>
 
-          <div className="card">
+          {/* 3) 주의사항 */}
+          <div className="card card--dark">
             <h3 className="card__title">주의사항</h3>
             <div className="form">
               <ul style={{ margin: 0, paddingLeft: 20 }}>
