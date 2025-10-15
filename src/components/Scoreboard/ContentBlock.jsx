@@ -15,6 +15,7 @@ import {
   TimeScale,
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import { ko } from 'date-fns/locale';
 
 ChartJS.register(
   CategoryScale,
@@ -64,19 +65,17 @@ const ContentBlock = ({ dataset }) => {
       x: {
         type: 'time',
         time: {
-          unit: 'minute',
-          stepSize: 30,
-          tooltipFormat: 'HH:mm',
+          unit: 'minute',          // 단위를 분 단위로 설정
+          stepSize: 30,            // 30분 간격
+          tooltipFormat: 'HH:mm',  // 마우스 오버 시 HH:mm 형식
           displayFormats: {
-            minute: 'HH시',        // X축에 00시, 01시, 13시 형식으로 표시
-            hour: 'HH시',          // 시간 단위일 때도 동일하게 표시
+            minute: 'HH:mm',       // X축 눈금 표시 형식
+            hour: 'HH:mm',         // 시간 단위일 때도 HH:mm
           },
         },
         adapters: {
           date: {
-            locale: {
-              code: 'ko',          // 한국어 로케일
-            },
+            locale: ko,          // 한국어 로케일
           },
         },
         ticks: {
