@@ -1,37 +1,25 @@
 import { Axios } from "./Axios";
 export async function fetchTeamProfileRows() {
+  try {
     const { data } = await Axios.get('/admin/team/all');
-
     const list = Array.isArray(data?.data) ? data.data : [];
 
-    // 팀 1개에 memberEmails 배열 → 행 여러 개로 펼치기
-    const rows = list.flatMap((t) => {
-      // 호환성: memberEmails(복수) 우선, 그다음 memberEmail(단수/배열), 없으면 빈 배열
-      const emails =
-        Array.isArray(t.memberEmails) ? t.memberEmails
+    //팀 단위 유지 
+    return list.map((t) => ({
+      teamName: t.teamName ?? '-',
+      teamMileage: t.teamMileage ?? 0,
+      teamTotalPoint: t.teamTotalPoint ?? 0,
+      // 서버가 memberEmails 배열로 주므로 그대로 보존
+      memberEmails: Array.isArray(t.memberEmails)
+        ? t.memberEmails
+        // 과거 호환(혹시 단수/다른 키가 오는 경우)
         : Array.isArray(t.memberEmail) ? t.memberEmail
-        : (t.memberEmail ? [t.memberEmail] : []);
-
-      // 멤버가 없으면 memberEmail=null로 1행 만들어서 표시(‘-’로 렌더)
-      if (emails.length === 0) {
-        return [{
-          teamName: t.teamName ?? '-',
-          memberEmail: null,
-          teamMileage: t.teamMileage ?? 0,
-          teamTotalPoint: t.teamTotalPoint ?? 0,
-        }];
-      }
-
-      // 멤버가 있으면 멤버 수만큼 행 생성
-      return emails.map((email) => ({
-        teamName: t.teamName ?? '-',
-        memberEmail: email,
-        teamMileage: t.teamMileage ?? 0,
-        teamTotalPoint: t.teamTotalPoint ?? 0,
-      }));
-    });
-
-    return rows;
+        : (t.memberEmail ? [t.memberEmail] : []),
+    }));
+  } catch (e) {
+    console.error('[TeamAPI] fetchTeamProfileRows failed:', e);
+    return [];
+  }
 }
 
 export async function createTeam(teamName) {
