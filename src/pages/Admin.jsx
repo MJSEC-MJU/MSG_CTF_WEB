@@ -1,8 +1,9 @@
 // src/pages/Admin.jsx
-// - Admin 페이지 전체
+// - Admin 페이지 전체 (Admin.css 스타일 전면 적용)
 // - Signature Codes(관리자) 탭 포함
 // - SIGNATURE 문제 추가/수정 시 club(팀명) 필수 입력 처리
 
+import './Admin.css';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createProblem } from '../api/CreateProblemAPI';
 import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
@@ -18,7 +19,7 @@ import {
   adminBulkUpsert,
   adminImportCSV,
   adminExportCSV,
-  adminGetPool,          // 내부 구현에서 /api/admin/signature/codes/pool/{challengeId} 사용
+  adminGetPool,
   adminGenerate,
   adminReassign,
   adminDeleteOne,
@@ -28,12 +29,11 @@ import {
 
 const Admin = () => {
   // ===== UI state =====
-  // users | teams | problems | payment | timer | signature
   const [tab, setTab] = useState('users');
 
   // ===== Users & Teams =====
   const [users, setUsers] = useState([]);
-  const [teamRows, setTeamRows] = useState([]); // normalized rows from team profile
+  const [teamRows, setTeamRows] = useState([]);
 
   const [editingUser, setEditingUser] = useState(null);
   const [newUser, setNewUser] = useState({
@@ -41,7 +41,7 @@ const Admin = () => {
     password: '',
     email: '',
     univ: '',
-    roles: 'user', // 콤마로 여러 개 입력 가능: "user,admin"
+    roles: 'user',
   });
 
   // Team tools inputs
@@ -193,7 +193,7 @@ const Admin = () => {
         role: editingUser.role,
       };
       const updated = await updateUser(editingUser.userId, payload);
-      const updatedObj = updated?.data ?? updated; // 서버 반환 형태 보정
+      const updatedObj = updated?.data ?? updated;
       setUsers((prev) => (Array.isArray(prev) ? prev.map((u) => (u.userId === updatedObj.userId ? updatedObj : u)) : []));
       setEditingUser(null);
       alert('사용자 정보가 수정되었습니다.');
@@ -307,7 +307,7 @@ const Admin = () => {
       title: problem.title ?? '',
       points: problem.points ?? '',
       category: problem.category ?? '',
-      club: problem.club ?? problem.clubName ?? '', // ✅ 서버가 clubName으로 돌려줘도 대응
+      club: problem.club ?? problem.clubName ?? '',
       startTime: problem.startTime ? convertToDatetimeLocal(problem.startTime) : '',
       endTime: problem.endTime ? convertToDatetimeLocal(problem.endTime) : '',
       description: problem.description ?? '',
@@ -322,7 +322,6 @@ const Admin = () => {
   // 서버 → input(datetime-local)
   const convertToDatetimeLocal = (serverTime) => {
     if (!serverTime) return '';
-    // 'YYYY-MM-DD HH:mm[:ss]' → 'YYYY-MM-DDTHH:mm'
     const base = serverTime.replace('T', ' ').slice(0, 16);
     return base.replace(' ', 'T');
   };
@@ -331,20 +330,17 @@ const Admin = () => {
   const toServerDateTime = (val) => {
     if (!val) return '';
     let s = val.replace('T', ' ');
-    // HH:mm만 있으면 초 붙이기
     if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
     return s;
   };
 
   const handleSaveProblem = async () => {
     if (!editingProblem) return alert('수정할 문제를 선택하세요.');
-    // ✅ SIGNATURE면 club 필수
     if (formData.category === 'SIGNATURE' && !String(formData.club || '').trim()) {
       alert('SIGNATURE 카테고리는 club(팀명)이 필수입니다.');
       return;
     }
 
-    // 업데이트 payload는 DTO 필드만 담아 깔끔하게 보냄
     const payload = {
       title: formData.title,
       description: formData.description,
@@ -552,166 +548,108 @@ const Admin = () => {
   const onFile = (e) => setFormData((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
 
   return (
-    <div style={{ padding: 16 }}>
-      <h1 style={{ color: 'black' }}>Admin Page</h1>
+    <div className="admin" style={{ padding: 16 }}>
+      <h1>Admin Page</h1>
 
-      <div style={{ marginBottom: 12 }}>
-        <button onClick={() => setTab('users')}>User List</button>
-        <button onClick={() => setTab('teams')} style={{ marginLeft: 8 }}>
-          Team List
-        </button>
-        <button onClick={() => setTab('problems')} style={{ marginLeft: 8 }}>
-          Problem List
-        </button>
-        <button onClick={() => setTab('payment')} style={{ marginLeft: 8 }}>
-          Payment
-        </button>
-        <button onClick={() => setTab('timer')} style={{ marginLeft: 8 }}>
-          Set Time
-        </button>
-        <button onClick={() => setTab('signature')} style={{ marginLeft: 8 }}>
-          Signature
-        </button>
+      <div className="tabs">
+        <button aria-current={tab==='users' ? 'page' : undefined} onClick={() => setTab('users')}>User List</button>
+        <button aria-current={tab==='teams' ? 'page' : undefined} onClick={() => setTab('teams')}>Team List</button>
+        <button aria-current={tab==='problems' ? 'page' : undefined} onClick={() => setTab('problems')}>Problem List</button>
+        <button aria-current={tab==='payment' ? 'page' : undefined} onClick={() => setTab('payment')}>Payment</button>
+        <button aria-current={tab==='timer' ? 'page' : undefined} onClick={() => setTab('timer')}>Set Time</button>
+        <button aria-current={tab==='signature' ? 'page' : undefined} onClick={() => setTab('signature')}>Signature</button>
       </div>
 
       {/* ================= Users Tab ================= */}
       {tab === 'users' && (
         <section>
-          <h2 style={{ color: 'black' }}>Users</h2>
+          <h2>Users</h2>
 
           {/* Create new user */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-              padding: 12,
-              border: '1px solid #000',
-              borderRadius: 8,
-              marginBottom: 12,
-              background: '#f5faff',
-            }}
-          >
-            <div style={{ gridColumn: '1 / -1' }}>
-              <h3 style={{ color: 'black', marginTop: 0 }}>신규 유저 추가</h3>
-            </div>
+          <div className="card" style={{ marginBottom: 12 }}>
+            <h3 className="card__title">신규 유저 추가</h3>
+            <div className="form form-grid">
+              <div className="field">
+                <label className="label">Login ID</label>
+                <input className="input" name="loginId" value={newUser.loginId} onChange={onNewUserInput} placeholder="newuser" />
+              </div>
+              <div className="field">
+                <label className="label">Password</label>
+                <input className="input" name="password" type="password" value={newUser.password} onChange={onNewUserInput} placeholder="비밀번호" />
+              </div>
+              <div className="field">
+                <label className="label">Email</label>
+                <input className="input" name="email" type="email" value={newUser.email} onChange={onNewUserInput} placeholder="newuser@example.com" />
+              </div>
+              <div className="field">
+                <label className="label">Univ</label>
+                <input className="input" name="univ" value={newUser.univ} onChange={onNewUserInput} placeholder="New University" />
+              </div>
 
-            <div>
-              <label style={{ color: 'black', display: 'block', marginBottom: 4 }}>Login ID</label>
-              <input
-                name="loginId"
-                value={newUser.loginId}
-                onChange={onNewUserInput}
-                style={{ width: '100%', padding: 6 }}
-                placeholder="newuser"
-              />
+              <div className="field" style={{ gridColumn: '1 / -1' }}>
+                <label className="label">Roles (콤마 구분)</label>
+                <input className="input" name="roles" value={newUser.roles} onChange={onNewUserInput} placeholder="user,admin" />
+                <p className="hint">예: <code>user</code> 또는 <code>user,admin</code></p>
+              </div>
             </div>
-            <div>
-              <label style={{ color: 'black', display: 'block', marginBottom: 4 }}>Password</label>
-              <input
-                name="password"
-                type="password"
-                value={newUser.password}
-                onChange={onNewUserInput}
-                style={{ width: '100%', padding: 6 }}
-                placeholder="비밀번호"
-              />
-            </div>
-            <div>
-              <label style={{ color: 'black', display: 'block', marginBottom: 4 }}>Email</label>
-              <input
-                name="email"
-                type="email"
-                value={newUser.email}
-                onChange={onNewUserInput}
-                style={{ width: '100%', padding: 6 }}
-                placeholder="newuser@example.com"
-              />
-            </div>
-            <div>
-              <label style={{ color: 'black', display: 'block', marginBottom: 4 }}>Univ</label>
-              <input
-                name="univ"
-                value={newUser.univ}
-                onChange={onNewUserInput}
-                style={{ width: '100%', padding: 6 }}
-                placeholder="New University"
-              />
-            </div>
-
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ color: 'black', display: 'block', marginBottom: 4 }}>Roles (콤마 구분)</label>
-              <input
-                name="roles"
-                value={newUser.roles}
-                onChange={onNewUserInput}
-                style={{ width: '100%', padding: 6 }}
-                placeholder="user,admin"
-              />
-              <p style={{ marginTop: 6, color: '#333', fontSize: 12 }}>
-                예: <code>user</code> 또는 <code>user,admin</code>
-              </p>
-            </div>
-
-            <div style={{ gridColumn: '1 / -1' }}>
-              <button onClick={handleCreateUser}>Create User</button>
+            <div className="actions">
+              <button className="btn btn--primary" onClick={handleCreateUser}>Create User</button>
             </div>
           </div>
 
           {/* Edit panel */}
           {editingUser && (
-            <div style={{ color: 'black', marginBottom: 12 }}>
-              <h3>Edit User</h3>
-              <label>Email:</label>
-              <input type="email" name="email" value={editingUser.email} onChange={onUserInput} />
-              <label>University:</label>
-              <input type="text" name="univ" value={editingUser.univ} onChange={onUserInput} />
-              <label>Login ID:</label>
-              <input type="text" name="loginId" value={editingUser.loginId} onChange={onUserInput} />
-              <label>Role:</label>
-              <input type="text" name="role" value={editingUser.role} onChange={onUserInput} />
-              <button onClick={handleSaveUser}>Save</button>
-              <button onClick={() => setEditingUser(null)}>Cancel</button>
+            <div className="card" style={{ marginBottom: 12 }}>
+              <h3 className="card__title">Edit User</h3>
+              <div className="form form-grid">
+                <div className="field">
+                  <label className="label">Email</label>
+                  <input className="input" type="email" name="email" value={editingUser.email} onChange={onUserInput} />
+                </div>
+                <div className="field">
+                  <label className="label">University</label>
+                  <input className="input" type="text" name="univ" value={editingUser.univ} onChange={onUserInput} />
+                </div>
+                <div className="field">
+                  <label className="label">Login ID</label>
+                  <input className="input" type="text" name="loginId" value={editingUser.loginId} onChange={onUserInput} />
+                </div>
+                <div className="field">
+                  <label className="label">Role</label>
+                  <input className="input" type="text" name="role" value={editingUser.role} onChange={onUserInput} />
+                </div>
+              </div>
+              <div className="actions">
+                <button className="btn" onClick={() => setEditingUser(null)}>Cancel</button>
+                <button className="btn btn--primary" onClick={handleSaveUser}>Save</button>
+              </div>
             </div>
           )}
 
           {/* Users table */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
+          <table className="table">
             <thead>
               <tr>
-                {[
-                  'ID',
-                  'Email',
-                  'LoginId',
-                  'Role',
-                  'Univ',
-                  'Created',
-                  'Updated',
-                  'Action',
-                ].map((h) => (
-                  <th key={h} style={{ padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' }}>
-                    {h}
-                  </th>
+                {['ID','Email','LoginId','Role','Univ','Created','Updated','Action'].map((h) => (
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {(Array.isArray(users) ? users : []).map((u) => (
                 <tr key={u.userId}>
-                  <td style={cell}>{u.userId}</td>
-                  <td style={cell}>{u.email}</td>
-                  <td style={cell}>{u.loginId}</td>
-                  <td style={cell}>{u.role}</td>
-                  <td style={cell}>{u.univ}</td>
-                  <td style={cell}>{u.createdAt?.slice(0, 19)}</td>
-                  <td style={cell}>{u.updatedAt?.slice(0, 19)}</td>
-                  <td style={cell}>
-                    <button style={{ margin: 5 }} onClick={() => handleDeleteUser(u.userId)}>
-                      Delete
-                    </button>
-                    <button style={{ margin: 5 }} onClick={() => setEditingUser(u)}>
-                      Change
-                    </button>
+                  <td>{u.userId}</td>
+                  <td>{u.email}</td>
+                  <td>{u.loginId}</td>
+                  <td>{u.role}</td>
+                  <td>{u.univ}</td>
+                  <td>{u.createdAt?.slice(0, 19)}</td>
+                  <td>{u.updatedAt?.slice(0, 19)}</td>
+                  <td>
+                    <div className="actions" style={{ justifyContent: 'center' }}>
+                      <button className="btn btn--danger" onClick={() => handleDeleteUser(u.userId)}>Delete</button>
+                      <button className="btn" onClick={() => setEditingUser(u)}>Change</button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -723,73 +661,52 @@ const Admin = () => {
       {/* ================= Teams Tab ================= */}
       {tab === 'teams' && (
         <section>
-          <h2 style={{ color: 'black' }}>Team List</h2>
+          <h2>Team List</h2>
 
-          {/* Team tools */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-              padding: 12,
-              border: '1px solid #000',
-              borderRadius: 8,
-              marginBottom: 12,
-              background: '#fafafa',
-            }}
-          >
-            <div>
-              <h3 style={{ color: 'black', marginTop: 0 }}>팀 생성</h3>
-              <input
-                placeholder="팀 이름"
-                value={teamNameForCreate}
-                onChange={(e) => setTeamNameForCreate(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
-              />
-              <button onClick={handleCreateTeam}>생성</button>
-            </div>
-            <div>
-              <h3 style={{ color: 'black', marginTop: 0 }}>팀원 추가</h3>
-              <input
-                placeholder="팀 이름"
-                value={teamNameForAdd}
-                onChange={(e) => setTeamNameForAdd(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
-              />
-              <input
-                placeholder="사용자 이메일"
-                value={memberEmailToAdd}
-                onChange={(e) => setMemberEmailToAdd(e.target.value)}
-                style={{ padding: 6, marginRight: 8 }}
-              />
-              <button onClick={handleAddMember}>추가</button>
+          <div className="card" style={{ marginBottom: 12 }}>
+            <h3 className="card__title">팀 생성</h3>
+            <div className="form">
+              <div className="field">
+                <input className="input" placeholder="팀 이름" value={teamNameForCreate} onChange={(e) => setTeamNameForCreate(e.target.value)} />
+              </div>
+              <div className="actions">
+                <button className="btn btn--primary" onClick={handleCreateTeam}>생성</button>
+              </div>
             </div>
           </div>
 
-          {/* Teams table */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
+          <div className="card" style={{ marginBottom: 12 }}>
+            <h3 className="card__title">팀원 추가</h3>
+            <div className="form form-grid">
+              <div className="field">
+                <input className="input" placeholder="팀 이름" value={teamNameForAdd} onChange={(e) => setTeamNameForAdd(e.target.value)} />
+              </div>
+              <div className="field">
+                <input className="input" placeholder="사용자 이메일" value={memberEmailToAdd} onChange={(e) => setMemberEmailToAdd(e.target.value)} />
+              </div>
+            </div>
+            <div className="actions">
+              <button className="btn btn--primary" onClick={handleAddMember}>추가</button>
+            </div>
+          </div>
+
+          <table className="table">
             <thead>
               <tr>
-                {['Team Name', 'Member Email', 'Team Mileage', 'Team Total',].map((h) => (
-                  <th key={h} style={{ padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' }}>
-                    {h}
-                  </th>
-                ))}
+                {['Team Name','Member Email','Team Mileage','Team Total'].map((h) => (<th key={h}>{h}</th>))}
               </tr>
             </thead>
             <tbody>
               {(Array.isArray(teamRows) ? teamRows : []).map((row, idx) => (
                 <tr key={`${row.teamName}-${idx}`}>
-                  <td style={cell}>{row.teamName ?? '-'}</td>
-                  <td style={cell}>
+                  <td>{row.teamName ?? '-'}</td>
+                  <td>
                     {Array.isArray(row.memberEmails) && row.memberEmails.length
-                      ? row.memberEmails.map((em, i) => (
-                          <div key={i} style={{ lineHeight: 1.2 }}>{em}</div>
-                        ))
+                      ? row.memberEmails.map((em, i) => (<div key={i} style={{ lineHeight: 1.2 }}>{em}</div>))
                       : '-'}
                   </td>
-                  <td style={cell}>{row.teamMileage ?? 0}</td>
-                  <td style={cell}>{row.teamTotalPoint ?? 0}</td>
+                  <td>{row.teamMileage ?? 0}</td>
+                  <td>{row.teamTotalPoint ?? 0}</td>
                 </tr>
               ))}
             </tbody>
@@ -800,58 +717,86 @@ const Admin = () => {
       {/* ================= Problems Tab ================= */}
       {tab === 'problems' && (
         <section>
-          <h2 style={{ color: 'black' }}>Problems</h2>
+          <h2>Problems</h2>
 
-          <button onClick={() => setShowAddProblemForm((v) => !v)}>
-            {showAddProblemForm ? 'Close Add Problem' : 'Add Problem'}
-          </button>
+          <div className="actions" style={{ marginBottom: 8 }}>
+            <button className="btn" onClick={() => setShowAddProblemForm((v) => !v)}>
+              {showAddProblemForm ? 'Close Add Problem' : 'Add Problem'}
+            </button>
+          </div>
 
           {/* Edit Problem */}
           {showEditProblemForm && editingProblem && (
-            <div style={{ color: 'black', padding: 10, border: '1px solid black', marginTop: 10 }}>
-              <h3>Edit Problem</h3>
-              <form onSubmit={(e) => e.preventDefault()}>
-                <label>Title:</label>
-                <input type="text" name="title" value={formData.title} onChange={onProblemInput} />
-                <label>Description:</label>
-                <textarea name="description" value={formData.description} onChange={onProblemInput} />
-                <label>Flag:</label>
-                <input type="text" name="flag" value={formData.flag} onChange={onProblemInput} />
-                <label>Points:</label>
-                <input type="number" name="points" value={formData.points} onChange={onProblemInput} />
-                <label>Min Points:</label>
-                <input type="number" name="minPoints" value={formData.minPoints} onChange={onProblemInput} />
-                <label>Initial Points:</label>
-                <input type="number" name="initialPoints" value={formData.initialPoints} onChange={onProblemInput} />
-                <label>Start Time:</label>
-                <input type="datetime-local" name="startTime" value={formData.startTime} onChange={onProblemInput} />
-                <label>End Time:</label>
-                <input type="datetime-local" name="endTime" value={formData.endTime} onChange={onProblemInput} />
-                <label>URL:</label>
-                <input type="text" name="url" value={formData.url} onChange={onProblemInput} />
-                <label>File:</label>
-                <input type="file" name="file" onChange={onFile} />
-                <label>Category:</label>
-                <input type="text" name="category" value={formData.category} onChange={onProblemInput} />
-                {/* ✅ SIGNATURE 편집 시 club 입력 */}
-                {formData.category === 'SIGNATURE' && (
-                  <>
-                    <label>Club (팀명) — SIGNATURE 필수</label>
-                    <input
-                      type="text"
-                      name="club"
-                      value={formData.club}
-                      onChange={onProblemInput}
-                      placeholder="예) alpha"
-                    />
-                  </>
-                )}
-                <button type="button" onClick={handleSaveProblem}>
-                  Save
-                </button>
-                <button type="button" onClick={() => setShowEditProblemForm(false)}>
-                  Cancel
-                </button>
+            <div className="card card--edit">
+              <h3 className="card__title">
+                Edit Problem {editingProblem?.category && <span className="badge" style={{ marginLeft: 8 }}>{editingProblem.category}</span>}
+              </h3>
+              <form className="form" onSubmit={(e) => e.preventDefault()}>
+                <div className="form-grid">
+                  <div className="field">
+                    <label className="label">Title</label>
+                    <input className="input" type="text" name="title" value={formData.title} onChange={onProblemInput} />
+                  </div>
+                  <div className="field">
+                    <label className="label">Points</label>
+                    <input className="input" type="number" name="points" value={formData.points} onChange={onProblemInput} />
+                  </div>
+
+                  <div className="field" style={{ gridColumn: '1 / -1' }}>
+                    <label className="label">Description</label>
+                    <textarea className="textarea" name="description" value={formData.description} onChange={onProblemInput} />
+                    <div className="hint">{formData.description?.length ?? 0} / 300</div>
+                  </div>
+
+                  <div className="field">
+                    <label className="label">Flag</label>
+                    <input className="input" type="text" name="flag" value={formData.flag} onChange={onProblemInput} />
+                  </div>
+                  <div className="field">
+                    <label className="label">Min Points</label>
+                    <input className="input" type="number" name="minPoints" value={formData.minPoints} onChange={onProblemInput} />
+                  </div>
+
+                  <div className="field">
+                    <label className="label">Initial Points</label>
+                    <input className="input" type="number" name="initialPoints" value={formData.initialPoints} onChange={onProblemInput} />
+                  </div>
+                  <div className="field">
+                    <label className="label">URL</label>
+                    <input className="input" type="text" name="url" value={formData.url} onChange={onProblemInput} />
+                  </div>
+
+                  <div className="field">
+                    <label className="label">Start Time</label>
+                    <input className="input" type="datetime-local" name="startTime" value={formData.startTime} onChange={onProblemInput} />
+                  </div>
+                  <div className="field">
+                    <label className="label">End Time</label>
+                    <input className="input" type="datetime-local" name="endTime" value={formData.endTime} onChange={onProblemInput} />
+                  </div>
+
+                  <div className="field">
+                    <label className="label">File</label>
+                    <input className="input" type="file" name="file" onChange={onFile} />
+                  </div>
+
+                  <div className="field">
+                    <label className="label">Category</label>
+                    <input className="input" type="text" name="category" value={formData.category} onChange={onProblemInput} />
+                  </div>
+
+                  {formData.category === 'SIGNATURE' && (
+                    <div className="field">
+                      <label className="label">Club (팀명) — SIGNATURE 필수</label>
+                      <input className="input" type="text" name="club" value={formData.club} onChange={onProblemInput} placeholder="예) alpha" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="actions">
+                  <button type="button" className="btn" onClick={() => setShowEditProblemForm(false)}>Cancel</button>
+                  <button type="button" className="btn btn--primary" onClick={handleSaveProblem}>Save</button>
+                </div>
               </form>
             </div>
           )}
@@ -859,140 +804,127 @@ const Admin = () => {
           {/* Add Problem */}
           {showAddProblemForm && (
             <form
+              className="card form"
               onSubmit={async (e) => {
                 e.preventDefault();
-                // ✅ SIGNATURE면 club 필수
                 if (formData.category === 'SIGNATURE' && !String(formData.club || '').trim()) {
                   alert('SIGNATURE 카테고리는 club(팀명)이 필수입니다.');
                   return;
                 }
                 try {
-                  const res = await createProblem(formData); // CreateProblemAPI에서 club 필드 처리
+                  const res = await createProblem(formData);
                   alert(res?.message || '생성 완료');
                 } catch (err) {
                   alert(err?.message || '문제 생성 실패');
                 }
               }}
-              style={{ marginTop: 20 }}
+              style={{ marginTop: 12 }}
             >
-              <div>
-                <label style={{ color: 'black' }}>Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={onProblemInput}
-                  required
-                  style={{ width: '100%', padding: 10, marginBottom: 10 }}
-                />
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 300) onProblemInput(e);
-                  }}
-                  required
-                  style={{ width: '100%', padding: 10, marginBottom: 10, height: 100 }}
-                />
-                <p style={{ color: 'black', fontSize: 12, textAlign: 'right' }}>{formData.description.length} / 300</p>
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>Flag</label>
-                <input type="text" name="flag" value={formData.flag} onChange={onProblemInput} required style={{ width: '100%', padding: 10, marginBottom: 10 }} />
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>Points</label>
-                <input type="number" name="points" value={formData.points} onChange={onProblemInput} required style={{ width: '100%', padding: 10, marginBottom: 10 }} />
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>Min Points</label>
-                <input type="number" name="minPoints" value={formData.minPoints} onChange={onProblemInput} required style={{ width: '100%', padding: 10, marginBottom: 10 }} />
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>Date</label>
-                <input type="date" name="date" value={formData.date} onChange={onProblemInput} required style={{ width: '100%', padding: 10, marginBottom: 10 }} />
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>Time</label>
-                <input type="time" name="time" value={formData.time} onChange={onProblemInput} required style={{ width: '100%', padding: 10, marginBottom: 10 }} />
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>File Upload</label>
-                <input type="file" name="file" onChange={onFile} style={{ marginBottom: 10, color: 'black' }} />
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>URL</label>
-                <input type="url" name="url" value={formData.url} onChange={onProblemInput} style={{ width: '100%', padding: 10, marginBottom: 10 }} />
-              </div>
-              <div>
-                <label style={{ color: 'black' }}>CATEGORY</label>
-                <select name="category" value={formData.category} onChange={onProblemInput} required style={{ width: '100%', padding: 10, marginBottom: 10, backgroundColor: 'white', color: 'black' }}>
-                  <option value="">카테고리 선택</option>
-                  <option value="MISC">MISC</option>
-                  <option value="REV">REV</option>
-                  <option value="ANDROID">ANDROID</option>
-                  <option value="FORENSICS">FORENSICS</option>
-                  <option value="PWN">PWN</option>
-                  <option value="WEB">WEB</option>
-                  <option value="CRYPTO">CRYPTO</option>
-                  <option value="SIGNATURE">SIGNATURE</option>
-                </select>
-              </div>
-              {/* ✅ SIGNATURE 전용 club 입력칸 */}
-              {formData.category === 'SIGNATURE' && (
-                <div>
-                  <label style={{ color: 'black' }}>Club (팀명) — SIGNATURE 필수</label>
-                  <input
-                    type="text"
-                    name="club"
-                    value={formData.club}
-                    onChange={onProblemInput}
-                    required
-                    style={{ width: '100%', padding: 10, marginBottom: 10 }}
-                    placeholder="예) alpha"
-                  />
+              <h3 className="card__title">Add Problem</h3>
+
+              <div className="form-grid">
+                <div className="field">
+                  <label className="label">Title</label>
+                  <input className="input" type="text" name="title" value={formData.title} onChange={onProblemInput} required />
                 </div>
-              )}
-              <div style={{ marginTop: 20 }}>
-                <button type="submit" style={{ marginRight: 10 }}>
-                  저장
-                </button>
-                <button type="button" style={{ marginRight: 10 }}>
-                  다른이름으로 저장
-                </button>
-                <button type="button">저장 및 계속</button>
+
+                <div className="field">
+                  <label className="label">Points</label>
+                  <input className="input" type="number" name="points" value={formData.points} onChange={onProblemInput} required />
+                </div>
+
+                <div className="field" style={{ gridColumn: '1 / -1' }}>
+                  <label className="label">Description</label>
+                  <textarea
+                    className="textarea"
+                    name="description"
+                    value={formData.description}
+                    onChange={(e) => { if (e.target.value.length <= 300) onProblemInput(e); }}
+                    required
+                  />
+                  <div className="hint">{formData.description.length} / 300</div>
+                </div>
+
+                <div className="field">
+                  <label className="label">Flag</label>
+                  <input className="input" type="text" name="flag" value={formData.flag} onChange={onProblemInput} required />
+                </div>
+
+                <div className="field">
+                  <label className="label">Min Points</label>
+                  <input className="input" type="number" name="minPoints" value={formData.minPoints} onChange={onProblemInput} required />
+                </div>
+
+                <div className="field">
+                  <label className="label">Date</label>
+                  <input className="input" type="date" name="date" value={formData.date} onChange={onProblemInput} required />
+                </div>
+
+                <div className="field">
+                  <label className="label">Time</label>
+                  <input className="input" type="time" name="time" value={formData.time} onChange={onProblemInput} required />
+                </div>
+
+                <div className="field">
+                  <label className="label">File Upload</label>
+                  <input className="input" type="file" name="file" onChange={onFile} />
+                </div>
+
+                <div className="field">
+                  <label className="label">URL</label>
+                  <input className="input" type="url" name="url" value={formData.url} onChange={onProblemInput} />
+                </div>
+
+                <div className="field">
+                  <label className="label">CATEGORY</label>
+                  <select className="select" name="category" value={formData.category} onChange={onProblemInput} required>
+                    <option value="">카테고리 선택</option>
+                    <option value="MISC">MISC</option>
+                    <option value="REV">REV</option>
+                    <option value="ANDROID">ANDROID</option>
+                    <option value="FORENSICS">FORENSICS</option>
+                    <option value="PWN">PWN</option>
+                    <option value="WEB">WEB</option>
+                    <option value="CRYPTO">CRYPTO</option>
+                    <option value="SIGNATURE">SIGNATURE</option>
+                  </select>
+                </div>
+
+                {formData.category === 'SIGNATURE' && (
+                  <div className="field">
+                    <label className="label">Club (팀명) — SIGNATURE 필수</label>
+                    <input className="input" type="text" name="club" value={formData.club} onChange={onProblemInput} required placeholder="예) alpha" />
+                  </div>
+                )}
+              </div>
+
+              <div className="actions">
+                <button type="button" className="btn">다른이름으로 저장</button>
+                <button type="button" className="btn">저장 및 계속</button>
+                <button type="submit" className="btn btn--primary">저장</button>
               </div>
             </form>
           )}
 
           {/* Problem table */}
-          <table style={{ width: '100%', marginTop: 10, borderCollapse: 'collapse', border: '1px solid black' }}>
+          <table className="table" style={{ marginTop: 10 }}>
             <thead>
               <tr>
-                {['ID', 'Title', 'Points', 'Category', 'Action'].map((h) => (
-                  <th key={h} style={{ padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' }}>
-                    {h}
-                  </th>
-                ))}
+                {['ID', 'Title', 'Points', 'Category', 'Action'].map((h) => (<th key={h}>{h}</th>))}
               </tr>
             </thead>
             <tbody>
               {(Array.isArray(problems) ? problems : []).map((p) => (
                 <tr key={p.challengeId}>
-                  <td style={cell}>{p.challengeId}</td>
-                  <td style={cell}>{p.title}</td>
-                  <td style={cell}>{p.points}</td>
-                  <td style={cell}>{p.category}</td>
-                  <td style={cell}>
-                    <button onClick={() => handleDeleteProblem(p.challengeId)} style={{ margin: 5 }}>
-                      Delete
-                    </button>
-                    <button style={{ margin: 5 }} onClick={() => handleEditProblem(p)}>
-                      Change
-                    </button>
+                  <td>{p.challengeId}</td>
+                  <td>{p.title}</td>
+                  <td>{p.points}</td>
+                  <td>{p.category}</td>
+                  <td>
+                    <div className="actions" style={{ justifyContent: 'center' }}>
+                      <button className="btn btn--danger" onClick={() => handleDeleteProblem(p.challengeId)}>Delete</button>
+                      <button className="btn" onClick={() => handleEditProblem(p)}>Change</button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -1004,95 +936,49 @@ const Admin = () => {
       {/* ================= Payment Tab ================= */}
       {tab === 'payment' && (
         <section>
-          <PaymentProcessor />
+          <div className="card">
+            <h2 className="card__title">Payment</h2>
+            <PaymentProcessor />
+          </div>
         </section>
       )}
 
       {/* ================= Timer Tab ================= */}
       {tab === 'timer' && (
         <section>
-          <h2 style={{ color: 'black' }}>Set Contest Time</h2>
+          <h2>Set Contest Time</h2>
 
-          {/* Current server time display */}
           {currentServerTime && (
-            <div
-              style={{
-                padding: 12,
-                border: '1px solid #4CAF50',
-                borderRadius: 8,
-                marginBottom: 12,
-                background: '#E8F5E9',
-              }}
-            >
-              <p style={{ color: 'black', margin: 0 }}>
+            <div className="card" style={{ marginBottom: 12 }}>
+              <p style={{ margin: 0 }}>
                 <strong>현재 서버 시간:</strong> {currentServerTime}
               </p>
             </div>
           )}
 
-          {/* Timer tools */}
-          <div
-            style={{
-              padding: 12,
-              border: '1px solid #000',
-              borderRadius: 8,
-              marginBottom: 12,
-              background: '#fafafa',
-            }}
-          >
-            <div style={{ marginBottom: 12 }}>
-              <h3 style={{ color: 'black', marginTop: 0 }}>시작 시간</h3>
-              <input
-                type="datetime-local"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                style={{ padding: 8, width: '100%', fontSize: 14 }}
-              />
-              <p style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
-                형식: yyyy-MM-dd HH:mm (예: 2025-03-29 10:00)
-              </p>
-            </div>
+          <div className="card" style={{ marginBottom: 12 }}>
+            <div className="form">
+              <div className="field">
+                <label className="label">시작 시간</label>
+                <input className="input" type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+                <p className="hint">형식: yyyy-MM-dd HH:mm (예: 2025-03-29 10:00)</p>
+              </div>
 
-            <div style={{ marginBottom: 12 }}>
-              <h3 style={{ color: 'black', marginTop: 0 }}>종료 시간</h3>
-              <input
-                type="datetime-local"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                style={{ padding: 8, width: '100%', fontSize: 14 }}
-              />
-              <p style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
-                형식: yyyy-MM-dd HH:mm (예: 2025-03-29 22:00)
-              </p>
-            </div>
+              <div className="field">
+                <label className="label">종료 시간</label>
+                <input className="input" type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                <p className="hint">형식: yyyy-MM-dd HH:mm (예: 2025-03-29 22:00)</p>
+              </div>
 
-            <button
-              onClick={handleSetContestTime}
-              style={{
-                padding: '10px 20px',
-                fontSize: 16,
-                fontWeight: 'bold',
-                backgroundColor: '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer'
-              }}
-            >
-              대회 시간 설정
-            </button>
+              <div className="actions">
+                <button className="btn btn--primary" onClick={handleSetContestTime}>대회 시간 설정</button>
+              </div>
+            </div>
           </div>
 
-          <div
-            style={{
-              padding: 12,
-              border: '1px solid #FF9800',
-              borderRadius: 8,
-              background: '#FFF3E0',
-            }}
-          >
-            <h4 style={{ color: 'black', marginTop: 0 }}>주의사항</h4>
-            <ul style={{ color: '#333', margin: 0, paddingLeft: 20 }}>
+          <div className="card">
+            <h4 className="card__title">주의사항</h4>
+            <ul style={{ margin: 0, paddingLeft: 20 }}>
               <li>시작 시간은 종료 시간보다 이전이어야 합니다.</li>
               <li>새로운 설정이 생성되면 기존의 활성화된 설정은 자동으로 비활성화됩니다.</li>
               <li>모든 시간은 <strong>Asia/Seoul (KST, UTC+09:00)</strong> 타임존 기준입니다.</li>
@@ -1105,82 +991,78 @@ const Admin = () => {
       {/* ================= Signature Admin Tab ================= */}
       {tab === 'signature' && (
         <section>
-          <h2 style={{ color: 'black' }}>Signature Codes (Admin)</h2>
+          <h2>Signature Codes (Admin)</h2>
           {sigLoading && <p style={{ color: '#444' }}>처리 중…</p>}
 
           {/* 1) Bulk Upsert */}
-          <div style={box}>
-            <h3 style={{ color: 'black', marginTop: 0 }}>1) 코드 일괄 업서트 (JSON)</h3>
-            <textarea
-              value={sigBulkText}
-              onChange={(e) => setSigBulkText(e.target.value)}
-              style={{ width: '100%', height: 120, color: 'black' }}
-            />
-            <button onClick={onSigBulkUpsert} style={{ marginTop: 8 }}>업서트</button>
+          <div className="card">
+            <h3 className="card__title">1) 코드 일괄 업서트 (JSON)</h3>
+            <textarea className="textarea" value={sigBulkText} onChange={(e) => setSigBulkText(e.target.value)} />
+            <div className="actions">
+              <button className="btn btn--primary" onClick={onSigBulkUpsert}>업서트</button>
+            </div>
           </div>
 
           {/* 2) Import / 3) Export */}
-          <div style={box}>
-            <h3 style={{ color: 'black', marginTop: 0 }}>2) CSV 임포트 / 3) CSV 익스포트</h3>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                onChange={(e) => setSigImportFile(e.target.files?.[0] || null)}
-                style={{ color: 'black' }}
-              />
-              <button onClick={onSigImport}>임포트</button>
-              <button onClick={onSigExport} style={{ marginLeft: 'auto' }}>익스포트</button>
+          <div className="card">
+            <h3 className="card__title">2) CSV 임포트 / 3) CSV 익스포트</h3>
+            <div className="form">
+              <input className="input" type="file" accept=".csv,text/csv" onChange={(e) => setSigImportFile(e.target.files?.[0] || null)} />
+              <div className="actions">
+                <button className="btn" onClick={onSigImport}>임포트</button>
+                <button className="btn btn--primary" onClick={onSigExport}>익스포트</button>
+              </div>
+              <p className="hint">CSV 헤더: <code>teamName,challengeId,code</code></p>
             </div>
-            <p style={{ color: '#666', fontSize: 12, marginTop: 6 }}>
-              CSV 헤더: <code>teamName,challengeId,code</code>
-            </p>
           </div>
 
           {/* 4) Pool 조회 */}
-          <div style={box}>
-            <h3 style={{ color: 'black', marginTop: 0 }}>4) 코드 풀 조회</h3>
-            <input
-              placeholder="challengeId"
-              value={sigPoolChallengeId}
-              onChange={(e) => setSigPoolChallengeId(e.target.value)}
-              style={{ padding: 6, marginRight: 8 }}
-            />
-            <button onClick={onSigLoadPool}>조회</button>
+          <div className="card">
+            <h3 className="card__title">4) 코드 풀 조회</h3>
+            <div className="form form-grid">
+              <div className="field">
+                <input className="input" placeholder="challengeId" value={sigPoolChallengeId} onChange={(e) => setSigPoolChallengeId(e.target.value)} />
+              </div>
+              <div className="actions">
+                <button className="btn btn--primary" onClick={onSigLoadPool}>조회</button>
+              </div>
+            </div>
 
             {sigPool?.items?.length > 0 ? (
-              <table style={{ width: '100%', marginTop: 10, borderCollapse: 'collapse', border: '1px solid black' }}>
+              <table className="table" style={{ marginTop: 10 }}>
                 <thead>
-                  <tr>{['ID','codeDigest','assignedTeamId','consumed','consumedAt'].map(h => (
-                    <th key={h} style={th}>{h}</th>
-                  ))}</tr>
+                  <tr>{['ID','codeDigest','assignedTeamId','consumed','consumedAt'].map(h => (<th key={h}>{h}</th>))}</tr>
                 </thead>
                 <tbody>
                   {sigPool.items.map((it) => (
                     <tr key={it.id}>
-                      <td style={td}>{it.id}</td>
-                      <td style={td} title={it.codeDigest}>{it.codeDigest}</td>
-                      <td style={td}>{it.assignedTeamId ?? '-'}</td>
-                      <td style={td}>{String(it.consumed)}</td>
-                      <td style={td}>{it.consumedAt ?? '-'}</td>
+                      <td>{it.id}</td>
+                      <td title={it.codeDigest}>{it.codeDigest}</td>
+                      <td>{it.assignedTeamId ?? '-'}</td>
+                      <td>{String(it.consumed)}</td>
+                      <td>{it.consumedAt ?? '-'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             ) : (
-              <p style={{ color: '#444', marginTop: 8 }}>아이템이 없습니다.</p>
+              <p className="hint" style={{ marginTop: 8 }}>아이템이 없습니다.</p>
             )}
           </div>
 
           {/* 5) Generate */}
-          <div style={box}>
-            <h3 style={{ color: 'black', marginTop: 0 }}>5) 랜덤 코드 생성</h3>
-            <input placeholder="challengeId" value={genChallengeId} onChange={(e)=>setGenChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <input placeholder="count (1~10000)" value={genCount} onChange={(e)=>setGenCount(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <input placeholder="teamName (선택)" value={genTeamName} onChange={(e)=>setGenTeamName(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <button onClick={onSigGenerate}>생성</button>
+          <div className="card">
+            <h3 className="card__title">5) 랜덤 코드 생성</h3>
+            <div className="form form-grid">
+              <input className="input" placeholder="challengeId" value={genChallengeId} onChange={(e)=>setGenChallengeId(e.target.value)} />
+              <input className="input" placeholder="count (1~10000)" value={genCount} onChange={(e)=>setGenCount(e.target.value)} />
+              <input className="input" placeholder="teamName (선택)" value={genTeamName} onChange={(e)=>setGenTeamName(e.target.value)} />
+            </div>
+            <div className="actions">
+              <button className="btn btn--primary" onClick={onSigGenerate}>생성</button>
+            </div>
             {genResult && (
-              <div style={{ marginTop: 8, color: 'black' }}>
+              <div style={{ marginTop: 8 }}>
                 <div>created: {genResult.created}</div>
                 {Array.isArray(genResult.codes) && genResult.codes.length > 0 && (
                   <details style={{ marginTop: 6 }}>
@@ -1193,51 +1075,60 @@ const Admin = () => {
           </div>
 
           {/* 6) Reassign / Reset */}
-          <div style={box}>
-            <h3 style={{ color: 'black', marginTop: 0 }}>6) 코드 재배정 / 소비상태 초기화</h3>
-            <input placeholder="challengeId" value={rsChallengeId} onChange={(e)=>setRsChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <input placeholder="codeDigest (sha256 hex)" value={rsCodeDigest} onChange={(e)=>setRsCodeDigest(e.target.value)} style={{ padding:6, marginRight:8, width: 360 }} />
-            <input placeholder="teamName (비우면 배정해제)" value={rsTeamName} onChange={(e)=>setRsTeamName(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <label style={{ color: 'black' }}>
-              <input type="checkbox" checked={rsResetConsumed} onChange={(e)=>setRsResetConsumed(e.target.checked)} /> resetConsumed
-            </label>
-            <div><button onClick={onSigReassign} style={{ marginTop: 8 }}>재배정/초기화</button></div>
+          <div className="card">
+            <h3 className="card__title">6) 코드 재배정 / 소비상태 초기화</h3>
+            <div className="form form-grid">
+              <input className="input" placeholder="challengeId" value={rsChallengeId} onChange={(e)=>setRsChallengeId(e.target.value)} />
+              <input className="input" placeholder="codeDigest (sha256 hex)" value={rsCodeDigest} onChange={(e)=>setRsCodeDigest(e.target.value)} />
+              <input className="input" placeholder="teamName (비우면 배정해제)" value={rsTeamName} onChange={(e)=>setRsTeamName(e.target.value)} />
+              <label className="label" style={{ alignSelf: 'center' }}>
+                <input type="checkbox" checked={rsResetConsumed} onChange={(e)=>setRsResetConsumed(e.target.checked)} /> resetConsumed
+              </label>
+            </div>
+            <div className="actions">
+              <button className="btn btn--primary" onClick={onSigReassign}>재배정/초기화</button>
+            </div>
           </div>
 
           {/* 7) Delete one */}
-          <div style={box}>
-            <h3 style={{ color: 'black', marginTop: 0 }}>7) 단건 삭제</h3>
-            <input placeholder="challengeId" value={delChallengeId} onChange={(e)=>setDelChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <input placeholder="codeDigest" value={delCodeDigest} onChange={(e)=>setDelCodeDigest(e.target.value)} style={{ padding:6, marginRight:8, width: 360 }} />
-            <button onClick={onSigDeleteOne}>삭제</button>
+          <div className="card">
+            <h3 className="card__title">7) 단건 삭제</h3>
+            <div className="form form-grid">
+              <input className="input" placeholder="challengeId" value={delChallengeId} onChange={(e)=>setDelChallengeId(e.target.value)} />
+              <input className="input" placeholder="codeDigest" value={delCodeDigest} onChange={(e)=>setDelCodeDigest(e.target.value)} />
+            </div>
+            <div className="actions">
+              <button className="btn btn--danger" onClick={onSigDeleteOne}>삭제</button>
+            </div>
           </div>
 
           {/* 8) Purge */}
-          <div style={box}>
-            <h3 style={{ color: 'black', marginTop: 0 }}>8) 챌린지 전체 코드 제거</h3>
-            <input placeholder="challengeId" value={purgeChallengeId} onChange={(e)=>setPurgeChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <button onClick={onSigPurge} style={{ background: '#f44336', color: '#fff' }}>전체 삭제</button>
+          <div className="card">
+            <h3 className="card__title">8) 챌린지 전체 코드 제거</h3>
+            <div className="form form-grid">
+              <input className="input" placeholder="challengeId" value={purgeChallengeId} onChange={(e)=>setPurgeChallengeId(e.target.value)} />
+            </div>
+            <div className="actions">
+              <button className="btn btn--danger" onClick={onSigPurge}>전체 삭제</button>
+            </div>
           </div>
 
           {/* 9) Force Unlock */}
-          <div style={box}>
-            <h3 style={{ color: 'black', marginTop: 0 }}>9) 강제 언락</h3>
-            <input placeholder="teamName" value={fuTeamName} onChange={(e)=>setFuTeamName(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <input placeholder="challengeId" value={fuChallengeId} onChange={(e)=>setFuChallengeId(e.target.value)} style={{ padding:6, marginRight:8 }} />
-            <button onClick={onSigForceUnlock}>강제 언락</button>
-            <p style={{ color: '#666', fontSize: 12, marginTop: 6 }}>
-              레코드가 없으면 생성합니다.
-            </p>
+          <div className="card">
+            <h3 className="card__title">9) 강제 언락</h3>
+            <div className="form form-grid">
+              <input className="input" placeholder="teamName" value={fuTeamName} onChange={(e)=>setFuTeamName(e.target.value)} />
+              <input className="input" placeholder="challengeId" value={fuChallengeId} onChange={(e)=>setFuChallengeId(e.target.value)} />
+            </div>
+            <div className="actions">
+              <button className="btn btn--primary" onClick={onSigForceUnlock}>강제 언락</button>
+            </div>
+            <p className="hint">레코드가 없으면 생성합니다.</p>
           </div>
         </section>
       )}
     </div>
   );
 };
-
-const cell = { padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' };
-const box = { padding: 12, border: '1px solid #000', borderRadius: 8, marginBottom: 12, background: '#fafafa' };
-const th  = { padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' };
-const td  = { padding: 8,  textAlign: 'center', color: 'black', border: '1px solid black' };
 
 export default Admin;
