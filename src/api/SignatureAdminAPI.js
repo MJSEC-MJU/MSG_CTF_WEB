@@ -39,7 +39,7 @@ export async function adminExportCSV() {
 
 // 4) 코드 풀 조회 (챌린지별 현황)
 export async function adminGetPool(challengeId) {
-  const { data } = await Axios.get(`/admin/signature/codes/challenge/${challengeId}`);
+  const { data } = await Axios.get(`/admin/signature/codes/pool/${challengeId}`);
   return data; // { challengeId, items: PoolItem[] }
 }
 
