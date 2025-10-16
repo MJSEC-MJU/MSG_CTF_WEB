@@ -121,6 +121,22 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
           user.scores = user.scores.slice(0, user.timeRange.length);
         });
 
+        // ✅ 같은 점수일 때 가장 빠른 시점만 남기기
+        sortIndividuals.forEach((user) => {
+          const filteredScores = [];
+          const filteredTimes = [];
+
+          for (let i = 0; i < user.scores.length; i++) {
+            if (i === 0 || user.scores[i] !== user.scores[i - 1]) {
+              filteredScores.push(user.scores[i]);
+              filteredTimes.push(user.timeRange[i]);
+            }
+          }
+
+          user.scores = filteredScores;
+          user.timeRange = filteredTimes;
+        });
+
         // ✅ 각 팀별 시간 구간만 매핑
         const chartDatasets = sortIndividuals.map((user) => ({
           id: user.id,
