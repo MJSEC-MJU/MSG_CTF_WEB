@@ -51,7 +51,7 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
         const individualRanking = {};
 
         parsedData.forEach((item) => {
-          const userId = item.teamId;
+          const userId = item.teamName;
           const timeLabel = item.solvedTime.slice(0, 19);
           const timeIndex = timeLabels.indexOf(timeLabel);
 
