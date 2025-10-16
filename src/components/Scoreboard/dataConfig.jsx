@@ -1,53 +1,51 @@
-    const colors = [
-      "rgba(255, 99, 132, 1)",
-      "rgba(54, 162, 235, 1)",
-      "rgba(75, 192, 192, 1)",
-      "rgba(255, 206, 86, 1)",
-      "rgba(153, 102, 255, 1)",
-      "rgba(255, 159, 64, 1)",
-      "rgba(199, 199, 199, 1)",
-      "rgba(83, 102, 255, 1)",
-      "rgba(255, 99, 255, 1)",
-      "rgba(99, 255, 132, 1)",
-      "rgba(54, 99, 235, 1)",
-      "rgba(192, 75, 192, 1)",
-      "rgba(255, 206, 100, 1)",
-      "rgba(153, 50, 255, 1)",
-      "rgba(255, 159, 200, 1)",
-      "rgba(199, 50, 199, 1)",
-      "rgba(83, 200, 255, 1)",
-      "rgba(255, 50, 255, 1)",
-      "rgba(99, 255, 200, 1)",
-      "rgba(54, 150, 235, 1)",
-    ];
+const colors = [
+  "rgba(255, 99, 132, 1)",
+  "rgba(54, 162, 235, 1)",
+  "rgba(75, 192, 192, 1)",
+  "rgba(255, 206, 86, 1)",
+  "rgba(153, 102, 255, 1)",
+  "rgba(255, 159, 64, 1)",
+  "rgba(199, 199, 199, 1)",
+  "rgba(83, 102, 255, 1)",
+  "rgba(255, 99, 255, 1)",
+  "rgba(99, 255, 132, 1)",
+  "rgba(54, 99, 235, 1)",
+  "rgba(192, 75, 192, 1)",
+  "rgba(255, 206, 100, 1)",
+  "rgba(153, 50, 255, 1)",
+  "rgba(255, 159, 200, 1)",
+  "rgba(199, 50, 199, 1)",
+  "rgba(83, 200, 255, 1)",
+  "rgba(255, 50, 255, 1)",
+  "rgba(99, 255, 200, 1)",
+  "rgba(54, 150, 235, 1)",
+];
 
 export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
   let eventSource;
   let reconnectInterval;
 
   const connectSSE = () => {
-    // 기존 연결 종료 (이미 연결되어 있다면)
     if (eventSource) {
       eventSource.close();
       eventSource = null;
     }
 
-    // 새 SSE 연결 생성
     eventSource = new EventSource(`${import.meta.env.VITE_API_URL}/api/leaderboard/graph`);
 
     eventSource.onopen = () => {
-      console.log('SSE 연결이 열렸습니다.');
+      console.log("SSE 연결이 열렸습니다.");
     };
 
     eventSource.addEventListener("update", (event) => {
       try {
-        console.log('수신된 데이터:', event.data);
+        console.log("수신된 데이터:", event.data);
         const parsedData = JSON.parse(event.data);
-        if (!Array.isArray(parsedData)) throw new Error('응답 데이터 형식이 잘못되었습니다.');
+        if (!Array.isArray(parsedData)) throw new Error("응답 데이터 형식이 잘못되었습니다.");
 
-        console.log('파싱된 데이터:', parsedData);
+        console.log("파싱된 데이터:", parsedData);
 
-        const timeLabels = [...new Set(parsedData.map(item => item.solvedTime.slice(0, 19)))].sort();
+        const timeLabels = [...new Set(parsedData.map((item) => item.solvedTime.slice(0, 19)))].sort();
         const individualRanking = {};
 
         parsedData.forEach((item) => {
@@ -55,41 +53,25 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
           const timeLabel = item.solvedTime.slice(0, 19);
           const timeIndex = timeLabels.indexOf(timeLabel);
 
-          // 개인 랭킹 처리
           if (!individualRanking[userId]) {
             individualRanking[userId] = {
               id: userId,
               scores: Array(timeLabels.length).fill(0),
-              // color: colors[Object.keys(individualRanking).length % colors.length],
-              lastSubmissionTime: timeLabel, // 최초 제출 시간 기록
+              lastSubmissionTime: timeLabel,
             };
           } else {
-            // 기존 기록과 비교하여 더 늦은 제출시간(최종 제출 시간)을 저장
             if (timeLabel > individualRanking[userId].lastSubmissionTime) {
               individualRanking[userId].lastSubmissionTime = timeLabel;
             }
           }
+
           individualRanking[userId].scores[timeIndex] += item.currentScore;
         });
 
-        // 팀별 누적 합산
-        // Object.values(individualRanking).forEach((user) => {
-        //   for (let i = 1; i < timeLabels.length; i++) {
-        //     if (user.scores[i] === 0) {
-        //       user.scores[i] = user.scores[i - 1] ?? 0;
-        //     } else {
-        //       user.scores[i] += user.scores[i - 1] ?? 0;
-        //     }
-        //   }
-        // });
-
-        // 시작 지점에 따른 그래프 처리
-        // 팀별 누적 합산
-        // ✅ 팀별 누적 합산 및 '처음 문제 푼 시점부터만 표시'
+        // ✅ 팀별 누적합 + 처음 푼 시점부터만 표시 + 구간 자르기
         Object.values(individualRanking).forEach((user) => {
           let firstSolvedIndex = -1;
-          
-          // 첫 문제 푼 인덱스 찾기
+
           for (let i = 0; i < timeLabels.length; i++) {
             if (user.scores[i] > 0) {
               firstSolvedIndex = i;
@@ -97,76 +79,72 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
             }
           }
 
-          // 아직 문제를 한 번도 안 푼 경우 → 전부 null
           if (firstSolvedIndex === -1) {
-            user.scores = Array(timeLabels.length).fill(null);
+            user.scores = [];
+            user.timeRange = [];
             return;
           }
 
-          // 첫 풀이 이전은 null, 이후부터 누적 합산
           for (let i = 0; i < timeLabels.length; i++) {
             if (i < firstSolvedIndex) {
-              user.scores[i] = null; // 첫 풀이 전은 데이터 없음
+              user.scores[i] = null;
             } else if (i > firstSolvedIndex) {
-              // 이전 값 누적 (이전이 null이면 0으로 간주)
               user.scores[i] += user.scores[i - 1] ?? 0;
             }
           }
+
+          // ✅ 실제로 푼 구간만 남기기 (null 구간 제거)
+          const start = user.scores.findIndex((v) => v !== null);
+          const end = user.scores.length - 1 - [...user.scores].reverse().findIndex((v) => v !== null);
+          user.timeRange = timeLabels.slice(start, end + 1);
+          user.scores = user.scores.slice(start, end + 1);
         });
 
-
-        // 개인 랭킹 정렬: 점수가 높은 순으로 정렬하고, 동일한 경우 마지막 제출 시간이 빠른 순으로 정렬
+        // ✅ 정렬 (점수 높은 순 + 마지막 제출 빠른 순)
         const sortIndividuals = Object.values(individualRanking)
           .sort((a, b) => {
-            const scoreDiff = b.scores[b.scores.length - 1] - a.scores[a.scores.length - 1];
+            const scoreDiff = (b.scores[b.scores.length - 1] ?? 0) - (a.scores[a.scores.length - 1] ?? 0);
             if (scoreDiff !== 0) return scoreDiff;
-            // 점수가 동일하면 마지막 제출 시간이 빠른 사용자가 우선순위를 가짐
             if (a.lastSubmissionTime < b.lastSubmissionTime) return -1;
             if (a.lastSubmissionTime > b.lastSubmissionTime) return 1;
             return 0;
-          })
-          // .slice(0, 3);
+          });
 
         sortIndividuals.forEach((user, index) => {
-          user.color = colors[index%colors.length]; 
+          user.color = colors[index % colors.length];
         });
 
-        const chartDatasets = sortIndividuals.map((user, index) => ({
+        // ✅ 각 팀별 시간 구간만 매핑
+        const chartDatasets = sortIndividuals.map((user) => ({
           id: user.id,
-          color: colors[index % colors.length],
-          scores: timeLabels.map((t, i) => ({
+          color: user.color,
+          scores: user.timeRange.map((t, i) => ({
             time: t,
-            value: user.scores[i] ?? null,
+            value: user.scores[i],
           })),
           spanGaps: false,
         }));
 
-        const finalData = [
-          { title: 'Individual Ranking', data: chartDatasets },
-        ];
+        const finalData = [{ title: "Individual Ranking", data: chartDatasets }];
 
         setDatasetsConfig(finalData);
         setLoading(false);
-        console.log('업데이트된 datasetsConfig:', finalData);
+        console.log("업데이트된 datasetsConfig:", finalData);
       } catch (err) {
-        console.error('데이터 처리 중 오류 발생:', err.message);
+        console.error("데이터 처리 중 오류 발생:", err.message);
       }
     });
 
     eventSource.onerror = (error) => {
-      //console.error('SSE 오류 발생:', error);
       eventSource.close();
     };
   };
 
-  // 최초 SSE 연결
   connectSSE();
 
-  // 1시간마다 재연결
   reconnectInterval = setInterval(connectSSE, 60 * 60 * 1000);
 };
 
-// ✅ 수정: time.parser를 ISO 문자열 형식으로 지정
 export const options = {
   responsive: true,
   plugins: {
@@ -177,8 +155,8 @@ export const options = {
     x: {
       type: "time",
       time: {
-        parser: "YYYY-MM-DDTHH:mm:ss", // ✅ 수정
-        unit: "minute", // ✅ hour → minute로 변경 (더 세밀한 시간 표시)
+        parser: "yyyy-MM-dd'T'HH:mm:ss", // ✅ 수정: date-fns 표준
+        unit: "minute", // 필요시 'second'로 변경 가능
         displayFormats: { minute: "HH:mm" },
       },
       ticks: { color: "#ffffff" },
