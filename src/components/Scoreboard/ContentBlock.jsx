@@ -80,6 +80,8 @@ const ContentBlock = ({ dataset }) => {
         },
         ticks: {
           color: '#333',
+          // source: 'data',
+          audoSkip: false,
         },
         grid: { color: 'rgba(255,255,255,0.2)' },
       },
