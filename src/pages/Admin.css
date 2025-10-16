@@ -32,9 +32,13 @@
 
   --radius:12px;
   --radius-sm:8px;
-
-  max-width:1200px;
-  margin:0 auto;
+  
+  box-sizing: border-box;
+  width: 100vw;       
+  max-width:100vw;
+  margin:0;
+  height: 100vh;
+  overflow: auto;
   padding:calc(var(--header-h) + 24px) 20px 32px !important;
   background-color: #0b1220;
 }
@@ -55,6 +59,7 @@
 /* ---------------- Tabs ---------------- */
 .admin .tabs{
   display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;
+  justify-content: center;
 }
 .admin .tabs button{
   appearance:none;cursor:pointer;
