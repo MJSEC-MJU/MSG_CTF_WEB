@@ -113,6 +113,13 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
         sortIndividuals.forEach((user, index) => {
           user.color = colors[index % colors.length];
         });
+        
+        // ✅ 각 팀별 마지막 제출 시각까지만 남기기
+        sortIndividuals.forEach((user) => {
+          const lastTime = new Date(user.lastSubmissionTime);
+          user.timeRange = user.timeRange.filter((t) => new Date(t) <= lastTime);
+          user.scores = user.scores.slice(0, user.timeRange.length);
+        });
 
         // ✅ 각 팀별 시간 구간만 매핑
         const chartDatasets = sortIndividuals.map((user) => ({
