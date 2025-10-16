@@ -2,6 +2,8 @@
 // - Admin 페이지 전체 (Admin.css 스타일 전면 적용)
 // - Signature Codes(관리자) 탭 포함
 // - SIGNATURE 문제 추가/수정 시 club(팀명) 필수 입력 처리
+// - 문제 생성/수정에 mileage 필드 추가 (목록 컬럼 포함)
+// - 편집 시 문제 상세 하이드레이트해 기존 값 주입
 
 import './Admin.css';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -69,6 +71,7 @@ const Admin = () => {
     points: '',
     minPoints: '',
     initialPoints: '',
+    mileage: '',        
     startTime: '',
     endTime: '',
     file: null,
@@ -76,7 +79,7 @@ const Admin = () => {
     category: '',
     date: '',
     time: '',
-    club: '', // ✅ SIGNATURE 전용
+    club: '', 
   });
 
   // ===== Signature Admin (state) =====
@@ -317,6 +320,35 @@ const Admin = () => {
   };
 
   // ===== Problems =====
+
+  // 상세 하이드레이트(가능한 엔드포인트 순회)
+  const hydrateProblemDetail = async (problem) => {
+    const id = problem?.challengeId;
+    if (!id) return problem;
+
+    const candidates = [
+      `/api/admin/challenges/${id}`,
+      `/api/challenges/${id}`,
+      `/api/problems/${id}`,
+    ];
+
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          const body = data?.data ?? data;
+          if (body && typeof body === 'object') {
+            return { ...problem, ...body };
+          }
+        }
+      } catch (e) {
+        // 다음 후보 계속
+      }
+    }
+    return problem;
+  };
+
   const handleDeleteProblem = async (challengeId) => {
     if (!window.confirm('정말로 삭제하시겠습니까?')) return;
     const res = await deleteProblem(challengeId);
@@ -328,24 +360,34 @@ const Admin = () => {
     }
   };
 
-  const handleEditProblem = (problem) => {
-    setEditingProblem(problem);
+  const handleEditProblem = async (problem) => {
+    const full = await hydrateProblemDetail(problem);
+
+    const minPts    = full.minPoints ?? full.minPoint ?? '';
+    const initPts   = full.initialPoints ?? full.initialPoint ?? full.points ?? '';
+    const clubName  = full.club ?? full.clubName ?? '';
+    const mileage   = full.mileage ?? full.mileagePoint ?? full.miles ?? '';
+
+    setEditingProblem(full);
     setShowEditProblemForm(true);
-    setFormData((fd) => ({
-      ...fd,
-      title: problem.title ?? '',
-      points: problem.points ?? '',
-      category: problem.category ?? '',
-      club: problem.club ?? problem.clubName ?? '',
-      startTime: problem.startTime ? convertToDatetimeLocal(problem.startTime) : '',
-      endTime: problem.endTime ? convertToDatetimeLocal(problem.endTime) : '',
-      description: problem.description ?? '',
-      flag: problem.flag ?? '',
-      minPoints: problem.minPoints ?? '',
-      initialPoints: problem.initialPoints ?? '',
-      url: problem.url ?? '',
-      file: null,
-    }));
+
+    setFormData({
+      title:         full.title ?? '',
+      description:   full.description ?? '',
+      flag:          full.flag ?? '',
+      points:        full.points ?? '',
+      minPoints:     minPts ?? '',
+      initialPoints: initPts ?? '',
+      mileage:       mileage ?? '',                // ✅ 추가
+      startTime:     full.startTime ? convertToDatetimeLocal(full.startTime) : '',
+      endTime:       full.endTime   ? convertToDatetimeLocal(full.endTime)   : '',
+      file:          null, // 보안상 미리 채울 수 없음
+      url:           full.url ?? '',
+      category:      full.category ?? '',
+      date:          '',
+      time:          '',
+      club:          clubName,
+    });
   };
 
   const handleSaveProblem = async () => {
@@ -356,16 +398,17 @@ const Admin = () => {
     }
 
     const payload = {
-      title: formData.title,
-      description: formData.description,
-      flag: formData.flag,
-      points: formData.points,
-      minPoints: formData.minPoints,
+      title:         formData.title,
+      description:   formData.description,
+      flag:          formData.flag,
+      points:        formData.points,
+      minPoints:     formData.minPoints,
       initialPoints: formData.initialPoints || formData.points,
-      startTime: toServerDateTime(formData.startTime),
-      endTime: toServerDateTime(formData.endTime),
-      url: formData.url,
-      category: formData.category,
+      mileage:       formData.mileage,             
+      startTime:     toServerDateTime(formData.startTime),
+      endTime:       toServerDateTime(formData.endTime),
+      url:           formData.url,
+      category:      formData.category,
       ...(formData.category === 'SIGNATURE' ? { club: String(formData.club).trim() } : {}),
     };
 
@@ -739,6 +782,10 @@ const Admin = () => {
                     <label className="label">Points</label>
                     <input className="input" type="number" name="points" value={formData.points} onChange={onProblemInput} />
                   </div>
+                  <div className="field">
+                    <label className="label">Mileage</label>
+                    <input className="input" type="number" name="mileage" value={formData.mileage} onChange={onProblemInput} />
+                  </div>
 
                   <div className="field" style={{ gridColumn: '1 / -1' }}>
                     <label className="label">Description</label>
@@ -831,6 +878,11 @@ const Admin = () => {
                   <input className="input" type="number" name="points" value={formData.points} onChange={onProblemInput} required />
                 </div>
 
+                <div className="field">
+                  <label className="label">Mileage</label>
+                  <input className="input" type="number" name="mileage" value={formData.mileage} onChange={onProblemInput} />
+                </div>
+
                 <div className="field" style={{ gridColumn: '1 / -1' }}>
                   <label className="label">Description</label>
                   <textarea
@@ -908,7 +960,7 @@ const Admin = () => {
           <table className="table" style={{ marginTop: 10 }}>
             <thead>
               <tr>
-                {['ID', 'Title', 'Points', 'Category', 'Action'].map((h) => (<th key={h}>{h}</th>))}
+                {['ID', 'Title', 'Points', 'Mileage', 'Category', 'Action'].map((h) => (<th key={h}>{h}</th>))}
               </tr>
             </thead>
             <tbody>
@@ -917,6 +969,7 @@ const Admin = () => {
                   <td>{p.challengeId}</td>
                   <td>{p.title}</td>
                   <td>{p.points}</td>
+                  <td>{p.mileage ?? '-'}</td>
                   <td>{p.category}</td>
                   <td>
                     <div className="actions" style={{ justifyContent: 'center' }}>
