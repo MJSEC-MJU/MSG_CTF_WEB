@@ -36,6 +36,7 @@
   max-width:1200px;
   margin:0 auto;
   padding:calc(var(--header-h) + 24px) 20px 32px !important;
+  background-color: #0b1220;
 }
 
 /* 제목 */
@@ -171,13 +172,4 @@
 @media (max-width:768px){
   .admin{padding:calc(var(--header-h) + 16px) 16px 20px !important}
   .admin .tabs button{padding:.5rem .9rem}
-}
-
-.admin{ position: relative; }
-.admin::before{
-  content:"";
-  position: fixed;
-  inset: 0;
-  background: var(--bg);   /* = #0b1220 */
-  z-index: -1;
 }
