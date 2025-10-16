@@ -55,6 +55,7 @@
 /* ---------------- Tabs ---------------- */
 .admin .tabs{
   display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;
+  justify-content: center;
 }
 .admin .tabs button{
   appearance:none;cursor:pointer;
@@ -163,10 +164,10 @@
    지원 불안정한 :has/:contains 선택자는 제거 */
 
 /* ---------------- Scrollbar (scoped) ---------------- */
-.admin *::-webkit-scrollbar{width:10px;height:10px}
-.admin *::-webkit-scrollbar-track{background:var(--bg)}
-.admin *::-webkit-scrollbar-thumb{background:#1f2944;border-radius:6px;border:2px solid var(--bg)}
-.admin *::-webkit-scrollbar-thumb:hover{background:#2a3556}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#1f2944;border-radius:6px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#2a3556}
 
 /* ---------------- Responsive ---------------- */
 @media (max-width:768px){
