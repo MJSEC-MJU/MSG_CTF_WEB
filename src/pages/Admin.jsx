@@ -998,16 +998,7 @@ const Admin = () => {
       {tab === 'timer' && (
         <section className="section--timer">
           <h2 style={{ gridColumn: '1 / -1' }}>Set Contest Time</h2>
-
-          {/* 1) 현재 서버 시간 */}
-          <div className="card card--dark">
-            <h3 className="card__title">현재 서버 시간</h3>
-            <div className="form">
-              <p style={{ margin: 0 }}>{currentServerTime || '—'}</p>
-            </div>
-          </div>
-
-          {/* 2) 설정 폼 */}
+          {/* 설정 폼 */}
           <div className="card">
             <div className="form form-grid">
               <div className="field">
@@ -1025,19 +1016,6 @@ const Admin = () => {
 
             <div className="actions">
               <button className="btn btn--primary" onClick={handleSetContestTime}>대회 시간 설정</button>
-            </div>
-          </div>
-
-          {/* 3) 주의사항 */}
-          <div className="card card--dark">
-            <h3 className="card__title">주의사항</h3>
-            <div className="form">
-              <ul style={{ margin: 0, paddingLeft: 20 }}>
-                <li>시작 시간은 종료 시간보다 이전이어야 합니다.</li>
-                <li>새로운 설정이 생성되면 기존의 활성화된 설정은 자동으로 비활성화됩니다.</li>
-                <li>모든 시간은 <strong>Asia/Seoul (KST, UTC+09:00)</strong> 타임존 기준입니다.</li>
-                <li>관리자 권한(ROLE_ADMIN)이 필요합니다.</li>
-              </ul>
             </div>
           </div>
         </section>
