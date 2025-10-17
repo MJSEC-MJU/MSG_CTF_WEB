@@ -55,13 +55,6 @@ const MyPage = () => {
   const [profile, setProfile] = useState(null);
   const [profileError, setProfileError] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState(false);
-
-  // 🔒 문제 섹션은 팀 단위 API 정리 전까지 주석
-  // const [solvedProblems, setSolvedProblems] = useState([]);
-  // const [unsolvedProblems, setUnsolvedProblems] = useState([]);
-  // const [problemsLoading, setProblemsLoading] = useState(true);
-  // const [problemsError, setProblemsError] = useState(false);
-
   // 팀 마일리지는 API의 teamMileage 사용
   const mileage = profile?.mileage ?? 0;
 
@@ -117,41 +110,11 @@ const MyPage = () => {
     })();
   }, []);
 
-  // 2) 문제(팀단위 미구현 → 전면 주석)
-  /*
-  useEffect(() => {
-    if (MOCK) {
-      const problems = Array.from({ length: 10 }).map((_, i) => ({
-        challengeId: 1000 + i,
-        title: `Sample Challenge ${i + 1}`,
-        points: 50 + i * 10,
-        solved: i % 3 === 0,
-      }));
-      setSolvedProblems(problems.filter((p) => p.solved));
-      setUnsolvedProblems(problems.filter((p) => !p.solved));
-      setProblemsLoading(false);
-      return;
-    }
-
-    setProblemsLoading(true);
-    fetchProblems(0, 20)
-      .then(({ problems }) => {
-        const list = Array.isArray(problems) ? problems : [];
-        const solved = list.filter((p) => p.solved === true);
-        const unsolved = list.filter((p) => p.solved === false);
-        setSolvedProblems(solved);
-        setUnsolvedProblems(unsolved);
-      })
-      .catch(() => setProblemsError(true))
-      .finally(() => setProblemsLoading(false));
-  }, []);
-  */
-
   // 3) 리더보드 SSE (teamName 기준으로 순위 반영)
   useEffect(() => {
     if (MOCK || !profile?.teamName) return;
 
-    const eventSource = new EventSource("https://msg.mjsec.kr/api/leaderboard/stream");
+    const eventSource = new EventSource("/api/leaderboard/stream");
     eventSource.onmessage = (event) => {
       try {
         let payloadStr = event.data;
@@ -389,62 +352,6 @@ const MyPage = () => {
           </aside>
         </div>
       </section>
-
-      {/* 🔒 문제 섹션 (팀단위 API 정리 전까지 주석 처리)
-      <section className="problems card">
-        <div className="card-header">
-          <h3>Solved Problems</h3>
-        </div>
-        <div className="problems-box">
-          {problemsLoading ? (
-            <Loading />
-          ) : problemsError ? (
-            <p className="error-message">문제 데이터를 불러오는 중 오류가 발생했습니다.</p>
-          ) : solvedProblems.length ? (
-            <div className="chips">
-              {solvedProblems.map((problem) => (
-                <button
-                  key={problem.challengeId}
-                  className="chip"
-                  onClick={() => navigate(`/problem/${problem.challengeId}`)}
-                >
-                  {problem.title}
-                  <span className="chip-pts">{problem.points} pts</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="dim">푼 문제가 없습니다.</p>
-          )}
-        </div>
-
-        <div className="card-header mt24">
-          <h3>Unsolved Problems</h3>
-        </div>
-        <div className="problems-box">
-          {problemsLoading ? (
-            <Loading />
-          ) : problemsError ? (
-            <p className="error-message">문제 데이터를 불러오는 중 오류가 발생했습니다.</p>
-          ) : unsolvedProblems.length ? (
-            <div className="chips">
-              {unsolvedProblems.map((problem) => (
-                <button
-                  key={problem.challengeId}
-                  className="chip ghost"
-                  onClick={() => navigate(`/problem/${problem.challengeId}`)}
-                >
-                  {problem.title}
-                  <span className="chip-pts">{problem.points} pts</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="dim">안 푼 문제가 없습니다.</p>
-          )}
-        </div>
-      </section>
-      */}
 
       {leaderboardError && (
         <p className="error-message">리더보드 업데이트에 실패했습니다.</p>
