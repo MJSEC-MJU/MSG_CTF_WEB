@@ -24,8 +24,10 @@ export const logout = async () => {
     //console.error('로그아웃 요청 실패:', error);
   } finally {
     // 무조건 토큰 삭제 및 로그아웃 처리
+    // refreshToken은 HttpOnly 쿠키라 JS에서 삭제 불가 (서버에서 처리됨)
     Cookies.remove('accessToken');
-    Cookies.remove('refreshToken');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('loginTime');
     window.location.href = '/login'; // 로그인 페이지로 리다이렉트
   }
 };
