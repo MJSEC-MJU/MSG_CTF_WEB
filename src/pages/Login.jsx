@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 import { signIn } from '../api/SigninApi';
 import { loginSchema } from '../hook/validationYup';
 import Modal2 from '../components/Modal2';
 import './Login.css';
-
-const SESSION_TIMEOUT = 3600;
 
 const Login = ({ setIsLoggedIn }) => {
   const [loginId, setLoginId] = useState('');
@@ -13,7 +12,6 @@ const Login = ({ setIsLoggedIn }) => {
   const [errorMessage, setErrorMessage] = useState(
     () => localStorage.getItem('errorMessage') || ''
   );
-  const [isError, setIsError] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({ loginId: '', password: '' });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const navigate = useNavigate();
@@ -22,34 +20,25 @@ const Login = ({ setIsLoggedIn }) => {
     localStorage.setItem('loginTime', Date.now());
   };
 
-  const checkSessionTimeout = () => {
-    const loginTime = localStorage.getItem('loginTime');
-    if (!loginTime) return;
-
-    const currentTime = Date.now();
-    const elapsedTime = (currentTime - loginTime) / 1000;
-
-    if (elapsedTime > SESSION_TIMEOUT) {
-      localStorage.removeItem('loginTime');
-      localStorage.removeItem('isLoggedIn');
-      setIsLoggedIn(false);
-      navigate('/login');
-    }
-  };
-
   useEffect(() => {
-    // 이미 로그인되어 있으면 홈으로 리다이렉트
-    if (localStorage.getItem('isLoggedIn') === 'true') {
-      navigate('/');
+    // 초기 마운트 시에만 체크 (한 번만)
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const accessToken = Cookies.get('accessToken');
+
+    // 토큰이 없는데 localStorage에 isLoggedIn이 남아있으면 정리
+    if (!accessToken && isLoggedIn === 'true') {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('loginTime');
+      localStorage.removeItem('errorMessage');
       return;
     }
 
-    const interval = setInterval(() => {
-      checkSessionTimeout();
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [navigate, setIsLoggedIn]);
+    // 토큰도 있고 로그인 상태면 홈으로 리다이렉트
+    if (accessToken && isLoggedIn === 'true') {
+      navigate('/');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 빈 배열: 마운트 시 1회만 실행
 
   useEffect(() => {
     localStorage.setItem('errorMessage', errorMessage);
@@ -58,7 +47,6 @@ const Login = ({ setIsLoggedIn }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setFieldErrors({ loginId: '', password: '' });
-    setIsError(false);
 
     try {
       await loginSchema.validate(
@@ -66,7 +54,7 @@ const Login = ({ setIsLoggedIn }) => {
         { abortEarly: false }
       );
 
-      const data = await signIn({ loginId, password });
+      await signIn({ loginId, password });
 
       localStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
@@ -85,7 +73,6 @@ const Login = ({ setIsLoggedIn }) => {
       } else {
         setErrorMessage(err.message || '로그인 실패');
       }
-      setIsError(true);
     }
   };
 

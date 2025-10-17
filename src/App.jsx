@@ -1,6 +1,6 @@
 // src/App.jsx
 import "./App.css";
-import { useState, Suspense, useRef } from "react";
+import { useState, Suspense, useRef, lazy } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,20 +9,22 @@ import {
   useLocation,
 } from "react-router-dom";
 import Header from "./components/Header";
-import Home from "./pages/Home";
-import Ranking from "./pages/Ranking";
-import Scoreboard from "./pages/Scoreboard";
-import Challenge from "./pages/Challenge";
-import ProblemDetail from "./pages/ProblemDetail";
-import MyPage from "./pages/MyPage";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
-import Admin from "./pages/Admin";
-import AdminAuth from "./api/AdminAuth";
 import Loading from "./components/Loading";
-import TimerPage from "./pages/TimerPage";
-import ProblemDetailMock from './pages/ProblemDetailMock';
 import { useContestTime } from "./components/Timer";
+
+// 코드 스플리팅: 페이지 컴포넌트들을 lazy loading
+const Home = lazy(() => import("./pages/Home"));
+const Ranking = lazy(() => import("./pages/Ranking"));
+const Scoreboard = lazy(() => import("./pages/Scoreboard"));
+const Challenge = lazy(() => import("./pages/Challenge"));
+const ProblemDetail = lazy(() => import("./pages/ProblemDetail"));
+const MyPage = lazy(() => import("./pages/MyPage"));
+const Login = lazy(() => import("./pages/Login"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Admin = lazy(() => import("./pages/Admin"));
+const AdminAuth = lazy(() => import("./api/AdminAuth"));
+const TimerPage = lazy(() => import("./pages/TimerPage"));
+const ProblemDetailMock = lazy(() => import('./pages/ProblemDetailMock'));
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {

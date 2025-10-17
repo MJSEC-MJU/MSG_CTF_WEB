@@ -52,10 +52,21 @@ const GlitchText = styled.h1`
   font-family: 'Courier New', Courier, monospace;
   text-transform: uppercase;
   background: linear-gradient(to right, #ff4500 20%, #dc0000 100%);
-  -webkit-background-clip: text;  /* 크롬, 사파리 */
+  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;          /* 파이어폭스 최신 버전 */
-  color: transparent; 
+  background-clip: text;
+  color: transparent;
+  margin: 40px 0 20px;
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+    margin: 30px 0 15px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2rem;
+    margin: 20px 0 10px;
+  }
 `;
 
 const NoDataText = styled.p`

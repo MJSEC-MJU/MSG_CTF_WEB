@@ -15,6 +15,86 @@
     margin-top: 80px;
 }
 
+/* Tablet */
+@media (max-width: 1024px) {
+    .Top3Container {
+        gap: 80px;
+        margin-top: 60px;
+    }
+
+    .TopCard {
+        padding: 16px;
+    }
+
+    .PlayerID {
+        font-size: 28px;
+    }
+
+    .PlayerScore {
+        font-size: 20px;
+    }
+
+    .RankImage {
+        width: 180%;
+        height: 180%;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .Top3Container {
+        gap: 40px;
+        margin-top: 40px;
+    }
+
+    .TopCard {
+        padding: 12px;
+    }
+
+    .PlayerID {
+        font-size: 22px;
+    }
+
+    .PlayerScore {
+        font-size: 18px;
+    }
+
+    .RankImage {
+        width: 160%;
+        height: 160%;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .Top3Container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .TopCard {
+        padding: 10px;
+        width: 130px !important;
+        height: 130px !important;
+    }
+
+    .PlayerID {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+
+    .PlayerScore {
+        font-size: 16px;
+    }
+
+    .RankImage {
+        width: 140%;
+        height: 140%;
+    }
+}
+
 .TopCard {
     all: unset;
     padding: 20px;

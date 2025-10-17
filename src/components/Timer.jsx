@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, useCal
 import { fetchContestTime } from '../api/ContestTimeAPI';
 
 const ContestTimeContext = createContext(null);
-const REFRESH_INTERVAL = 5 * 60 * 1000; // 5분
+const REFRESH_INTERVAL = 10 * 60 * 1000; // 10분 (서버 부하 감소)
 
 export function ContestTimeProvider({ children }) {
   const [startMs, setStartMs] = useState(null);
