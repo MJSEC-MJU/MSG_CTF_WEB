@@ -58,6 +58,11 @@ function App() {
       return <Navigate to="/timer" state={{ from: location.pathname }} />;
     }
 
+    // 대회가 시작되면 alert 플래그 초기화 (다음 대회를 위해)
+    if (isContestStarted && alertRef.current.contestNotStarted) {
+      alertRef.current.contestNotStarted = false;
+    }
+
     return element;
   };
 
