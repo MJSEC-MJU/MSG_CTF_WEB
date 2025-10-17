@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // 이동을 위해 추가
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchProblems } from "../api/ChallengeAllAPI";
 import { fetchSolvedChallenges } from "../api/UserChallengeAPI";
 import {
-  fetchUnlockedList,       // GET /api/signature/unlocked
-  fetchUnlockStatus,       // GET /api/signature/:id/status
-  submitSignatureCode,     // POST /api/signature/:id/check
+  fetchUnlockedList,
+  fetchUnlockStatus,
+  submitSignatureCode,
 } from "../api/SignatureAPI";
+import Loading from "../components/Loading";
 import "./Challenge.css";
 
 function Challenge() {
@@ -14,6 +15,11 @@ function Challenge() {
   const [problems, setProblems] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  // API 캐싱 (페이지 변경 시 불필요한 재호출 방지)
+  const cachedSolvedRef = useRef(null);
+  const cachedUnlockedRef = useRef(null);
 
   // 해결/언락 상태
   const [solvedChallenges, setSolvedChallenges] = useState(new Set());
@@ -28,7 +34,8 @@ function Challenge() {
 
   const navigate = useNavigate();
 
-  const categoryImages = {
+  // useMemo로 categoryImages 메모이제이션 (재생성 방지)
+  const categoryImages = useMemo(() => ({
     FORENSICS: "/assets/forensics.svg",
     CRYPTO: "/assets/crypto.svg",
     PWN: "/assets/pwn.svg",
@@ -37,42 +44,64 @@ function Challenge() {
     MISC: "/assets/misc.svg",
     WEB: "/assets/web.svg",
     SIGNATURE: "/assets/signature.svg",
-  };
+  }), []);
+
   const categoryFallback = "/assets/misc.svg";
 
   useEffect(() => {
     let isMounted = true;
 
+    // 3개의 API를 병렬로 호출하여 로딩 속도 개선 + 캐싱
     (async () => {
+      setLoading(true);
       try {
-        const { problems, totalPages } = await fetchProblems(currentPage);
+        // 캐시된 데이터가 있으면 재사용, 없으면 새로 호출
+        const solvedPromise = cachedSolvedRef.current
+          ? Promise.resolve(cachedSolvedRef.current)
+          : fetchSolvedChallenges();
+
+        const unlockedPromise = cachedUnlockedRef.current
+          ? Promise.resolve(cachedUnlockedRef.current)
+          : fetchUnlockedList();
+
+        const [problemsResult, solvedResult, unlockedResult] = await Promise.allSettled([
+          fetchProblems(currentPage),
+          solvedPromise,
+          unlockedPromise,
+        ]);
+
         if (!isMounted) return;
-        setProblems(problems);
-        setTotalPages(totalPages);
+
+        // 문제 목록
+        if (problemsResult.status === 'fulfilled') {
+          const { problems, totalPages } = problemsResult.value;
+          setProblems(problems);
+          setTotalPages(totalPages);
+        } else {
+          console.error('fetchProblems failed:', problemsResult.reason);
+        }
+
+        // 해결한 문제 (캐싱)
+        if (solvedResult.status === 'fulfilled') {
+          const solvedData = solvedResult.value;
+          cachedSolvedRef.current = solvedData; // 캐시 저장
+          setSolvedChallenges(new Set(solvedData.map((s) => String(s.challengeId))));
+        } else {
+          setSolvedChallenges(new Set());
+        }
+
+        // 언락된 시그니처 문제 (캐싱)
+        if (unlockedResult.status === 'fulfilled') {
+          const unlocked = unlockedResult.value;
+          cachedUnlockedRef.current = unlocked; // 캐시 저장
+          setUnlockedSet(new Set((unlocked?.challengeIds || []).map(String)));
+        } else {
+          setUnlockedSet(new Set());
+        }
       } catch (e) {
-        console.error(e);
-      }
-    })();
-
-    (async () => {
-      try {
-        const solvedData = await fetchSolvedChallenges();
-        if (!isMounted) return;
-        setSolvedChallenges(new Set(solvedData.map((s) => String(s.challengeId))));
-      } catch {
-        if (!isMounted) return;
-        setSolvedChallenges(new Set());
-      }
-    })();
-
-    (async () => {
-      try {
-        const unlocked = await fetchUnlockedList(); // { teamId, challengeIds }
-        if (!isMounted) return;
-        setUnlockedSet(new Set((unlocked?.challengeIds || []).map(String)));
-      } catch {
-        if (!isMounted) return;
-        setUnlockedSet(new Set());
+        console.error('Challenge data fetch error:', e);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     })();
 
@@ -142,6 +171,14 @@ function Challenge() {
       setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="challenge-container">
+        <Loading />
+      </div>
+    );
+  }
 
   return (
     <div className="challenge-container">

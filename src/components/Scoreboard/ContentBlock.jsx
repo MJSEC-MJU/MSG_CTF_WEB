@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import styled from 'styled-components';
 import ScoreRank from './ScoreRank';
 import {
@@ -153,56 +153,111 @@ ContentBlock.propTypes = {
   }).isRequired,
 };
 
-export default ContentBlock;
+export default memo(ContentBlock);
 
 const TitleText = styled.h1`
   font-size: 3.5rem;
   font-family: 'Courier New', Courier, monospace;
   text-transform: uppercase;
   background: linear-gradient(to right, #ff4500 20%, #dc0000 100%);
-  -webkit-background-clip: text;  /* 크롬, 사파리 */
+  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;          /* 파이어폭스 최신 버전 */
-  color: transparent; 
+  background-clip: text;
+  color: transparent;
+  margin: 20px 0;
 
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+    margin: 15px 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2rem;
+    margin: 10px 0;
+  }
 `;
 
 const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 130%;
+  width: 100%;
+  max-width: 1400px;
   gap: 20px;
   margin-bottom: 100px;
+  padding: 0 20px;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 0 12px;
+    margin-bottom: 60px;
+  }
 `;
 
 const ChartContainer = styled.div`
   width: 100%;
   max-width: 1200px;
   height: 500px;
+
   @media (min-width: 768px) {
     height: 600px;
+  }
+
+  @media (max-width: 768px) {
+    height: 400px;
+  }
+
+  @media (max-width: 480px) {
+    height: 300px;
   }
 `;
 
 const TeamLabels = styled.div`
   display: flex;
-  flex-wrap: wrap;   
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 10px -5px; // 줄 간격, 칸 간격
+  gap: 10px;
   margin-top: 10px;
-  border-radius: 20px;      /* 모서리 둥글게 */
-  padding: 15px;            /* 안쪽 여백 */
+  border-radius: 20px;
+  padding: 15px;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 6px;
+    padding: 8px;
+  }
 `;
 
 const TeamLabel = styled.span`
-  flex: 1 1 calc(25% - 20px); // 4개씩 배치되도록
-  min-width: 120px;           // 너무 줄어들지 않게 최소 폭
+  flex: 1 1 calc(25% - 20px);
+  min-width: 120px;
   text-align: center;
   color: ${props => props.color};
   font-weight: bold;
   font-size: 25px;
-  white-space: nowrap;        /* 줄바꿈 방지 */
-  overflow: hidden;           /* 넘치는 텍스트 숨김 */
-  text-overflow: ellipsis;    /* ...으로 표시 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 1024px) {
+    flex: 1 1 calc(33.33% - 16px);
+    min-width: 100px;
+    font-size: 22px;
+  }
+
+  @media (max-width: 768px) {
+    flex: 1 1 calc(50% - 12px);
+    min-width: 80px;
+    font-size: 18px;
+  }
+
+  @media (max-width: 480px) {
+    flex: 1 1 100%;
+    min-width: 60px;
+    font-size: 16px;
+  }
 `;

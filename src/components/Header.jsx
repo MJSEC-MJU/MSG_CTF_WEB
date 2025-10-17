@@ -15,13 +15,32 @@ const Header = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // 초기 로그인 상태 확인
     const checkLoginStatus = () => {
       const token = Cookies.get('accessToken');
       setIsLoggedIn(!!token);
     };
     checkLoginStatus();
-    const interval = setInterval(checkLoginStatus, 1000);
-    return () => clearInterval(interval);
+
+    // 페이지 포커스 복귀 시 확인 (탭 전환 후 돌아올 때)
+    const handleFocus = () => {
+      checkLoginStatus();
+    };
+
+    // 페이지 가시성 변경 시 확인 (백그라운드 → 포그라운드)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkLoginStatus();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const handleProfile = () => navigate('/mypage');
@@ -31,12 +50,16 @@ const Header = () => {
     try {
       const accessToken = Cookies.get('accessToken');
       if (!accessToken) return;
-      const result = await logout();
-      if (result.message === '로그아웃 성공!') {
-        setIsLoggedIn(false);
-        navigate('/');
-      }
-    } catch {}
+
+      // 즉시 로그아웃 상태로 변경 (UX 개선)
+      setIsLoggedIn(false);
+
+      await logout();
+      navigate('/');
+    } catch (error) {
+      // 실패해도 로그아웃 처리 (쿠키는 이미 삭제됨)
+      navigate('/');
+    }
   };
 
   const handleNavigation = (e, targetPage) => {
