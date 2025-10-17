@@ -35,14 +35,14 @@ function App() {
 
   const PrivateRoute = ({ element, requireContestStarted = false }) => {
     const location = useLocation();
-    const isAdminPage = location.pathname.startsWith("/adminPage");
+    const isChallengePage = location.pathname.startsWith("/challenge");
     const isMyPage = location.pathname.startsWith("/mypage");
 
     if (isLoading || isContestStarted === null) {
       return <Loading />;
     }
 
-    if (requireContestStarted && isContestEnded && !isAdminPage) {
+    if (requireContestStarted && isContestEnded && isChallengePage) {
       if (!alertRef.current.contestEnded) {
         alert("대회가 종료되었습니다!");
         alertRef.current.contestEnded = true;
