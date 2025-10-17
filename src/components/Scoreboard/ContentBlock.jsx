@@ -117,14 +117,20 @@ const ContentBlock = ({ dataset }) => {
               color={team.color}
               style={{ left: `${(idx / (top8Teams.length - 1)) * 100}%` }}
             >
-              {team.id}
+              {team.id.length > 6 ? team.id.slice(0, 12) + '...' : team.id}
             </TeamLabel>
             ))}
         </TeamLabels>
 
       {/* 상위 3팀 스코어보드 */}
       <TitleText>TOP 3</TitleText>
-      <ScoreRank data={top3Teams} />
+      {/* <ScoreRank data={top3Teams} /> */}
+      <ScoreRank
+        data={top3Teams.map(team => ({
+          ...team,
+          id: team.id.length > 6 ? team.id.slice(0, 6) + '...' : team.id,
+        }))} 
+      />
     </Content>
   );
 };
@@ -196,4 +202,7 @@ const TeamLabel = styled.span`
   color: ${props => props.color};
   font-weight: bold;
   font-size: 25px;
+  white-space: nowrap;        /* 줄바꿈 방지 */
+  overflow: hidden;           /* 넘치는 텍스트 숨김 */
+  text-overflow: ellipsis;    /* ...으로 표시 */
 `;
