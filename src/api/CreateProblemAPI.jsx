@@ -30,6 +30,7 @@ export const createProblem = async (formData) => {
       points: formData.points,
       minPoints: formData.minPoints,
       initialPoints: formData.initialPoints || formData.points, // 없으면 points 사용
+      mileage: formData.mileage,
       startTime: `${formData.date} ${formData.time}:00`,
       endTime: `${formData.date} ${formData.time}:00`,
       url: formData.url,
