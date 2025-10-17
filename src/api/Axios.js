@@ -86,14 +86,17 @@ Axios.interceptors.response.use(
           originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
           return Axios(originalRequest);
         }
+        // newToken이 없으면 로그아웃
+        throw new Error('Token refresh failed');
       } catch (e) {
-        // 재발급 실패 → 로그아웃
+        // 재발급 실패 → 로그아웃 후 에러 반환
         Cookies.remove('accessToken');
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('loginTime');
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
+        return Promise.reject(e);
       }
     }
 
@@ -107,8 +110,12 @@ async function handleTokenRefresh() {
 
   tokenRefreshing = (async () => {
     try {
-      // 재발급은 쿠키 필요할 수 있으니 이 호출만 withCredentials: true
-      const resp = await Axios.post('/reissue', {}, { withCredentials: true });
+      // 재발급은 만료된 토큰을 보내면 안 되므로 순수 axios 사용
+      const resp = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/reissue`,
+        {},
+        { withCredentials: true }
+      );
 
       // 헤더 우선
       const authHeader = resp.headers?.['authorization'];

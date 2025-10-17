@@ -35,6 +35,8 @@ export function ContestTimeProvider({ children }) {
     }
   }, []);
 
+  const [tick, setTick] = useState(0);
+
   useEffect(() => {
     // 최초 로드
     load();
@@ -44,10 +46,8 @@ export function ContestTimeProvider({ children }) {
 
     // 초당 1회 틱 → UI만 갱신(네트워크 호출 아님)
     tickTimer.current = setInterval(() => {
-      // 아무 것도 안 해도 상태가 필요하면 useState로 더미 tick 해도 됨.
-      // 여기선 소비측이 serverNow()를 매 렌더마다 계산하게 두고,
-      // 1초 틱으로 강제 리렌더를 유도하려면 아래처럼:
-      setSkewMs((v) => v); // no-op set → 리렌더 유도 (가볍게 유지)
+      // tick 상태 변경으로 강제 리렌더 유도 → useMemo 재계산
+      setTick((prev) => prev + 1);
     }, 1000);
 
     return () => {
@@ -61,12 +61,12 @@ export function ContestTimeProvider({ children }) {
   const isContestStarted = useMemo(() => {
     if (startMs == null) return null;
     return serverNow() >= startMs;
-  }, [startMs, serverNow]);
+  }, [startMs, serverNow, tick]);
 
   const isContestEnded = useMemo(() => {
     if (endMs == null) return false;
     return serverNow() >= endMs;
-  }, [endMs, serverNow]);
+  }, [endMs, serverNow, tick]);
 
   const value = useMemo(() => ({
     contestStartTime: startMs,      // ms
