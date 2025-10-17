@@ -38,8 +38,10 @@ const Login = ({ setIsLoggedIn }) => {
   };
 
   useEffect(() => {
-    if (!localStorage.getItem('isLoggedIn')) {
-      navigate('/login');
+    // 이미 로그인되어 있으면 홈으로 리다이렉트
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      navigate('/');
+      return;
     }
 
     const interval = setInterval(() => {

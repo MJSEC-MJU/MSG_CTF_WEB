@@ -63,6 +63,19 @@ Axios.interceptors.response.use(
 
     const status = error.response.status;
 
+    // 401 → 블랙리스트/인증 실패 → 즉시 로그아웃 (무한 루프 방지)
+    if (status === 401) {
+      // accessToken만 삭제 (refreshToken은 HttpOnly라 JS에서 삭제 불가)
+      Cookies.remove('accessToken');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('loginTime');
+      // 로그인 페이지가 아닐 때만 리다이렉트
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
+
     // 403 → 토큰 재발급 1회 시도 후 원 요청 재시도
     if (status === 403 && !originalRequest?._retry) {
       originalRequest._retry = true;
@@ -74,8 +87,13 @@ Axios.interceptors.response.use(
           return Axios(originalRequest);
         }
       } catch (e) {
+        // 재발급 실패 → 로그아웃
         Cookies.remove('accessToken');
-        Cookies.remove('refreshToken');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('loginTime');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
       }
     }
 
