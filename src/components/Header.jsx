@@ -22,24 +22,23 @@ const Header = () => {
     };
     checkLoginStatus();
 
-    // 페이지 포커스 복귀 시 확인 (탭 전환 후 돌아올 때)
-    const handleFocus = () => {
-      checkLoginStatus();
+    // 탭 포커스/가시성 복귀 시 재확인
+    const handleFocus = () => checkLoginStatus();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') checkLoginStatus();
     };
 
-    // 페이지 가시성 변경 시 확인 (백그라운드 → 포그라운드)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkLoginStatus();
-      }
-    };
+    // ★ 로그인/로그아웃 직후 강제 동기화(커스텀 이벤트)
+    const handleAuthChanged = () => checkLoginStatus();
 
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('auth:changed', handleAuthChanged);
 
     return () => {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('auth:changed', handleAuthChanged);
     };
   }, []);
 
@@ -51,20 +50,25 @@ const Header = () => {
       const accessToken = Cookies.get('accessToken');
       if (!accessToken) return;
 
-      // 즉시 로그아웃 상태로 변경 (UX 개선)
+      // 즉시 로그아웃 상태로 변경 (UX)
       setIsLoggedIn(false);
 
       await logout();
+      //  모든 컴포넌트에 "상태 바뀜" 알림
+      window.dispatchEvent(new Event('auth:changed'));
       navigate('/');
     } catch (error) {
       // 실패해도 로그아웃 처리 (쿠키는 이미 삭제됨)
+      window.dispatchEvent(new Event('auth:changed'));
       navigate('/');
     }
   };
 
+  // ★ 클릭 시점마다 최신 쿠키로 판정(핵심 패치)
   const handleNavigation = (e, targetPage) => {
     e.preventDefault();
-    if (!isLoggedIn) setIsModalVisible(true);
+    const authedNow = !!Cookies.get('accessToken');
+    if (!authedNow) setIsModalVisible(true);
     else navigate(targetPage);
   };
 
@@ -129,7 +133,7 @@ const backgroundAnimation = keyframes`
 const HeaderWrapper = styled.div`
   position: fixed;
   inset: 0 0 auto 0;
-  width: 100%;                 /* 100vw 대신 100%: 모바일 가로 넘침 방지 */
+  width: 100%;
   background-color: #232323;
   background-size: 60px 60px;
   animation: ${backgroundAnimation} 3s linear infinite;

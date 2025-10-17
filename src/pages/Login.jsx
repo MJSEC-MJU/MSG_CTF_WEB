@@ -61,6 +61,10 @@ const Login = ({ setIsLoggedIn }) => {
       setLoginTime();
       setIsModalVisible(true);
       setErrorMessage('');
+
+      //  헤더 등에서 즉시 쿠키 변화 감지하도록 커스텀 이벤트 발행
+      window.dispatchEvent(new Event('auth:changed'));
+
       navigate('/');
     } catch (err) {
       if (err.inner) {
