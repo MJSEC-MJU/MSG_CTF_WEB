@@ -40,7 +40,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 1000px;
+  width: 100%;
   max-width: 1000px;
   margin: 0 auto; /* 중앙 정렬 */
 }
@@ -121,24 +121,116 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
-  .list {
-    max-width: 100%;
+/* Tablet - 768px ~ 1024px */
+@media (max-width: 1024px) {
+  .ranking-wrapper {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    margin-top: 60px;
   }
 
   .card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    padding: 14px;
+    font-size: 1.1rem;
   }
 
-  .rank {
-    width: 100%;
-    justify-content: flex-start;
+  .rank-number {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 1.3rem;
+  }
+
+  .user {
+    font-size: 1.3rem;
   }
 
   .score {
-    width: 100%;
+    font-size: 30px;
+  }
+}
+
+/* Mobile - max 768px */
+@media (max-width: 768px) {
+  .ranking-wrapper {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    margin-top: 50px;
+  }
+
+  .list {
+    gap: 10px;
+  }
+
+  .card {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .rank {
+    gap: 8px;
+  }
+
+  .rank-number {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 1.2rem;
+  }
+
+  .user {
+    font-size: 1.1rem;
+  }
+
+  .score {
+    font-size: 24px;
+  }
+}
+
+/* Small Mobile - max 480px */
+@media (max-width: 480px) {
+  .ranking-wrapper {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+    margin-top: 40px;
+  }
+
+  .card {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+
+  .rank {
+    flex: 1 1 100%;
+    gap: 6px;
+  }
+
+  .rank-number {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 1rem;
+  }
+
+  .user {
+    font-size: 1rem;
+    text-align: left;
+  }
+
+  .score {
+    flex: 1 1 100%;
+    margin-top: 8px;
+    font-size: 22px;
     text-align: left;
   }
 }
