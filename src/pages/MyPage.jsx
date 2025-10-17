@@ -82,7 +82,7 @@ const MyPage = () => {
         teamName: "Admin",
         members: ["admin@example.com"],
         rank: 1,
-        points: 0,
+        toalPoint: 0,
         mileage: 0,
         solvedCount: 0,
         avatarUrl: "/assets/profileSample.webp",
@@ -106,7 +106,7 @@ const MyPage = () => {
           teamName: first.teamName ?? "TEAM",
           members,
           rank: 1, // 최초 진입 시 임시값, SSE에서 업데이트
-          points: first.teamTotalPoint ?? 0,
+          toalPoint: first.teamTotalPoint ?? 0,
           mileage: first.teamMileage ?? 0,
           solvedCount: first.teamSolvedCount ?? 0,
           avatarUrl: "/assets/profileSample.webp",
@@ -154,16 +154,23 @@ const MyPage = () => {
     const eventSource = new EventSource("https://msg.mjsec.kr/api/leaderboard/stream");
     eventSource.onmessage = (event) => {
       try {
-        let jsonStr = event.data;
-        if (jsonStr.startsWith("data:")) jsonStr = jsonStr.substring(5);
-        const payload = JSON.parse(jsonStr);
-        const leaderboard = Array.isArray(payload) ? payload : payload.data;
+        let payloadStr = event.data;
+        if (typeof payloadStr === "string" && payloadStr.startsWith("data:")) {
+          payloadStr = payloadStr.slice(5);
+        }
+        const parsed = JSON.parse(payloadStr);
+        const leaderboard = Array.isArray(parsed) ? parsed : parsed?.data;
         if (!Array.isArray(leaderboard)) return;
 
-        // 항목이 { teamName, points, ... } 구조라고 가정
-        const rankIndex = leaderboard.findIndex((item) => item.teamName === profile.teamName);
-        if (rankIndex !== -1) {
-          setProfile((prev) => ({ ...prev, rank: rankIndex + 1 }));
+        const mine = leaderboard.find((item) => item.teamId === profile.teamId)
+                ?? leaderboard.find((item) => item.teamName === profile.teamName);
+
+        if (mine) {
+          setProfile((prev) => ({
+            ...prev,
+            rank: mine.rank ?? prev.rank,
+            totalPoint: mine.totalPoint ?? prev.totalPoint,
+          }));
         }
       } catch {
         // no-op
@@ -174,7 +181,7 @@ const MyPage = () => {
       eventSource.close();
     };
     return () => eventSource.close();
-  }, [profile?.teamName]);
+  }, [profile?.teamId, profile?.teamName]);
 
   // ===== QR 발급 =====
   const issueQR = useCallback(async () => {
@@ -339,7 +346,7 @@ const MyPage = () => {
 
                 <div className="profile-stats">
                   <span className="pill">Rank #{profile.rank}</span>
-                  <span className="pill">{profile.points} pts</span>
+                  <span className="pill">{profile.totalPoint} pts</span>
                   {/* 팀 솔브 카운트가 필요하면 아래 라인을 풀 것:
                   <span className="pill">Solves {profile.solvedCount}</span>
                   */}
