@@ -114,6 +114,7 @@ const Admin = () => {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [selectedTeamNameForMileage, setSelectedTeamNameForMileage] = useState('');
   const [teamSearchQuery, setTeamSearchQuery] = useState('');
+  const [paymentHistorySearchQuery, setPaymentHistorySearchQuery] = useState('');
   const [mileageAmount, setMileageAmount] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -1125,48 +1126,77 @@ const Admin = () => {
           {/* 결제 히스토리 */}
           <div className="card">
             <h3 className="card__title">전체 결제 히스토리</h3>
-            <div className="actions" style={{ marginBottom: 12 }}>
-              <button
-                className="btn btn--primary"
-                onClick={loadPaymentHistory}
-                disabled={paymentLoading}
-              >
-                {paymentLoading ? '로딩 중...' : '히스토리 조회'}
-              </button>
+            <div className="form form-grid" style={{ marginBottom: 12 }}>
+              <div className="field">
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="팀명 또는 요청자로 검색..."
+                  value={paymentHistorySearchQuery}
+                  onChange={(e) => setPaymentHistorySearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="actions" style={{ alignItems: 'end' }}>
+                <button
+                  className="btn btn--primary"
+                  onClick={loadPaymentHistory}
+                  disabled={paymentLoading}
+                >
+                  {paymentLoading ? '로딩 중...' : '히스토리 조회'}
+                </button>
+              </div>
             </div>
 
             {paymentHistory.length > 0 ? (
-              <table className="table">
-                <thead>
-                  <tr>
-                    {['ID', '팀명', '사용 마일리지', '요청자', '결제 시간', '액션'].map((h) => (
-                      <th key={h}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paymentHistory.map((payment) => (
-                    <tr key={payment.teamPaymentHistoryId}>
-                      <td>{payment.teamPaymentHistoryId}</td>
-                      <td>{payment.teamName ?? '-'}</td>
-                      <td>{payment.mileageUsed?.toLocaleString() ?? 0}</td>
-                      <td>{payment.requesterLoginId ?? '-'}</td>
-                      <td>{payment.createdAt ? new Date(payment.createdAt).toLocaleString('ko-KR') : '-'}</td>
-                      <td>
-                        <div className="actions" style={{ justifyContent: 'center' }}>
-                          <button
-                            className="btn btn--danger"
-                            onClick={() => handleRefundPayment(payment.teamPaymentHistoryId)}
-                            disabled={paymentLoading}
-                          >
-                            환불
-                          </button>
-                        </div>
-                      </td>
+              <>
+                <p className="hint" style={{ marginBottom: 8 }}>
+                  전체: {paymentHistory.length}건
+                  {paymentHistorySearchQuery && ` / 검색 결과: ${paymentHistory.filter(p =>
+                    (p.teamName?.toLowerCase().includes(paymentHistorySearchQuery.toLowerCase())) ||
+                    (p.requesterLoginId?.toLowerCase().includes(paymentHistorySearchQuery.toLowerCase()))
+                  ).length}건`}
+                </p>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      {['ID', '팀명', '사용 마일리지', '요청자', '결제 시간', '액션'].map((h) => (
+                        <th key={h}>{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paymentHistory
+                      .filter(payment => {
+                        if (!paymentHistorySearchQuery) return true;
+                        const query = paymentHistorySearchQuery.toLowerCase();
+                        return (
+                          payment.teamName?.toLowerCase().includes(query) ||
+                          payment.requesterLoginId?.toLowerCase().includes(query)
+                        );
+                      })
+                      .map((payment) => (
+                        <tr key={payment.teamPaymentHistoryId}>
+                          <td>{payment.teamPaymentHistoryId}</td>
+                          <td>{payment.teamName ?? '-'}</td>
+                          <td>{payment.mileageUsed?.toLocaleString() ?? 0}</td>
+                          <td>{payment.requesterLoginId ?? '-'}</td>
+                          <td>{payment.createdAt ? new Date(payment.createdAt).toLocaleString('ko-KR') : '-'}</td>
+                          <td>
+                            <div className="actions" style={{ justifyContent: 'center' }}>
+                              <button
+                                className="btn btn--danger"
+                                onClick={() => handleRefundPayment(payment.teamPaymentHistoryId)}
+                                disabled={paymentLoading}
+                              >
+                                환불
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </>
             ) : (
               <p className="hint">결제 히스토리가 없거나 조회 버튼을 눌러주세요.</p>
             )}
