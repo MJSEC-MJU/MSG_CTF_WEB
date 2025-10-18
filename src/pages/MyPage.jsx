@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchTeamProfile } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
-import { fetchPaymentQRToken, buildPaymentQRString } from "../api/PaymentAPI"; // ✅ 결제 QR 토큰 + 스킴 빌더
+import { fetchPaymentQRToken, buildPaymentQRString, fetchPaymentHistory } from "../api/PaymentAPI"; // 결제 QR 토큰 + 스킴 빌더 + 히스토리
 // import { fetchProblems } from "../api/ChallengeAllAPI"; // 🔒 팀단위 정리 전까지 미사용
 import Loading from "../components/Loading";
 import "./MyPage.css";
@@ -66,6 +66,11 @@ const MyPage = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const refreshTimerRef = useRef(null);
   const tickRef = useRef(null);
+
+  // 결제 히스토리
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
 
   // 1) 팀 프로필 (rows -> 팀 객체로 재구성)
   useEffect(() => {
@@ -145,6 +150,43 @@ const MyPage = () => {
     };
     return () => eventSource.close();
   }, [profile?.teamId, profile?.teamName]);
+
+  // ===== 결제 히스토리 로드 =====
+  const loadPaymentHistory = useCallback(async () => {
+    if (MOCK) {
+      setPaymentHistory([
+        {
+          id: 1,
+          mileageUsed: 500,
+          requestedBy: "admin@example.com",
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          mileageUsed: 300,
+          requestedBy: "user@example.com",
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+        },
+      ]);
+      return;
+    }
+
+    setHistoryLoading(true);
+    setHistoryError(false);
+    try {
+      const history = await fetchPaymentHistory();
+      setPaymentHistory(Array.isArray(history) ? history : []);
+    } catch (err) {
+      console.error('결제 히스토리 로딩 실패:', err);
+      setHistoryError(true);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPaymentHistory();
+  }, [loadPaymentHistory]);
 
   // ===== QR 발급 =====
   const issueQR = useCallback(async () => {
@@ -350,6 +392,67 @@ const MyPage = () => {
               </div>
             </div>
           </aside>
+        </div>
+      </section>
+
+      {/* 결제 히스토리 섹션 */}
+      <section className="card">
+        <div className="card-header">
+          <h3>결제 히스토리</h3>
+          <button
+            onClick={loadPaymentHistory}
+            disabled={historyLoading}
+            style={{
+              padding: '6px 12px',
+              fontSize: '14px',
+              cursor: historyLoading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {historyLoading ? '로딩 중...' : '새로고침'}
+          </button>
+        </div>
+        <div className="problems-box">
+          {historyLoading ? (
+            <Loading />
+          ) : historyError ? (
+            <p className="error-message">결제 히스토리를 불러오는 중 오류가 발생했습니다.</p>
+          ) : paymentHistory.length > 0 ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                minWidth: '500px'
+              }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #ddd' }}>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>사용 마일리지</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>요청자</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>결제 시간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paymentHistory.map((payment) => (
+                    <tr key={payment.id} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '12px 8px' }}>{payment.id}</td>
+                      <td style={{ padding: '12px 8px' }}>
+                        {payment.mileageUsed?.toLocaleString() ?? 0} pt
+                      </td>
+                      <td style={{ padding: '12px 8px' }}>{payment.requestedBy ?? '-'}</td>
+                      <td style={{ padding: '12px 8px' }}>
+                        {payment.createdAt
+                          ? new Date(payment.createdAt).toLocaleString('ko-KR')
+                          : '-'
+                        }
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="dim">결제 히스토리가 없습니다.</p>
+          )}
         </div>
       </section>
 
