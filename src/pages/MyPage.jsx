@@ -156,15 +156,15 @@ const MyPage = () => {
     if (MOCK) {
       setPaymentHistory([
         {
-          id: 1,
+          teamPaymentHistoryId: 1,
           mileageUsed: 500,
-          requestedBy: "admin@example.com",
+          requesterLoginId: "admin",
           createdAt: new Date().toISOString(),
         },
         {
-          id: 2,
+          teamPaymentHistoryId: 2,
           mileageUsed: 300,
-          requestedBy: "user@example.com",
+          requesterLoginId: "user",
           createdAt: new Date(Date.now() - 86400000).toISOString(),
         },
       ]);
@@ -433,12 +433,12 @@ const MyPage = () => {
                 </thead>
                 <tbody>
                   {paymentHistory.map((payment) => (
-                    <tr key={payment.id} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '12px 8px' }}>{payment.id}</td>
+                    <tr key={payment.teamPaymentHistoryId} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '12px 8px' }}>{payment.teamPaymentHistoryId}</td>
                       <td style={{ padding: '12px 8px' }}>
                         {payment.mileageUsed?.toLocaleString() ?? 0} pt
                       </td>
-                      <td style={{ padding: '12px 8px' }}>{payment.requestedBy ?? '-'}</td>
+                      <td style={{ padding: '12px 8px' }}>{payment.requesterLoginId ?? '-'}</td>
                       <td style={{ padding: '12px 8px' }}>
                         {payment.createdAt
                           ? new Date(payment.createdAt).toLocaleString('ko-KR')
