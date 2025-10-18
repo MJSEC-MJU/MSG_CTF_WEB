@@ -68,3 +68,88 @@ export const buildPaymentQRString = ({ token, expiry, loginId }) => {
 
   return u.toString().replace("https://placeholder", "pay+ctf://");
 };
+
+/**
+ * 현재 팀의 결제 히스토리 조회 API (사용자용)
+ * GET /api/payment/history
+ * @returns {Promise<Array>} 결제 히스토리 배열
+ */
+export const fetchPaymentHistory = async () => {
+  try {
+    const response = await Axios.get("/payment/history");
+
+    if (response.data?.code === "SUCCESS" && response.data?.data) {
+      return response.data.data;
+    }
+
+    throw new Error(response.data?.message || "결제 히스토리 조회 실패");
+  } catch (error) {
+    console.error("Payment History API Error:", error);
+    throw error;
+  }
+};
+
+/**
+ * 모든 팀의 결제 히스토리 조회 API (관리자용)
+ * GET /api/admin/payment/history
+ * @returns {Promise<Array>} 전체 결제 히스토리 배열
+ */
+export const fetchAllPaymentHistory = async () => {
+  try {
+    const response = await Axios.get("/admin/payment/history");
+
+    if (response.data?.code === "SUCCESS" && response.data?.data) {
+      return response.data.data;
+    }
+
+    throw new Error(response.data?.message || "전체 결제 히스토리 조회 실패");
+  } catch (error) {
+    console.error("Admin Payment History API Error:", error);
+    throw error;
+  }
+};
+
+/**
+ * 결제 철회(환불) API (관리자용)
+ * DELETE /api/admin/payment/refund/{paymentHistoryId}
+ * @param {number} paymentHistoryId - 결제 히스토리 ID
+ * @returns {Promise<Object>} 환불 결과
+ */
+export const refundPayment = async (paymentHistoryId) => {
+  try {
+    const response = await Axios.delete(`/admin/payment/refund/${paymentHistoryId}`);
+
+    if (response.data?.code === "SUCCESS") {
+      return response.data;
+    }
+
+    throw new Error(response.data?.message || "결제 환불 실패");
+  } catch (error) {
+    console.error("Payment Refund API Error:", error);
+    throw error;
+  }
+};
+
+/**
+ * 팀에 마일리지 부여 API (관리자용)
+ * POST /api/admin/team/mileage/{teamId}
+ * @param {number} teamId - 팀 ID
+ * @param {number} mileage - 부여할 마일리지
+ * @returns {Promise<Object>} 마일리지 부여 결과
+ */
+export const grantMileageToTeam = async (teamId, mileage) => {
+  try {
+    const response = await Axios.post(`/admin/team/mileage/${teamId}`, {
+      mileage,
+    });
+
+    if (response.data?.code === "SUCCESS") {
+      return response.data;
+    }
+
+    throw new Error(response.data?.message || "마일리지 부여 실패");
+  } catch (error) {
+    console.error("Grant Mileage API Error:", error);
+    throw error;
+  }
+};
