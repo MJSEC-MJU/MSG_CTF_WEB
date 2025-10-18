@@ -1418,7 +1418,7 @@ const Admin = () => {
                               ) : '-'}
                             </td>
                             <td>
-                              {record.isFirstBlood ? (
+                              {(record.isFirstBlood || record.firstBlood) ? (
                                 <span style={{
                                   color: '#e74c3c',
                                   fontWeight: 'bold',
