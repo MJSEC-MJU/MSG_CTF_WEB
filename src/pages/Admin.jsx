@@ -6,6 +6,7 @@ import { fetchTeamProfileRows, createTeam, addTeamMember } from '../api/TeamAPI'
 import { updateProblem } from '../api/ProblemUpdateAPI';
 import PaymentProcessor from '../components/PaymentProcessor';
 import { useContestTime } from "../components/Timer";
+import { fetchAllPaymentHistory, refundPayment, grantMileageToTeam } from '../api/PaymentAPI';
 
 const Admin = () => {
   // ===== UI state =====
@@ -54,6 +55,12 @@ const Admin = () => {
     date: '',
     time: '',
   });
+
+  // ===== Payment History =====
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [selectedTeamIdForMileage, setSelectedTeamIdForMileage] = useState('');
+  const [mileageAmount, setMileageAmount] = useState('');
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   // ===== Derived: map member email -> team row =====
   const teamByMemberEmail = useMemo(() => {
@@ -291,6 +298,67 @@ const Admin = () => {
   };
 
   const onFile = (e) => setFormData((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
+
+  // ===== Payment Handlers =====
+  const loadPaymentHistory = async () => {
+    try {
+      setPaymentLoading(true);
+      const history = await fetchAllPaymentHistory();
+      setPaymentHistory(Array.isArray(history) ? history : []);
+    } catch (err) {
+      console.error('결제 히스토리 로딩 실패:', err);
+      alert('결제 히스토리를 불러오는데 실패했습니다.');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleRefundPayment = async (paymentHistoryId) => {
+    if (!window.confirm('이 결제를 환불하시겠습니까? 마일리지가 팀에 반환됩니다.')) return;
+    try {
+      setPaymentLoading(true);
+      const res = await refundPayment(paymentHistoryId);
+      alert(res?.message || '환불이 완료되었습니다.');
+      await loadPaymentHistory();
+      const latestRows = await fetchTeamProfileRows();
+      setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+    } catch (err) {
+      console.error('환불 실패:', err);
+      alert(err?.message || '환불에 실패했습니다.');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleGrantMileage = async () => {
+    const teamId = parseInt(selectedTeamIdForMileage, 10);
+    const amount = parseInt(mileageAmount, 10);
+
+    if (!teamId || isNaN(teamId)) {
+      alert('팀을 선택해주세요.');
+      return;
+    }
+
+    if (!amount || isNaN(amount) || amount < 0) {
+      alert('유효한 마일리지 금액을 입력해주세요 (0 이상).');
+      return;
+    }
+
+    try {
+      setPaymentLoading(true);
+      const res = await grantMileageToTeam(teamId, amount);
+      alert(res?.message || `마일리지 ${amount}가 부여되었습니다.`);
+      setSelectedTeamIdForMileage('');
+      setMileageAmount('');
+      const latestRows = await fetchTeamProfileRows();
+      setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+    } catch (err) {
+      console.error('마일리지 부여 실패:', err);
+      alert(err?.message || '마일리지 부여에 실패했습니다.');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
 
   return (
     <div style={{ padding: 16 }}>
@@ -701,7 +769,101 @@ const Admin = () => {
       {/* ================= Payment Tab ================= */}
       {tab === 'payment' && (
         <section>
-          <PaymentProcessor />
+          <h2 style={{ color: 'black' }}>Payment Management</h2>
+
+          {/* Payment Processor (기존) */}
+          <div style={{ padding: 12, border: '1px solid #000', borderRadius: 8, marginBottom: 12, background: '#fafafa' }}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>결제 처리</h3>
+            <PaymentProcessor />
+          </div>
+
+          {/* 마일리지 부여 */}
+          <div style={{ padding: 12, border: '1px solid #000', borderRadius: 8, marginBottom: 12, background: '#f5faff' }}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>팀 마일리지 부여</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ color: 'black', display: 'block', marginBottom: 4 }}>팀 선택</label>
+                <select
+                  value={selectedTeamIdForMileage}
+                  onChange={(e) => setSelectedTeamIdForMileage(e.target.value)}
+                  style={{ width: '100%', padding: 6, backgroundColor: 'white', color: 'black' }}
+                >
+                  <option value="">팀을 선택하세요</option>
+                  {Array.from(new Map(teamRows.map(row => [row.teamId, row])).values()).map((team) => (
+                    <option key={team.teamId} value={team.teamId}>
+                      {team.teamName} (현재 마일리지: {team.teamMileage ?? 0})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ color: 'black', display: 'block', marginBottom: 4 }}>마일리지 금액</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="부여할 마일리지"
+                  value={mileageAmount}
+                  onChange={(e) => setMileageAmount(e.target.value)}
+                  style={{ width: '100%', padding: 6 }}
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleGrantMileage}
+              disabled={paymentLoading}
+              style={{ padding: '8px 16px' }}
+            >
+              {paymentLoading ? '처리 중...' : '마일리지 부여'}
+            </button>
+          </div>
+
+          {/* 결제 히스토리 */}
+          <div style={{ padding: 12, border: '1px solid #000', borderRadius: 8, background: '#fff' }}>
+            <h3 style={{ color: 'black', marginTop: 0 }}>전체 결제 히스토리</h3>
+            <button
+              onClick={loadPaymentHistory}
+              disabled={paymentLoading}
+              style={{ padding: '8px 16px', marginBottom: 12 }}
+            >
+              {paymentLoading ? '로딩 중...' : '히스토리 조회'}
+            </button>
+
+            {paymentHistory.length > 0 ? (
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black' }}>
+                <thead>
+                  <tr>
+                    {['ID', '팀명', '사용 마일리지', '요청자', '결제 시간', '액션'].map((h) => (
+                      <th key={h} style={{ padding: 10, textAlign: 'center', color: 'black', border: '1px solid black' }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paymentHistory.map((payment) => (
+                    <tr key={payment.id}>
+                      <td style={cell}>{payment.id}</td>
+                      <td style={cell}>{payment.teamName ?? '-'}</td>
+                      <td style={cell}>{payment.mileageUsed?.toLocaleString() ?? 0}</td>
+                      <td style={cell}>{payment.requestedBy ?? '-'}</td>
+                      <td style={cell}>{payment.createdAt ? new Date(payment.createdAt).toLocaleString('ko-KR') : '-'}</td>
+                      <td style={cell}>
+                        <button
+                          onClick={() => handleRefundPayment(payment.id)}
+                          disabled={paymentLoading}
+                          style={{ margin: 5, padding: '6px 12px', backgroundColor: '#ff4444', color: 'white', border: 'none', borderRadius: 4, cursor: paymentLoading ? 'not-allowed' : 'pointer' }}
+                        >
+                          환불
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p style={{ color: '#666' }}>결제 히스토리가 없거나 조회 버튼을 눌러주세요.</p>
+            )}
+          </div>
         </section>
       )}
 
