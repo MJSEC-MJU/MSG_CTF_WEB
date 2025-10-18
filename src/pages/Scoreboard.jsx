@@ -49,14 +49,14 @@ const Wrapper = styled.div`
 
 const GlitchText = styled.h1`
   font-size: 3.5rem;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Black Han Sans","Noto Sans KR",sans-serif;
   text-transform: uppercase;
-  background: linear-gradient(to right, #ff4500 20%, #dc0000 100%);
+  background: linear-gradient(to right, #FF0000 0%, #FEA500 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
-  margin: 40px 0 20px;
+  margin: 80px 0 20px;
 
   @media (max-width: 768px) {
     font-size: 2.5rem;
