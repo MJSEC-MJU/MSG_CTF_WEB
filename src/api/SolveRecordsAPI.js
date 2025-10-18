@@ -25,6 +25,12 @@ export const fetchAllSolveRecords = async () => {
   try {
     const response = await Axios.get("/admin/challenge/solve-records");
 
+    // 백엔드가 배열을 직접 반환하는 경우
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    // 백엔드가 { code: "SUCCESS", data: [...] } 형태로 반환하는 경우
     if (response.data?.code === "SUCCESS" && response.data?.data) {
       return response.data.data;
     }
@@ -46,6 +52,12 @@ export const fetchSolveRecordsByChallenge = async (challengeId) => {
   try {
     const response = await Axios.get(`/admin/challenge/${challengeId}/solve-records`);
 
+    // 백엔드가 배열을 직접 반환하는 경우
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    // 백엔드가 { code: "SUCCESS", data: [...] } 형태로 반환하는 경우
     if (response.data?.code === "SUCCESS" && response.data?.data) {
       return response.data.data;
     }
