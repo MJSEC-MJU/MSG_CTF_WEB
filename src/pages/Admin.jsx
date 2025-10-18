@@ -16,6 +16,12 @@ import PaymentProcessor from '../components/PaymentProcessor';
 import { useContestTime } from "../components/Timer";
 import { fetchContestTime, updateContestTime } from '../api/ContestTimeAPI';
 import { fetchAllPaymentHistory, refundPayment, grantMileageToTeam } from '../api/PaymentAPI';
+import {
+  fetchAllSolveRecords,
+  fetchSolveRecordsByChallenge,
+  revokeSolveRecord,
+  deleteAllSolveRecordsByUser
+} from '../api/SolveRecordsAPI';
 
 // ── Signature Admin API ─────────────────────────────────────────────
 import {
@@ -117,6 +123,13 @@ const Admin = () => {
   const [paymentHistorySearchQuery, setPaymentHistorySearchQuery] = useState('');
   const [mileageAmount, setMileageAmount] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
+
+  // ===== Solve Records =====
+  const [solveRecords, setSolveRecords] = useState([]);
+  const [solveRecordsSearchQuery, setSolveRecordsSearchQuery] = useState('');
+  const [selectedChallengeFilter, setSelectedChallengeFilter] = useState('');
+  const [selectedUserForBulkDelete, setSelectedUserForBulkDelete] = useState('');
+  const [solveRecordsLoading, setSolveRecordsLoading] = useState(false);
 
   // ===== Derived =====
   const teamByMemberEmail = useMemo(() => {
@@ -658,6 +671,72 @@ const Admin = () => {
     }
   };
 
+  // ===== Solve Records Handlers =====
+  const loadSolveRecords = async () => {
+    try {
+      setSolveRecordsLoading(true);
+      const records = await fetchAllSolveRecords();
+      setSolveRecords(Array.isArray(records) ? records : []);
+    } catch (err) {
+      console.error('제출 기록 로딩 실패:', err);
+      alert('제출 기록을 불러오는데 실패했습니다.');
+    } finally {
+      setSolveRecordsLoading(false);
+    }
+  };
+
+  const handleRevokeSolveRecord = async (challengeId, loginId, challengeTitle) => {
+    if (!window.confirm(`[${challengeTitle}] 문제의 ${loginId} 사용자 제출 기록을 철회하시겠습니까?\n\n- 팀 점수 및 마일리지가 복구됩니다.\n- 다이나믹 스코어가 재계산됩니다.`)) {
+      return;
+    }
+
+    try {
+      setSolveRecordsLoading(true);
+      const res = await revokeSolveRecord(challengeId, loginId);
+      alert(res?.message || '제출 기록이 철회되었습니다.');
+      await loadSolveRecords();
+      const latestRows = await fetchTeamProfileRows();
+      setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+      const latestProblems = await fetchProblems();
+      setProblems(Array.isArray(latestProblems) ? latestProblems : []);
+    } catch (err) {
+      console.error('제출 기록 철회 실패:', err);
+      alert(err?.message || '제출 기록 철회에 실패했습니다.');
+    } finally {
+      setSolveRecordsLoading(false);
+    }
+  };
+
+  const handleBulkDeleteUserRecords = async () => {
+    const loginId = selectedUserForBulkDelete.trim();
+
+    if (!loginId) {
+      alert('사용자 로그인 ID를 입력해주세요.');
+      return;
+    }
+
+    if (!window.confirm(`${loginId} 사용자의 모든 제출 기록을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
+      return;
+    }
+
+    try {
+      setSolveRecordsLoading(true);
+      const res = await deleteAllSolveRecordsByUser(loginId);
+      alert(res?.message || `${res?.deletedCount || 0}개의 제출 기록이 삭제되었습니다.`);
+      setSelectedUserForBulkDelete('');
+      await loadSolveRecords();
+      const latestRows = await fetchTeamProfileRows();
+      setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+      const latestProblems = await fetchProblems();
+      setProblems(Array.isArray(latestProblems) ? latestProblems : []);
+    } catch (err) {
+      console.error('사용자 제출 기록 삭제 실패:', err);
+      alert(err?.message || '사용자 제출 기록 삭제에 실패했습니다.');
+    } finally {
+      setSolveRecordsLoading(false);
+    }
+  };
+
   return (
     <div className="admin">
       <h1>Admin Page</h1>
@@ -666,6 +745,7 @@ const Admin = () => {
         <button aria-current={tab==='users' ? 'page' : undefined} onClick={() => setTab('users')}>User List</button>
         <button aria-current={tab==='teams' ? 'page' : undefined} onClick={() => setTab('teams')}>Team List</button>
         <button aria-current={tab==='problems' ? 'page' : undefined} onClick={() => setTab('problems')}>Problem List</button>
+        <button aria-current={tab==='solverecords' ? 'page' : undefined} onClick={() => setTab('solverecords')}>Solve Records</button>
         <button aria-current={tab==='payment' ? 'page' : undefined} onClick={() => setTab('payment')}>Payment</button>
         <button aria-current={tab==='timer' ? 'page' : undefined} onClick={() => setTab('timer')}>Set Time</button>
         <button aria-current={tab==='signature' ? 'page' : undefined} onClick={() => setTab('signature')}>Signature</button>
@@ -1199,6 +1279,176 @@ const Admin = () => {
               </>
             ) : (
               <p className="hint">결제 히스토리가 없거나 조회 버튼을 눌러주세요.</p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ================= Solve Records Tab ================= */}
+      {tab === 'solverecords' && (
+        <section>
+          <h2>Solve Records Management</h2>
+
+          {/* 사용자 전체 제출 기록 삭제 */}
+          <div className="card">
+            <h3 className="card__title">사용자 전체 제출 기록 삭제</h3>
+            <div className="form form-grid">
+              <div className="field">
+                <label className="label">사용자 로그인 ID</label>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="삭제할 사용자의 로그인 ID"
+                  value={selectedUserForBulkDelete}
+                  onChange={(e) => setSelectedUserForBulkDelete(e.target.value)}
+                />
+                <p className="hint">해당 사용자의 모든 문제 제출 기록이 삭제됩니다. (중복 제출 정리, 테스트 계정 정리 등에 유용)</p>
+              </div>
+            </div>
+            <div className="actions">
+              <button
+                className="btn btn--danger"
+                onClick={handleBulkDeleteUserRecords}
+                disabled={solveRecordsLoading}
+              >
+                {solveRecordsLoading ? '삭제 중...' : '전체 삭제'}
+              </button>
+            </div>
+          </div>
+
+          {/* 제출 기록 조회 */}
+          <div className="card">
+            <h3 className="card__title">전체 제출 기록</h3>
+            <div className="form form-grid" style={{ marginBottom: 12 }}>
+              <div className="field">
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="문제 제목, 로그인 ID, 팀명, 대학으로 검색..."
+                  value={solveRecordsSearchQuery}
+                  onChange={(e) => setSolveRecordsSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <select
+                  className="select"
+                  value={selectedChallengeFilter}
+                  onChange={(e) => setSelectedChallengeFilter(e.target.value)}
+                >
+                  <option value="">모든 문제</option>
+                  {Array.from(new Set(solveRecords.map(r => r.challengeId)))
+                    .sort((a, b) => a - b)
+                    .map((cid) => {
+                      const record = solveRecords.find(r => r.challengeId === cid);
+                      return (
+                        <option key={cid} value={cid}>
+                          [{cid}] {record?.challengeTitle || 'Unknown'}
+                        </option>
+                      );
+                    })}
+                </select>
+              </div>
+              <div className="actions" style={{ alignItems: 'end' }}>
+                <button
+                  className="btn btn--primary"
+                  onClick={loadSolveRecords}
+                  disabled={solveRecordsLoading}
+                >
+                  {solveRecordsLoading ? '로딩 중...' : '조회'}
+                </button>
+              </div>
+            </div>
+
+            {solveRecords.length > 0 ? (
+              <>
+                <p className="hint" style={{ marginBottom: 8 }}>
+                  전체: {solveRecords.length}건
+                  {(solveRecordsSearchQuery || selectedChallengeFilter) && ` / 필터링 결과: ${
+                    solveRecords.filter(record => {
+                      const query = solveRecordsSearchQuery.toLowerCase();
+                      const matchesSearch = !solveRecordsSearchQuery ||
+                        record.challengeTitle?.toLowerCase().includes(query) ||
+                        record.loginId?.toLowerCase().includes(query) ||
+                        record.teamName?.toLowerCase().includes(query) ||
+                        record.univ?.toLowerCase().includes(query);
+                      const matchesChallenge = !selectedChallengeFilter ||
+                        String(record.challengeId) === String(selectedChallengeFilter);
+                      return matchesSearch && matchesChallenge;
+                    }).length
+                  }건`}
+                </p>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        {['History ID', '문제 ID', '문제 제목', '로그인 ID', '팀명', '대학', '제출 시간', '점수', '마일리지', 'FB 보너스', '퍼스트 블러드', '액션'].map((h) => (
+                          <th key={h}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {solveRecords
+                        .filter(record => {
+                          const query = solveRecordsSearchQuery.toLowerCase();
+                          const matchesSearch = !solveRecordsSearchQuery ||
+                            record.challengeTitle?.toLowerCase().includes(query) ||
+                            record.loginId?.toLowerCase().includes(query) ||
+                            record.teamName?.toLowerCase().includes(query) ||
+                            record.univ?.toLowerCase().includes(query);
+                          const matchesChallenge = !selectedChallengeFilter ||
+                            String(record.challengeId) === String(selectedChallengeFilter);
+                          return matchesSearch && matchesChallenge;
+                        })
+                        .map((record) => (
+                          <tr key={record.historyId}>
+                            <td>{record.historyId}</td>
+                            <td>{record.challengeId}</td>
+                            <td>{record.challengeTitle || '-'}</td>
+                            <td>{record.loginId || '-'}</td>
+                            <td>{record.teamName || '-'}</td>
+                            <td>{record.univ || '-'}</td>
+                            <td>{record.solvedTime ? new Date(record.solvedTime).toLocaleString('ko-KR') : '-'}</td>
+                            <td>{record.pointsAwarded?.toLocaleString() || 0}</td>
+                            <td>{record.mileageAwarded?.toLocaleString() || 0}</td>
+                            <td>
+                              {record.mileageBonus > 0 ? (
+                                <span style={{ color: '#e67e22', fontWeight: 'bold' }}>
+                                  +{record.mileageBonus}
+                                </span>
+                              ) : '-'}
+                            </td>
+                            <td>
+                              {(record.isFirstBlood || record.firstBlood) ? (
+                                <span style={{
+                                  color: '#e74c3c',
+                                  fontWeight: 'bold',
+                                  backgroundColor: '#ffe6e6',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px'
+                                }}>
+                                  FIRST BLOOD
+                                </span>
+                              ) : '-'}
+                            </td>
+                            <td>
+                              <div className="actions" style={{ justifyContent: 'center' }}>
+                                <button
+                                  className="btn btn--danger"
+                                  onClick={() => handleRevokeSolveRecord(record.challengeId, record.loginId, record.challengeTitle)}
+                                  disabled={solveRecordsLoading}
+                                >
+                                  철회
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <p className="hint">제출 기록이 없거나 조회 버튼을 눌러주세요.</p>
             )}
           </div>
         </section>
