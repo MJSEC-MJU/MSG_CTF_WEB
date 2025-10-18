@@ -132,14 +132,14 @@ export const refundPayment = async (paymentHistoryId) => {
 
 /**
  * 팀에 마일리지 부여 API (관리자용)
- * POST /api/admin/team/mileage/{teamId}
- * @param {number} teamId - 팀 ID
+ * POST /api/admin/team/mileage/{teamName}
+ * @param {string} teamName - 팀 이름
  * @param {number} mileage - 부여할 마일리지
  * @returns {Promise<Object>} 마일리지 부여 결과
  */
-export const grantMileageToTeam = async (teamId, mileage) => {
+export const grantMileageToTeam = async (teamName, mileage) => {
   try {
-    const response = await Axios.post(`/admin/team/mileage/${teamId}`, {
+    const response = await Axios.post(`/admin/team/mileage/${encodeURIComponent(teamName)}`, {
       mileage,
     });
 

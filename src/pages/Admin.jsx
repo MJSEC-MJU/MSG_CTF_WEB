@@ -112,7 +112,7 @@ const Admin = () => {
 
   // ===== Payment History =====
   const [paymentHistory, setPaymentHistory] = useState([]);
-  const [selectedTeamIdForMileage, setSelectedTeamIdForMileage] = useState('');
+  const [selectedTeamNameForMileage, setSelectedTeamNameForMileage] = useState('');
   const [mileageAmount, setMileageAmount] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -627,10 +627,10 @@ const Admin = () => {
   };
 
   const handleGrantMileage = async () => {
-    const teamId = parseInt(selectedTeamIdForMileage, 10);
+    const teamName = selectedTeamNameForMileage.trim();
     const amount = parseInt(mileageAmount, 10);
 
-    if (!teamId || isNaN(teamId)) {
+    if (!teamName) {
       alert('팀을 선택해주세요.');
       return;
     }
@@ -642,9 +642,9 @@ const Admin = () => {
 
     try {
       setPaymentLoading(true);
-      const res = await grantMileageToTeam(teamId, amount);
-      alert(res?.message || `마일리지 ${amount}가 부여되었습니다.`);
-      setSelectedTeamIdForMileage('');
+      const res = await grantMileageToTeam(teamName, amount);
+      alert(res?.message || `${teamName} 팀에 마일리지 ${amount}가 부여되었습니다.`);
+      setSelectedTeamNameForMileage('');
       setMileageAmount('');
       const latestRows = await fetchTeamProfileRows();
       setTeamRows(Array.isArray(latestRows) ? latestRows : []);
@@ -802,12 +802,13 @@ const Admin = () => {
           <table className="table">
             <thead>
               <tr>
-                {['Team Name','Member Email','Team Mileage','Team Total'].map((h) => (<th key={h}>{h}</th>))}
+                {['Team ID','Team Name','Member Email','Team Mileage','Team Total'].map((h) => (<th key={h}>{h}</th>))}
               </tr>
             </thead>
             <tbody>
               {(Array.isArray(teamRows) ? teamRows : []).map((row, idx) => (
                 <tr key={`${row.teamName}-${idx}`}>
+                  <td>{row.teamId ?? '-'}</td>
                   <td>{row.teamName ?? '-'}</td>
                   <td>
                     {Array.isArray(row.memberEmails) && row.memberEmails.length
@@ -1068,16 +1069,19 @@ const Admin = () => {
             <h3 className="card__title">팀 마일리지 부여</h3>
             <div className="form form-grid">
               <div className="field">
-                <label className="label">팀 ID</label>
-                <input
-                  className="input"
-                  type="number"
-                  min="1"
-                  placeholder="팀 ID 입력"
-                  value={selectedTeamIdForMileage}
-                  onChange={(e) => setSelectedTeamIdForMileage(e.target.value)}
-                />
-                <p className="hint">QR 결제 시 확인한 팀 ID를 입력하세요</p>
+                <label className="label">팀 선택</label>
+                <select
+                  className="select"
+                  value={selectedTeamNameForMileage}
+                  onChange={(e) => setSelectedTeamNameForMileage(e.target.value)}
+                >
+                  <option value="">팀을 선택하세요</option>
+                  {Array.from(new Map(teamRows.map(row => [row.teamName, row])).values()).map((team) => (
+                    <option key={team.teamName} value={team.teamName}>
+                      {team.teamName} (ID: {team.teamId}, 마일리지: {team.teamMileage ?? 0})
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="field">
                 <label className="label">마일리지 금액</label>
