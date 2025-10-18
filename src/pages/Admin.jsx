@@ -113,6 +113,7 @@ const Admin = () => {
   // ===== Payment History =====
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [selectedTeamNameForMileage, setSelectedTeamNameForMileage] = useState('');
+  const [teamSearchQuery, setTeamSearchQuery] = useState('');
   const [mileageAmount, setMileageAmount] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -1069,6 +1070,16 @@ const Admin = () => {
             <h3 className="card__title">팀 마일리지 부여</h3>
             <div className="form form-grid">
               <div className="field">
+                <label className="label">팀 검색</label>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="팀명을 입력하세요"
+                  value={teamSearchQuery}
+                  onChange={(e) => setTeamSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="field">
                 <label className="label">팀 선택</label>
                 <select
                   className="select"
@@ -1076,12 +1087,17 @@ const Admin = () => {
                   onChange={(e) => setSelectedTeamNameForMileage(e.target.value)}
                 >
                   <option value="">팀을 선택하세요</option>
-                  {Array.from(new Map(teamRows.map(row => [row.teamName, row])).values()).map((team) => (
-                    <option key={team.teamName} value={team.teamName}>
-                      {team.teamName} (ID: {team.teamId}, 마일리지: {team.teamMileage ?? 0})
-                    </option>
-                  ))}
+                  {Array.from(new Map(teamRows.map(row => [row.teamName, row])).values())
+                    .filter(team => team.teamName.toLowerCase().includes(teamSearchQuery.toLowerCase()))
+                    .map((team) => (
+                      <option key={team.teamName} value={team.teamName}>
+                        {team.teamName} (ID: {team.teamId}, 마일리지: {team.teamMileage ?? 0})
+                      </option>
+                    ))}
                 </select>
+                <p className="hint">
+                  {teamSearchQuery && `검색 결과: ${Array.from(new Map(teamRows.map(row => [row.teamName, row])).values()).filter(team => team.teamName.toLowerCase().includes(teamSearchQuery.toLowerCase())).length}개`}
+                </p>
               </div>
               <div className="field">
                 <label className="label">마일리지 금액</label>
