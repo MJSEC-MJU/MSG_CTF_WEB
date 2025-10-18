@@ -1,0 +1,151 @@
+/* 제목 스타일 */
+.title-text {
+  font-size: 3.5rem;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: uppercase;
+  background: linear-gradient(to right, #ff4500 20%, #dc0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  margin: 60px 0 20px 0;
+}
+
+@media (max-width: 768px) {
+  .title-text {
+    font-size: 2.5rem;
+    margin: 15px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .title-text {
+    font-size: 2rem;
+    margin: 10px 0;
+  }
+}
+
+/* 콘텐츠 영역 */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  gap: 20px;
+  margin-bottom: 100px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 0 12px;
+    margin-bottom: 60px;
+  }
+}
+
+/* 차트 컨테이너 */
+.chart-container {
+  position: relative; /* ::before 위치 기준 */
+  width: 100%;
+  max-width: 1200px;
+  height: 500px;
+  overflow: hidden; /* 이미지 넘침 방지 */
+  border: 3px solid rgba(0, 0, 0, 1); /* 테두리 추가 */
+  padding: 15px; 
+  border-radius: 12px;
+  z-index: 1;
+  /* background-color: rgba(0, 0, 0, 0.1);/ */
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('../../assets/MsgLogo.png') center/cover no-repeat; /* 배경 이미지 경로 */
+  background-size: 40%;
+  background-position: center;
+  filter: blur(3px) brightness(1.6); /* 흐림 + 어둡게 */
+  z-index: 0;
+}
+
+.chart-container canvas {
+  position: relative;
+  z-index: 1; /* 차트는 이미지 위에 */
+}
+
+@media (min-width: 768px) {
+  .chart-container {
+    height: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    height: 300px;
+  }
+}
+
+/* 팀 라벨 영역 */
+.team-labels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .team-labels {
+    gap: 8px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-labels {
+    gap: 6px;
+    padding: 8px;
+  }
+}
+
+/* 팀 개별 라벨 */
+.team-label {
+  flex: 1 1 calc(25% - 20px);
+  min-width: 120px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 25px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1024px) {
+  .team-label {
+    flex: 1 1 calc(33.33% - 16px);
+    min-width: 100px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-label {
+    flex: 1 1 calc(50% - 12px);
+    min-width: 80px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-label {
+    flex: 1 1 100%;
+    min-width: 60px;
+    font-size: 16px;
+  }
+}
