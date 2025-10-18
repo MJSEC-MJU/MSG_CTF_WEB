@@ -1129,17 +1129,17 @@ const Admin = () => {
                 </thead>
                 <tbody>
                   {paymentHistory.map((payment) => (
-                    <tr key={payment.id}>
-                      <td>{payment.id}</td>
+                    <tr key={payment.teamPaymentHistoryId}>
+                      <td>{payment.teamPaymentHistoryId}</td>
                       <td>{payment.teamName ?? '-'}</td>
                       <td>{payment.mileageUsed?.toLocaleString() ?? 0}</td>
-                      <td>{payment.requestedBy ?? '-'}</td>
+                      <td>{payment.requesterLoginId ?? '-'}</td>
                       <td>{payment.createdAt ? new Date(payment.createdAt).toLocaleString('ko-KR') : '-'}</td>
                       <td>
                         <div className="actions" style={{ justifyContent: 'center' }}>
                           <button
                             className="btn btn--danger"
-                            onClick={() => handleRefundPayment(payment.id)}
+                            onClick={() => handleRefundPayment(payment.teamPaymentHistoryId)}
                             disabled={paymentLoading}
                           >
                             환불

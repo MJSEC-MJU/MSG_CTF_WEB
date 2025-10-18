@@ -4,8 +4,9 @@ export async function fetchTeamProfileRows() {
     const { data } = await Axios.get('/admin/team/all');
     const list = Array.isArray(data?.data) ? data.data : [];
 
-    //팀 단위 유지 
+    //팀 단위 유지
     return list.map((t) => ({
+      teamId: t.teamId,
       teamName: t.teamName ?? '-',
       teamMileage: t.teamMileage ?? 0,
       teamTotalPoint: t.teamTotalPoint ?? 0,
