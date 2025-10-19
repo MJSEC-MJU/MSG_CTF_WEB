@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchTeamProfile } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
+import { fetchTeamProfile, fetchTeamHistory } from "../api/TeamAPI"; // ✅ TeamAPI의 rows 사용
 import { fetchPaymentQRToken, buildPaymentQRString, fetchPaymentHistory } from "../api/PaymentAPI"; // 결제 QR 토큰 + 스킴 빌더 + 히스토리
 // import { fetchProblems } from "../api/ChallengeAllAPI"; // 🔒 팀단위 정리 전까지 미사용
 import Loading from "../components/Loading";
@@ -71,6 +71,11 @@ const MyPage = () => {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState(false);
+
+  // 팀 히스토리 (문제 풀이 기록)
+  const [teamHistory, setTeamHistory] = useState([]);
+  const [teamHistoryLoading, setTeamHistoryLoading] = useState(false);
+  const [teamHistoryError, setTeamHistoryError] = useState(false);
 
   // 1) 팀 프로필 (rows -> 팀 객체로 재구성)
   useEffect(() => {
@@ -187,6 +192,49 @@ const MyPage = () => {
   useEffect(() => {
     loadPaymentHistory();
   }, [loadPaymentHistory]);
+
+  // ===== 팀 히스토리 로드 =====
+  const loadTeamHistory = useCallback(async () => {
+    if (MOCK) {
+      setTeamHistory([
+        {
+          teamId: 1,
+          teamName: "Admin",
+          challengeId: "1",
+          title: "Sample Challenge 1",
+          solvedTime: new Date().toISOString(),
+          currentScore: 100,
+          solvedBy: "admin",
+        },
+        {
+          teamId: 1,
+          teamName: "Admin",
+          challengeId: "2",
+          title: "Sample Challenge 2",
+          solvedTime: new Date(Date.now() - 3600000).toISOString(),
+          currentScore: 200,
+          solvedBy: "user1",
+        },
+      ]);
+      return;
+    }
+
+    setTeamHistoryLoading(true);
+    setTeamHistoryError(false);
+    try {
+      const history = await fetchTeamHistory();
+      setTeamHistory(Array.isArray(history) ? history : []);
+    } catch (err) {
+      console.error('팀 히스토리 로딩 실패:', err);
+      setTeamHistoryError(true);
+    } finally {
+      setTeamHistoryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTeamHistory();
+  }, [loadTeamHistory]);
 
   // ===== QR 발급 =====
   const issueQR = useCallback(async () => {
@@ -452,6 +500,76 @@ const MyPage = () => {
             </div>
           ) : (
             <p className="dim">결제 히스토리가 없습니다.</p>
+          )}
+        </div>
+      </section>
+
+      {/* 팀 히스토리 섹션 */}
+      <section className="card">
+        <div className="card-header">
+          <h3>팀 문제 풀이 기록</h3>
+          <button
+            onClick={loadTeamHistory}
+            disabled={teamHistoryLoading}
+            style={{
+              padding: '6px 12px',
+              fontSize: '14px',
+              cursor: teamHistoryLoading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {teamHistoryLoading ? '로딩 중...' : '새로고침'}
+          </button>
+        </div>
+        <div className="problems-box">
+          {teamHistoryLoading ? (
+            <Loading />
+          ) : teamHistoryError ? (
+            <p className="error-message">팀 히스토리를 불러오는 중 오류가 발생했습니다.</p>
+          ) : teamHistory.length > 0 ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                minWidth: '600px'
+              }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #ddd' }}>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>문제 ID</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>문제 제목</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>풀이자</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>획득 점수</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>풀이 시간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teamHistory.map((record, idx) => (
+                    <tr key={`${record.challengeId}-${idx}`} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '12px 8px' }}>{record.challengeId}</td>
+                      <td style={{ padding: '12px 8px', fontWeight: '500' }}>
+                        {record.title || '-'}
+                      </td>
+                      <td style={{ padding: '12px 8px' }}>{record.solvedBy || '-'}</td>
+                      <td style={{ padding: '12px 8px' }}>
+                        <span style={{
+                          color: record.currentScore > 0 ? '#2ecc71' : '#95a5a6',
+                          fontWeight: '600'
+                        }}>
+                          {record.currentScore?.toLocaleString() ?? 0} pt
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 8px' }}>
+                        {record.solvedTime
+                          ? new Date(record.solvedTime).toLocaleString('ko-KR')
+                          : '-'
+                        }
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="dim">아직 풀이한 문제가 없습니다.</p>
           )}
         </div>
       </section>
