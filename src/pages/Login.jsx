@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { signIn } from '../api/SigninApi';
 import { loginSchema } from '../hook/validationYup';
-import Modal2 from '../components/Modal2';
 import './Login.css';
 
 const Login = ({ setIsLoggedIn }) => {
@@ -13,7 +12,6 @@ const Login = ({ setIsLoggedIn }) => {
     () => localStorage.getItem('errorMessage') || ''
   );
   const [fieldErrors, setFieldErrors] = useState({ loginId: '', password: '' });
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const navigate = useNavigate();
 
   const setLoginTime = () => {
@@ -71,7 +69,6 @@ const Login = ({ setIsLoggedIn }) => {
       localStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn?.(true);
       setLoginTime();
-      setIsModalVisible(true);
 
       // Header 등 즉시 갱신
       window.dispatchEvent(new Event('auth:changed'));
@@ -141,11 +138,6 @@ const Login = ({ setIsLoggedIn }) => {
     }
   };
 
-  const handleModalClose = () => {
-    setIsModalVisible(false);
-    navigate('/');
-  };
-
   return (
     <div className="PageContainer">
       <div className="RightTrapezoidWrapper">
@@ -198,8 +190,6 @@ const Login = ({ setIsLoggedIn }) => {
           </div>
         </form>
       </div>
-
-      {isModalVisible && <Modal2 onClose={handleModalClose} content="로그인 성공" />}
     </div>
   );
 };

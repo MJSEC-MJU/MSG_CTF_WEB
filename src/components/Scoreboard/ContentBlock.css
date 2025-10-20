@@ -64,7 +64,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: url('../../assets/MsgLogo.svg') center/cover no-repeat; /* 배경 이미지 경로 */
+  background: url('/public/assets/Header/MsgLogo.svg') center/cover no-repeat; /* 배경 이미지 경로 */
   background-size: 55%;
   background-position: center;
   opacity: 0.2;

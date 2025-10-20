@@ -1,21 +1,9 @@
 import { Axios } from './Axios';
 import Cookies from 'js-cookie';
-import { dummySolved } from '/src/mock/problems'; // 더미데이터
 
 const API_URL = "/users/challenges";
 
 export const fetchSolvedChallenges = async () => {
-  const USE_MOCK = false; // 개발 중 true, 실제 서버 모드 false
-
-  if (USE_MOCK) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(dummySolved);
-      }, 200);
-    });
-  }
-
-
   // 실제 API 호출 부분.
   try {
     const token = Cookies.get("accessToken");  // 토큰 가져오기
