@@ -24,7 +24,6 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Admin = lazy(() => import("./pages/Admin"));
 const AdminAuth = lazy(() => import("./api/AdminAuth"));
 const TimerPage = lazy(() => import("./pages/TimerPage"));
-const ProblemDetailMock = lazy(() => import('./pages/ProblemDetailMock'));
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -88,7 +87,6 @@ function App() {
             element={<PrivateRoute requireContestStarted element={isLoggedIn ? <Challenge /> : <Navigate to="/login" />} />}
           />
           <Route path="/problem/:id" element={<PrivateRoute requireContestStarted element={<ProblemDetail />} />} />
-          <Route path="/problem" element={<ProblemDetailMock />} />
           <Route
             path="/myPage"
             element={<PrivateRoute requireContestStarted element={isLoggedIn ? <MyPage /> : <Navigate to="/login" />} />}
