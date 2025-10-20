@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import './Home.css';
 
 function Home() {
-  const images = ['/public/assets/Homepage/BOF.svg','/public/assets/Homepage/shellad.svg', '/public/assets/Homepage/hashBrown.svg'];
+  const images = ['/assets/Homepage/BOF.svg','/assets/Homepage/shellad.svg', '/assets/Homepage/hashBrown.svg'];
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef(null);
@@ -10,17 +10,17 @@ function Home() {
   const go = (i) => setIdx(i);
   const cards = [
     {
-      img: '/public/assets/Homepage/card1.svg',
+      img: '/assets/Homepage/card1.svg',
       title: 'MSG CTF의 시작',
       desc: '명지대학교의 Mjsec, 건국대학교의 seKurity, 세종대학교의 SSG 세 학교가 연합하여 "음식점" 이라는 컨셉의 CTF를 \n 2024년에 개최하였습니다.'
     },
     {
-      img: '/public/assets/Homepage/card2.svg',
+      img: '/assets/Homepage/card2.svg',
       title: '시그니처 문제를 풀어보세요',
       desc: '각 대학교 부스에서 시그니처 문제를 해금하고 \n 추가점수를 획득해보세요!'
     },
     {
-      img: '/public/assets/Homepage/card3.svg',
+      img: '/assets/Homepage/card3.svg',
       title: '마일리지를 쌓아보세요',
       desc: '문제를 풀고 오프라인샵에서 쓸 수 있는 \n 마일리지를 획득해보세요!'
     }
