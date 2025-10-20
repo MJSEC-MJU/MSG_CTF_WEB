@@ -111,7 +111,7 @@ const Ranking = () => {
   return (
     <div className="responsive-wrapper">
       <div className="ranking-wrapper">
-        <h2 className="title">Ranking</h2>
+        <h2 className="Rankingtitle">Ranking</h2>
         <div className="list">{displayScores}</div>
       </div>
     </div>
