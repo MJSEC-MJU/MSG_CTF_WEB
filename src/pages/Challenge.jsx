@@ -172,6 +172,18 @@ function Challenge() {
     }
   };
 
+  // ===== [추가] 시그니처 클럽별 솔브 이미지 선택기 =====
+  // club 문자열을 slug로 만들어 /assets/Challenge/signature/<slug>.svg 를 사용
+  // (예: "Red Dragons" => "/assets/Challenge/signature/red-dragons.svg")
+  const getSignatureSolvedImg = (club) => {
+    const slug = String(club || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-]/g, "");
+    return `/assets/Challenge/signature/${slug}.svg`;
+  };
+
   if (loading) {
     return (
       <div className="challenge-container">
@@ -193,6 +205,18 @@ function Challenge() {
             const isSignature = isSignatureProblem(problem);
             const unlocked = unlockedSet.has(String(problem.challengeId));
 
+            // [변경 1] 메인 버튼 이미지: 시그니처 & solved면 club별 이미지
+            const mainImgSrc = isSignature
+              ? (solved
+                  ? getSignatureSolvedImg(problem.club) // club별 이미지
+                  : "/assets/Challenge/signature_challenge.svg")
+              : (solved
+                  ? "/assets/Challenge/challenge_solved.svg"
+                  : "/assets/Challenge/challenge.svg");
+
+            // [변경 2] 표시 텍스트: 시그니처면 title 대신 club 표시
+            const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
+
             return (
               <div key={problem.challengeId} className="problem-button-wrapper">
                 <Link
@@ -206,14 +230,8 @@ function Challenge() {
                 >
                   <div className="button-wrapper">
                     <img
-                      src={
-                        solved
-                          ? "/assets/Challenge/challenge_solved.svg"
-                          : isSignature
-                          ? "/assets/Challenge/signature_challenge.svg"
-                          : "/assets/Challenge/challenge.svg"
-                      }
-                      alt={problem.title}
+                      src={mainImgSrc}
+                      alt={displayTitle}
                     />
                     <img
                       src={categoryImages[problem.category] ?? categoryFallback}
@@ -224,7 +242,7 @@ function Challenge() {
                       className="button-title"
                       style={solved ? { color: "#00FF00" } : undefined}
                     >
-                      {problem.title}
+                      {displayTitle}
                     </div>
                     <div
                       className="button-score"
@@ -294,7 +312,7 @@ function Challenge() {
               {/* ← 빨간색 스타일 적용 */}
               <button onClick={closeSignature} disabled={submitting}>취소</button>
               <button
-                className="submit-btn"        
+                className="submit-btn"
                 onClick={submitSignature}
                 disabled={submitting || signatureInput.length !== 6}
               >
@@ -314,3 +332,4 @@ function Challenge() {
 }
 
 export default Challenge;
+
