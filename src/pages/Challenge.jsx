@@ -36,17 +36,17 @@ function Challenge() {
 
   // useMemo로 categoryImages 메모이제이션 (재생성 방지)
   const categoryImages = useMemo(() => ({
-    FORENSICS: "/assets/forensics.svg",
-    CRYPTO: "/assets/crypto.svg",
-    PWN: "/assets/pwn.svg",
-    ANDROID: "/assets/android.svg",
-    REV: "/assets/rev.svg",
-    MISC: "/assets/misc.svg",
-    WEB: "/assets/web.svg",
-    SIGNATURE: "/assets/signature.svg",
+    FORENSICS: "/assets/Challenge/forensics.svg",
+    CRYPTO: "/assets/Challenge/crypto.svg",
+    PWN: "/assets/Challenge/pwn.svg",
+    ANDROID: "/assets/Challenge/android.svg",
+    REV: "/assets/Challenge/rev.svg",
+    MISC: "/assets/Challenge/misc.svg",
+    WEB: "/assets/Challenge/web.svg",
+    SIGNATURE: "/assets/Challenge/signature.svg",
   }), []);
 
-  const categoryFallback = "/assets/misc.svg";
+  const categoryFallback = "/assets/Challenge/misc.svg";
 
   useEffect(() => {
     let isMounted = true;
@@ -204,10 +204,10 @@ function Challenge() {
                     <img
                       src={
                         solved
-                          ? "/assets/meat-cook.svg"
+                          ? "/assets/Challenge/challenge_solved.svg"
                           : isSignature
-                          ? "/assets/signature_challenge.svg"
-                          : "/assets/challenge.svg"
+                          ? "/assets/Challenge/signature_challenge.svg"
+                          : "/assets/Challenge/challenge.svg"
                       }
                       alt={problem.title}
                     />
