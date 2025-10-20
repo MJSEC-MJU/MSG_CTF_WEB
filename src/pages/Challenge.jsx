@@ -51,11 +51,9 @@ function Challenge() {
   useEffect(() => {
     let isMounted = true;
 
-    // 3개의 API를 병렬로 호출하여 로딩 속도 개선 + 캐싱
     (async () => {
       setLoading(true);
       try {
-        // 캐시된 데이터가 있으면 재사용, 없으면 새로 호출
         const solvedPromise = cachedSolvedRef.current
           ? Promise.resolve(cachedSolvedRef.current)
           : fetchSolvedChallenges();
@@ -72,7 +70,6 @@ function Challenge() {
 
         if (!isMounted) return;
 
-        // 문제 목록
         if (problemsResult.status === 'fulfilled') {
           const { problems, totalPages } = problemsResult.value;
           setProblems(problems);
@@ -81,19 +78,17 @@ function Challenge() {
           console.error('fetchProblems failed:', problemsResult.reason);
         }
 
-        // 해결한 문제 (캐싱)
         if (solvedResult.status === 'fulfilled') {
           const solvedData = solvedResult.value;
-          cachedSolvedRef.current = solvedData; // 캐시 저장
+          cachedSolvedRef.current = solvedData;
           setSolvedChallenges(new Set(solvedData.map((s) => String(s.challengeId))));
         } else {
           setSolvedChallenges(new Set());
         }
 
-        // 언락된 시그니처 문제 (캐싱)
         if (unlockedResult.status === 'fulfilled') {
           const unlocked = unlockedResult.value;
-          cachedUnlockedRef.current = unlocked; // 캐시 저장
+          cachedUnlockedRef.current = unlocked;
           setUnlockedSet(new Set((unlocked?.challengeIds || []).map(String)));
         } else {
           setUnlockedSet(new Set());
@@ -172,9 +167,7 @@ function Challenge() {
     }
   };
 
-  // ===== [추가] 시그니처 클럽별 솔브 이미지 선택기 =====
-  // club 문자열을 slug로 만들어 /assets/Challenge/signature/<slug>.svg 를 사용
-  // (예: "Red Dragons" => "/assets/Challenge/signature/red-dragons.svg")
+  // 시그니처 클럽별 솔브 이미지
   const getSignatureSolvedImg = (club) => {
     const slug = String(club || "")
       .trim()
@@ -194,7 +187,7 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
-      <img src="/assets/background.svg" className="background" />
+      <img src="/assets/background.svg" className="background" alt="" />
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
@@ -202,17 +195,18 @@ function Challenge() {
             const isSignature = isSignatureProblem(problem);
             const unlocked = unlockedSet.has(String(problem.challengeId));
 
-            // [변경 1] 메인 버튼 이미지: 시그니처 & solved면 club별 이미지
             const mainImgSrc = isSignature
               ? (solved
-                  ? getSignatureSolvedImg(problem.club) // club별 이미지
+                  ? getSignatureSolvedImg(problem.club)
                   : "/assets/Challenge/signature_challenge.svg")
               : (solved
                   ? "/assets/Challenge/challenge_solved.svg"
                   : "/assets/Challenge/challenge.svg");
 
-            // [변경 2] 표시 텍스트: 시그니처면 title 대신 club 표시
             const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
+
+            // ▼ 여기서부터 요구사항 반영: 시그니처 + 풀었을 때 제목/점수 숨김
+            const hideTextForSolvedSignature = isSignature && solved;
 
             return (
               <div key={problem.challengeId} className="problem-button-wrapper">
@@ -235,18 +229,26 @@ function Challenge() {
                       alt={problem.category}
                       className="category-icon"
                     />
-                    <div
-                      className="button-title"
-                      style={solved ? { color: "#00FF00" } : undefined}
-                    >
-                      {displayTitle}
-                    </div>
-                    <div
-                      className="button-score"
-                      style={solved ? { color: "#00FF00" } : undefined}
-                    >
-                      {problem.points}
-                    </div>
+
+                    {/* 제목(클럽) - 시그니처 문제를 풀었으면 렌더링하지 않음 */}
+                    {!hideTextForSolvedSignature && (
+                      <div
+                        className="button-title"
+                        style={solved ? { color: "#00FF00" } : undefined}
+                      >
+                        {displayTitle}
+                      </div>
+                    )}
+
+                    {/* 점수 - 시그니처 문제를 풀었으면 렌더링하지 않음 */}
+                    {!hideTextForSolvedSignature && (
+                      <div
+                        className="button-score"
+                        style={solved ? { color: "#00FF00" } : undefined}
+                      >
+                        {problem.points}
+                      </div>
+                    )}
                   </div>
                 </Link>
               </div>
@@ -305,8 +307,6 @@ function Challenge() {
               autoFocus
             />
             <div className="signature-buttons">
-              {/* 왼쪽: 취소 / 오른쪽: 제출 */}
-              {/* ← 빨간색 스타일 적용 */}
               <button onClick={closeSignature} disabled={submitting}>취소</button>
               <button
                 className="submit-btn"
@@ -329,4 +329,5 @@ function Challenge() {
 }
 
 export default Challenge;
+
 
