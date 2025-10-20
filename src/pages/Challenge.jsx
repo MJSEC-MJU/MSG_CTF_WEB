@@ -36,17 +36,17 @@ function Challenge() {
 
   // useMemo로 categoryImages 메모이제이션 (재생성 방지)
   const categoryImages = useMemo(() => ({
-    FORENSICS: "/public/assets/Challenge/forensics.svg",
-    CRYPTO: "/public/assets/Challenge/crypto.svg",
-    PWN: "/public/assets/Challenge/pwn.svg",
-    ANDROID: "/public/assets/Challenge/android.svg",
-    REV: "/public/assets/Challenge/rev.svg",
-    MISC: "/public/assets/Challenge/misc.svg",
-    WEB: "/public/assets/Challenge/web.svg",
-    SIGNATURE: "/public/assets/Challenge/signature.svg",
+    FORENSICS: "/assets/Challenge/forensics.svg",
+    CRYPTO: "/assets/Challenge/crypto.svg",
+    PWN: "/assets/Challenge/pwn.svg",
+    ANDROID: "/assets/Challenge/android.svg",
+    REV: "/assets/Challenge/rev.svg",
+    MISC: "/assets/Challenge/misc.svg",
+    WEB: "/assets/Challenge/web.svg",
+    SIGNATURE: "/assets/Challenge/signature.svg",
   }), []);
 
-  const categoryFallback = "/public/assets/Challenge/misc.svg";
+  const categoryFallback = "/assets/Challenge/misc.svg";
 
   useEffect(() => {
     let isMounted = true;
@@ -204,10 +204,10 @@ function Challenge() {
                     <img
                       src={
                         solved
-                          ? "/public/assets/Challenge/challenge_solved.svg"
+                          ? "/assets/Challenge/challenge_solved.svg"
                           : isSignature
-                          ? "/public/assets/Challenge/signature_challenge.svg"
-                          : "/public/assets/Challenge/challenge.svg"
+                          ? "/assets/Challenge/signature_challenge.svg"
+                          : "/assets/Challenge/challenge.svg"
                       }
                       alt={problem.title}
                     />
