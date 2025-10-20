@@ -54,3 +54,45 @@ export async function addTeamMember(teamName, email) {
   const { data } = await Axios.post(`/admin/team/member/${encodeURIComponent(teamName)}`, null, { params: { email } });
   return data;
 }
+
+/**
+ * 팀 히스토리 조회 API
+ * GET /api/team/history
+ * @returns {Promise<Array>} 팀의 문제 풀이 히스토리
+ * [
+ *   {
+ *     teamId: number,
+ *     teamName: string,
+ *     challengeId: string,
+ *     title: string,
+ *     solvedTime: string,
+ *     currentScore: number,
+ *     solvedBy: string
+ *   }
+ * ]
+ */
+export async function fetchTeamHistory() {
+  try {
+    const { data } = await Axios.get('/team/history');
+
+    // 배열을 직접 반환하는 경우
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    // { code: "SUCCESS", data: [...] } 형태로 반환하는 경우
+    if (data?.code === "SUCCESS" && data?.data) {
+      return data.data;
+    }
+
+    // data 필드가 있는 경우
+    if (Array.isArray(data?.data)) {
+      return data.data;
+    }
+
+    return [];
+  } catch (e) {
+    console.error('[TeamAPI] fetchTeamHistory failed:', e);
+    return [];
+  }
+}

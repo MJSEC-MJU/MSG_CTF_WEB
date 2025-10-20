@@ -71,7 +71,7 @@ const ProblemDetail = () => {
   if (loading) return <h1>로딩 중...</h1>;
   if (error) return <h1>{error}</h1>;
 
-  const heroImage = '/assets/hamburger.png'; //나중에 카테고리별로
+  const heroImage = '/public/assets/Challenge/hamburger.svg'; 
 
   const diffNum = (() => {
     const n = Math.round(Number(problem?.difficulty));
