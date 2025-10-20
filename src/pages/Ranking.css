@@ -86,8 +86,9 @@
 }
 
 .rank-number.top3 {
-  background: url('/src/assets/Ranking/flame.png') no-repeat center center;
-  background-size: contain;
+  background: url('/src/assets/Ranking/flame.svg') no-repeat center center;
+  background-size: 300%;
+  background-position: center -22px;
 }
 
 /* User */
