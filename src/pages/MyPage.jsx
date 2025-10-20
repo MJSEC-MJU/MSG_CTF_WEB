@@ -79,19 +79,19 @@ const MyPage = () => {
 
   // 1) 팀 프로필 (rows -> 팀 객체로 재구성)
   useEffect(() => {
-    if (MOCK) {
-      setProfile({
-        teamId: 1,
-        teamName: "Admin",
-        members: ["admin@example.com"],
-        rank: 1,
-        toalPoint: 0,
-        mileage: 0,
-        solvedCount: 0,
-        avatarUrl: "/src/assets/MsgLogo.svg",
-      });
-      return;
-    }
+    // if (MOCK) {
+    //   setProfile({
+    //     teamId: 1,
+    //     teamName: "Admin",
+    //     members: ["admin@example.com"],
+    //     rank: 1,
+    //     toalPoint: 0,
+    //     mileage: 0,
+    //     solvedCount: 0,
+    //     avatarUrl: "/src/assets/MsgLogo.svg",
+    //   });
+    //   return;
+    // }
 
     (async () => {
       try {
@@ -112,7 +112,7 @@ const MyPage = () => {
           toalPoint: first.teamTotalPoint ?? 0,
           mileage: first.teamMileage ?? 0,
           solvedCount: first.teamSolvedCount ?? 0,
-          avatarUrl: "/src/assets/MsgLogo.svg",
+          avatarUrl: "/assets/Header/MsgLogo.svg",
         });
       } catch {
         setProfileError(true);
