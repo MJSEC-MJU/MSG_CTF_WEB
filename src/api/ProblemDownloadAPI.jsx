@@ -40,6 +40,6 @@ export const downloadFile = async (challengeId) => {
     //console.log('파일 다운로드 성공');
   } catch (error) {
     //console.error('파일 다운로드 오류:', error);
-    alert('파일 다운로드 중 오류가 발생했습니다.');
+    alert('파일이 존재하지 않는 문제입니다.');
   }
 };
