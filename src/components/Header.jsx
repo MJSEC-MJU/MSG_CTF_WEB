@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import Cookies from 'js-cookie';
-import Logo from '../assets/MsgLogo.png';
+import Logo from '../assets/MsgLogo.svg';
 import loginIcon from '../assets/Login.png';
 import logoutIcon from '../assets/Logout.png';
 import profileIcon from '../assets/profile.png';
@@ -173,8 +173,8 @@ const LogoWrap = styled(Link)`
 `;
 
 const LogoIcon = styled.img`
-  width: 140px;
-  height: 70px;
+  width: 180px;
+  height: 120px;
   object-fit: contain;
   display: block;
 
