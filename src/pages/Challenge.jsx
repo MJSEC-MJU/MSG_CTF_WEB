@@ -194,10 +194,7 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
-      <img src="/assets/sticker1.svg" alt="MSG sticker" className="sticker-locator1" />
-      <img src="/assets/sticker2.svg" alt="MSG sticker" className="sticker-locator2" />
-      <img src="/assets/sticker3.svg" alt="MSG sticker" className="sticker-locator3" />
-      <img src="/assets/sticker2.svg" alt="MSG sticker" className="sticker-locator4" />
+      <img src="/assets/background.svg" className="background" />
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {

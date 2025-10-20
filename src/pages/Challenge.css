@@ -244,46 +244,12 @@ background: #181818; color: #fff; border: 1px solid #333;
   cursor: not-allowed;
 }
 
-/* 좌측 상단 */
-.sticker-locator1 {
-  position: fixed;
-  top: 150px;            /* 상단 20px */
-  left: 10px;           /* 왼쪽 20px */
-  transform: rotate(-40deg);
-  width: 300px;
-  height: auto;
-  z-index: 0;
-}
 
-/* 좌측 하단 */
-.sticker-locator2 {
+.background {
   position: fixed;
-  bottom: 100px;         /* 하단 20px */
-  left: 130px;           /* 왼쪽 20px */
-  transform: rotate(60deg);
-  width: 300px;
-  height: auto;
-  z-index: 0;
-}
-
-/* 우측 중앙 */
-.sticker-locator3 {
-  position: fixed;
-  top: 30%;            /* 화면 세로 중앙 */
-  right: 20px;         /* 오른쪽에서 20px */
-  transform: translateY(-50%) rotate(40deg); /* 세로 중앙 정렬 + 회전 */
-  width: 250px;
-  height: auto;
-  z-index: 0;
-}
-
-/* 가운데 */
-.sticker-locator4 {
-  position: fixed;
-  top: 70%;            /* 화면 세로 중앙 */
-  right: 40%;         /* 오른쪽에서 20px */
-  transform: translateY(-50%) rotate(-30deg); /* 세로 중앙 정렬 + 회전 */
-  width: 250px;
+  top: 0px;           
+  left: 0px;          
+  width: 100%;
   height: auto;
   z-index: 0;
 }
