@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import Cookies from 'js-cookie';
 import Logo from '../assets/MsgLogo.svg';
-import loginIcon from '../assets/Login.png';
-import logoutIcon from '../assets/Logout.png';
-import profileIcon from '../assets/profile.png';
+import loginIcon from '../assets/Login.svg';
+import logoutIcon from '../assets/Logout.svg';
+import profileIcon from '../assets/Profile.svg';
 import logout from '../api/LogoutApi';
 import Modal2 from './Modal2';
 
