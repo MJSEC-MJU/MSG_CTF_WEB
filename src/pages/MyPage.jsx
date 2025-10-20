@@ -88,7 +88,7 @@ const MyPage = () => {
         toalPoint: 0,
         mileage: 0,
         solvedCount: 0,
-        avatarUrl: "/src/assets/MSGLogo.png",
+        avatarUrl: "/src/assets/MsgLogo.svg",
       });
       return;
     }
@@ -112,7 +112,7 @@ const MyPage = () => {
           toalPoint: first.teamTotalPoint ?? 0,
           mileage: first.teamMileage ?? 0,
           solvedCount: first.teamSolvedCount ?? 0,
-          avatarUrl: "/src/assets/MSGLogo.png",
+          avatarUrl: "/src/assets/MsgLogo.svg",
         });
       } catch {
         setProfileError(true);

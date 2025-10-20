@@ -80,7 +80,7 @@ body { background: var(--bg); }
   background: #f3f4f6; border-radius: 50%; overflow: hidden;
   border: 1px solid var(--line);
 }
-.avatar-image { width: 100%; height: 100%; object-fit: contain; margin: auto; display: block; }
+.avatar-image { width: 130%; height: 130%; object-position: center; object-fit: contain; transform: translate(-11%, -10%);}
 .profile-meta { display: flex; flex-direction: column; gap: 10px; }
 .profile-name { margin: 0; font-size: 1.35rem; font-weight: 900; letter-spacing: -0.01em; }
 
