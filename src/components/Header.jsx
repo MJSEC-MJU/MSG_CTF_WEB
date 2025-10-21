@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import Cookies from 'js-cookie';
-import Logo from '/public/assets/Header/MsgLogo.svg';
-import loginIcon from '/public/assets/Header/Login.svg';
-import logoutIcon from '/public/assets/Header/Logout.svg';
-import profileIcon from '/public/assets/Header/Profile.svg';
+import Logo from '/src/assets/Header/MsgLogo.svg';
+import loginIcon from '/src/assets/Header/Login.svg';
+import logoutIcon from '/src/assets/Header/Logout.svg';
+import profileIcon from '/src/assets/Header/Profile.svg';
 import logout from '../api/LogoutApi';
 import Modal2 from './Modal2';
 
