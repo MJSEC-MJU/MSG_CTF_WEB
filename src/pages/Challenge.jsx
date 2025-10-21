@@ -19,10 +19,10 @@ import miscImg from "/src/assets/Challenge/misc.svg";
 import webImg from "/src/assets/Challenge/web.svg";
 import signatureImg from "/src/assets/Challenge/signature.svg";
 
-import signatureChallengeImg from "../assets/Challenge/signature_challenge.svg";
-import challengeSolvedImg from "../assets/Challenge/challenge_solved.svg";
-import challengeImg from "../assets/Challenge/challenge.svg";
-import backgroundImg from "../assets/background.svg";
+import signatureChallengeImg from "/src/assets/Challenge/signature_challenge.svg";
+import challengeSolvedImg from "/src/assets/Challenge/challenge_solved.svg";
+import challengeImg from "/src/assets/Challenge/challenge.svg";
+import backgroundImg from "/src/assets/background.svg";
 
 function Challenge() {
   // 문제/페이지네이션
