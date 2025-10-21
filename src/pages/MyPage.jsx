@@ -6,6 +6,7 @@ import { fetchPaymentQRToken, buildPaymentQRString, fetchPaymentHistory } from "
 import Loading from "../components/Loading";
 import "./MyPage.css";
 import { QRCodeCanvas } from "qrcode.react";
+import avatar from "/src/assets/Header/MsgLogo.svg";
 
 // ===== [개발용 ONLY] Mock 모드 스위치 =====
 const MOCK = new URLSearchParams(window.location.search).has("mock");
@@ -112,7 +113,7 @@ const MyPage = () => {
           toalPoint: first.teamTotalPoint ?? 0,
           mileage: first.teamMileage ?? 0,
           solvedCount: first.teamSolvedCount ?? 0,
-          avatarUrl: "/src/assets/Header/MsgLogo.svg",
+          avatarUrl: avatar,
         });
       } catch {
         setProfileError(true);

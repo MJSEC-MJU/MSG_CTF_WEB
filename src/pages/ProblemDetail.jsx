@@ -4,6 +4,7 @@ import { fetchProblemDetail } from '../api/ProblemDetailAPI';
 import { submitFlag } from '../api/SubmitAPI';
 import { downloadFile } from '../api/ProblemDownloadAPI';
 import './ProblemDetail.css';
+import heroImage from '/src/assets/Challenge/hamburger.svg';
 
 const ProblemDetail = () => {
   const { id } = useParams();
@@ -71,7 +72,7 @@ const ProblemDetail = () => {
   if (loading) return <h1>로딩 중...</h1>;
   if (error) return <h1>{error}</h1>;
 
-  const heroImage = '/src/assets/Challenge/hamburger.svg'; 
+  const heroImage = heroImage; 
 
   const diffNum = (() => {
     const n = Math.round(Number(problem?.difficulty));

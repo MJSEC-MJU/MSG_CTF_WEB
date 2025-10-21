@@ -10,6 +10,20 @@ import {
 import Loading from "../components/Loading";
 import "./Challenge.css";
 
+import forensicsImg from "/src/assets/Challenge/forensics.svg";
+import cryptoImg from "/src/assets/Challenge/crypto.svg";
+import pwnImg from "/src/assets/Challenge/pwn.svg";
+import androidImg from "/src/assets/Challenge/android.svg";
+import revImg from "/src/assets/Challenge/rev.svg";
+import miscImg from "/src/assets/Challenge/misc.svg";
+import webImg from "/src/assets/Challenge/web.svg";
+import signatureImg from "/src/assets/Challenge/signature.svg";
+
+import signatureChallengeImg from "../assets/Challenge/signature_challenge.svg";
+import challengeSolvedImg from "../assets/Challenge/challenge_solved.svg";
+import challengeImg from "../assets/Challenge/challenge.svg";
+import backgroundImg from "../assets/background.svg";
+
 function Challenge() {
   // 문제/페이지네이션
   const [problems, setProblems] = useState([]);
@@ -36,17 +50,17 @@ function Challenge() {
 
   // useMemo로 categoryImages 메모이제이션 (재생성 방지)
   const categoryImages = useMemo(() => ({
-    FORENSICS: "/src/assets/Challenge/forensics.svg",
-    CRYPTO: "/src/assets/Challenge/crypto.svg",
-    PWN: "/src/assets/Challenge/pwn.svg",
-    ANDROID: "/src/assets/Challenge/android.svg",
-    REV: "/src/assets/Challenge/rev.svg",
-    MISC: "/src/assets/Challenge/misc.svg",
-    WEB: "/src/assets/Challenge/web.svg",
-    SIGNATURE: "/src/assets/Challenge/signature.svg",
+    FORENSICS: forensicsImg,
+    CRYPTO: cryptoImg,
+    PWN: pwnImg,
+    ANDROID: androidImg,
+    REV: revImg,
+    MISC: miscImg,
+    WEB: webImg,
+    SIGNATURE: signatureImg,
   }), []);
 
-  const categoryFallback = "/src/assets/Challenge/misc.svg";
+  const categoryFallback = miscImg;
 
   useEffect(() => {
     let isMounted = true;
@@ -174,7 +188,7 @@ function Challenge() {
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^a-z0-9\-]/g, "");
-    return `/src/assets/Challenge/signature/${slug}.svg`;
+    return `/assets/signature/${slug}.svg`;
   };
 
   if (loading) {
@@ -187,7 +201,7 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
-      <img src="/src/assets/background.svg" className="background" alt="" />
+      <img src={backgroundImg} className="background" alt="" />
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
@@ -198,10 +212,10 @@ function Challenge() {
             const mainImgSrc = isSignature
               ? (solved
                   ? getSignatureSolvedImg(problem.club)
-                  : "/src/assets/Challenge/signature_challenge.svg")
+                  : {signatureChallengeImg})
               : (solved
-                  ? "/src/assets/Challenge/challenge_solved.svg"
-                  : "/src/assets/Challenge/challenge.svg");
+                  ? {challengeSolvedImg}
+                  : {challengeImg});
 
             const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
 
