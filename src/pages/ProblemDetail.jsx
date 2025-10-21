@@ -4,7 +4,7 @@ import { fetchProblemDetail } from '../api/ProblemDetailAPI';
 import { submitFlag } from '../api/SubmitAPI';
 import { downloadFile } from '../api/ProblemDownloadAPI';
 import './ProblemDetail.css';
-import heroImage from '/src/assets/Challenge/hamburger.svg';
+import heroImg from '/src/assets/Challenge/hamburger.svg';
 
 const ProblemDetail = () => {
   const { id } = useParams();
@@ -72,7 +72,7 @@ const ProblemDetail = () => {
   if (loading) return <h1>로딩 중...</h1>;
   if (error) return <h1>{error}</h1>;
 
-  const heroImage = heroImage; 
+  const heroImage = heroImg; 
 
   const diffNum = (() => {
     const n = Math.round(Number(problem?.difficulty));
@@ -83,7 +83,7 @@ const ProblemDetail = () => {
     <div className="pd-page">
       {/* 상단 히어로 (카테고리 배지) */}
       <div className="pd-hero">
-        <img src={heroImage} alt="dish hero" className="pd-hero-img" />
+        <img src={heroImg} alt="dish hero" className="pd-hero-img" />
         <div className="pd-hero-overlay" />
         <div className="pd-hero-content">
           {diffNum !== null && (

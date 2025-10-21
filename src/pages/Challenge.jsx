@@ -212,10 +212,10 @@ function Challenge() {
             const mainImgSrc = isSignature
               ? (solved
                   ? getSignatureSolvedImg(problem.club)
-                  : {signatureChallengeImg})
+                  : signatureChallengeImg)
               : (solved
-                  ? {challengeSolvedImg}
-                  : {challengeImg});
+                  ? challengeSolvedImg
+                  : challengeImg);
 
             const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
 
