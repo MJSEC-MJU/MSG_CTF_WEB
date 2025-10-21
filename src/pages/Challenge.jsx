@@ -36,17 +36,17 @@ function Challenge() {
 
   // useMemo로 categoryImages 메모이제이션 (재생성 방지)
   const categoryImages = useMemo(() => ({
-    FORENSICS: "/assets/Challenge/forensics.svg",
-    CRYPTO: "/assets/Challenge/crypto.svg",
-    PWN: "/assets/Challenge/pwn.svg",
-    ANDROID: "/assets/Challenge/android.svg",
-    REV: "/assets/Challenge/rev.svg",
-    MISC: "/assets/Challenge/misc.svg",
-    WEB: "/assets/Challenge/web.svg",
-    SIGNATURE: "/assets/Challenge/signature.svg",
+    FORENSICS: "/src/assets/Challenge/forensics.svg",
+    CRYPTO: "/src/assets/Challenge/crypto.svg",
+    PWN: "/src/assets/Challenge/pwn.svg",
+    ANDROID: "/src/assets/Challenge/android.svg",
+    REV: "/src/assets/Challenge/rev.svg",
+    MISC: "/src/assets/Challenge/misc.svg",
+    WEB: "/src/assets/Challenge/web.svg",
+    SIGNATURE: "/src/assets/Challenge/signature.svg",
   }), []);
 
-  const categoryFallback = "/assets/Challenge/misc.svg";
+  const categoryFallback = "/src/assets/Challenge/misc.svg";
 
   useEffect(() => {
     let isMounted = true;
@@ -174,7 +174,7 @@ function Challenge() {
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^a-z0-9\-]/g, "");
-    return `/assets/Challenge/signature/${slug}.svg`;
+    return `/src/assets/Challenge/signature/${slug}.svg`;
   };
 
   if (loading) {
@@ -187,7 +187,7 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
-      <img src="/assets/background.svg" className="background" alt="" />
+      <img src="/src/assets/background.svg" className="background" alt="" />
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
@@ -198,10 +198,10 @@ function Challenge() {
             const mainImgSrc = isSignature
               ? (solved
                   ? getSignatureSolvedImg(problem.club)
-                  : "/assets/Challenge/signature_challenge.svg")
+                  : "/src/assets/Challenge/signature_challenge.svg")
               : (solved
-                  ? "/assets/Challenge/challenge_solved.svg"
-                  : "/assets/Challenge/challenge.svg");
+                  ? "/src/assets/Challenge/challenge_solved.svg"
+                  : "/src/assets/Challenge/challenge.svg");
 
             const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
 

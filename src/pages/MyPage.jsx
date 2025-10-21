@@ -112,7 +112,7 @@ const MyPage = () => {
           toalPoint: first.teamTotalPoint ?? 0,
           mileage: first.teamMileage ?? 0,
           solvedCount: first.teamSolvedCount ?? 0,
-          avatarUrl: "/assets/Header/MsgLogo.svg",
+          avatarUrl: "/src/assets/Header/MsgLogo.svg",
         });
       } catch {
         setProfileError(true);
