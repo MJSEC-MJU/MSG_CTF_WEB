@@ -201,7 +201,7 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
-      <img src={backgroundImg} className="background" alt="" />
+     
       <div className="problem-grid">
         {problems.length > 0 ? (
           problems.map((problem) => {
