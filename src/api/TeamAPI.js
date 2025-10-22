@@ -18,7 +18,7 @@ export async function fetchTeamProfileRows() {
         : (t.memberEmail ? [t.memberEmail] : []),
     }));
   } catch (e) {
-    console.error('[TeamAPI] fetchTeamProfileRows failed:', e);
+    // console.error('[TeamAPI] fetchTeamProfileRows failed:', e);
     return [];
   }
 }
@@ -40,7 +40,7 @@ export async function fetchTeamProfile() {
        teamSolvedCount: p.teamSolvedCount,
      }));
    } catch (e) {
-     console.error('[TeamAPI] fetchTeamProfileRows failed:', e);
+    //  console.error('[TeamAPI] fetchTeamProfileRows failed:', e);
      return []; // 실패해도 빈 배열로 처리해 UI는 뜨게
    }
  }
@@ -92,7 +92,7 @@ export async function fetchTeamHistory() {
 
     return [];
   } catch (e) {
-    console.error('[TeamAPI] fetchTeamHistory failed:', e);
+    // console.error('[TeamAPI] fetchTeamHistory failed:', e);
     return [];
   }
 }
