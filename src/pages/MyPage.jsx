@@ -109,7 +109,7 @@ const MyPage = () => {
           teamId: first.teamId,
           teamName: first.teamName ?? "TEAM",
           members,
-          rank: 1, // 최초 진입 시 임시값, SSE에서 업데이트
+          rank: " - ", // 최초 진입 시 임시값, SSE에서 업데이트
           toalPoint: first.teamTotalPoint ?? 0,
           mileage: first.teamMileage ?? 0,
           solvedCount: first.teamSolvedCount ?? 0,

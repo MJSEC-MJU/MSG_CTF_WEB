@@ -21,20 +21,47 @@
   background-size: contain;
   padding: 50px;
   top: 50px;
-
+  z-index: 0;
+}
+.problem-grid::before,
+.problem-grid::after {
+  content: "";
+  position: absolute;
+  left: -150px;     /* grid padding과 맞춤 */
+  right: -150px;    /* 양쪽 고정 → 가운데 기준으로 늘어남 */
+  width: auto;    /* 반드시 auto로 */
+  height: 100px;                  /* 카펫 두께 */
+  border-radius: 10px;
+  background: linear-gradient(90deg, #b90f0f 0%, #e31b1b 50%, #b90f0f 100%);
+  box-shadow: 0 6px 18px rgba(227, 27, 27, 0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+  z-index: 1;                    /* 버튼(z=2)보다 아래, 배경(z=0)보다 위 */
+  pointer-events: none;          /* 클릭 방해 X */
 }
 
+/* 2줄 기준 위치: 각 행의 중앙보다 살짝 아래로 */
+.problem-grid::before {
+  /* 그리드 패딩(50px) + 첫 행의 중간(대략)에서 약간 아래 */
+  top: calc(50px + 150px + 26px); /* 150px=이미지 절반, +26px로 ‘살짝 아래’ */
+}
+
+.problem-grid::after {
+  /* 두 번째 줄은 더 아래. 그리드 전체 높이(500px)와 패딩(50px*2)을 고려 */
+  top: calc(50px + 150px + 26px + 300px); 
+  /* 200px은 첫 줄과 두 번째 줄 사이 대략 간격(이미지 크기/여백 기준) */
+}
 .problem-button {
   text-decoration: none;
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2;
 }
 
 .button-wrapper {
   position: relative;
   display: inline-block;
   transition: transform 0.2s ease-in-out;
+  z-index: 2;
 }
 
 .button-wrapper img {
@@ -52,7 +79,7 @@
   top: 0;
   left: 5%;
   margin: 5px; /* 버튼 테두리와 살짝 띄우기 */
-  z-index: 1; /* 다른 요소보다 위에 오도록 설정 */
+  z-index: 3; /* 다른 요소보다 위에 오도록 설정 */
 }
 
 .button-wrapper:hover {
@@ -70,7 +97,7 @@
   font-weight: 1000;
   color: white;
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
   text-shadow: 2.5px 2.5px 0px black, -2.5px -2.5px 0px black, 2.5px -2.5px 0px black, -2.5px 2.5px 0px black;
   text-align: center;
   white-space: nowrap;
@@ -244,12 +271,71 @@ background: #181818; color: #fff; border: 1px solid #333;
   cursor: not-allowed;
 }
 
+/* === 모바일(폭 390 기준)에서 한 줄에 한 문제 + 가로 꽉 채움 === */
+@media (max-width: 640px) {
+  /* 컨테이너도 모바일에선 고정폭(1200px) 제거 */
+  .challenge-container {
+    width: 100%;
+    max-width: 100%;
+  }
 
-.background {
-  position: fixed;
-  top: 0px;           
-  left: 0px;          
-  width: 100%;
-  height: auto;
-  z-index: 0;
+  .problem-grid {
+    grid-template-columns: 1fr !important; /* 1열 */
+    width: 100%;
+    max-width: 100%;
+    height: auto;        /* 세로로 자연스럽게 */
+    padding: 0;          /* 가로 꽉 차게 */
+  }
+
+  /* 레드카펫 숨김(유지) */
+  .problem-grid::before,
+  .problem-grid::after {
+    display: none;
+  }
+
+  /* 각 아이템이 행 전체를 차지하도록 */
+  .problem-button-wrapper {
+    width: 100%;
+    display: block;
+  }
+
+  .problem-button {
+    width: 100%;
+    display: block;
+  }
+
+  .button-wrapper {
+    width: 100%;
+    position: relative;
+  }
+
+  /* 메인 썸네일을 가로 꽉 차게 */
+  .button-wrapper img {
+    width: 100%;
+    height: auto;     /* 비율 유지 */
+    max-width: 100%;
+  }
+
+  /* 카테고리 아이콘은 상대 비율로 축소 */
+  .category-icon {
+    width: 22vw !important;
+    max-width: none !important;
+    max-height: none !important;
+    left: 4%;
+    top: 2%;
+  }
+
+  /* 제목/점수는 그대로 가운데 오버레이되지만, 글자 크기를 약간 축소 */
+  .button-title {
+    font-size: clamp(14px, 10vw, 40px);
+  }
+  .button-score {
+    font-size: clamp(16px, 10vw, 40px);
+  }
+
+  /* 하단 페이지네이션은 가려지지 않게 살짝 올림 */
+  .pagination {
+    bottom: 8px;
+    padding-bottom: 16px;
+  }
 }

@@ -72,7 +72,7 @@ button:focus-visible {
 body { overflow-x: hidden; }
 
 /* ---------------- Scrollbar (scoped) ---------------- */
-::-webkit-scrollbar{width:7px;height:10px}
+::-webkit-scrollbar{width:8px;height:10px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:#1f2944;border-radius:6px;border:2px solid var(--bg)}
 ::-webkit-scrollbar-thumb:hover{background:#2a3556}
