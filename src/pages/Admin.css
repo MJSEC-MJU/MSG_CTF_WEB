@@ -97,7 +97,7 @@
 .admin .hint{font-size:.8rem;color:var(--text-muted)}
 
 .admin .input,.admin .select,.admin .textarea{
-  width:100%;padding:.7rem .9rem;border-radius:var(--radius-sm);
+  width:80%;padding:.7rem .9rem;border-radius:var(--radius-sm);
   background:var(--input-bg);color:var(--text);
   border:1px solid var(--input-br);font-size:.95rem;transition:.15s;
 }
@@ -163,11 +163,6 @@
 /* Timer 안내/서버시간 카드는 JSX에서 card--dark로 처리하므로
    지원 불안정한 :has/:contains 선택자는 제거 */
 
-/* ---------------- Scrollbar (scoped) ---------------- */
-::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:#1f2944;border-radius:6px;border:2px solid var(--bg)}
-::-webkit-scrollbar-thumb:hover{background:#2a3556}
 
 /* ---------------- Responsive ---------------- */
 @media (max-width:768px){
