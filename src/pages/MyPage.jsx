@@ -183,7 +183,7 @@ const MyPage = () => {
       const history = await fetchPaymentHistory();
       setPaymentHistory(Array.isArray(history) ? history : []);
     } catch (err) {
-      console.error('결제 히스토리 로딩 실패:', err);
+      // console.error('결제 히스토리 로딩 실패:', err);
       setHistoryError(true);
     } finally {
       setHistoryLoading(false);
@@ -226,7 +226,7 @@ const MyPage = () => {
       const history = await fetchTeamHistory();
       setTeamHistory(Array.isArray(history) ? history : []);
     } catch (err) {
-      console.error('팀 히스토리 로딩 실패:', err);
+      // console.error('팀 히스토리 로딩 실패:', err);
       setTeamHistoryError(true);
     } finally {
       setTeamHistoryLoading(false);
@@ -301,13 +301,13 @@ const MyPage = () => {
         // 유효하지 않은 날짜인 경우 기본값 5분 사용
         let leftSec;
         if (isNaN(serverNow.getTime()) || isNaN(expire.getTime())) {
-          console.warn('[MyPage] Invalid date format, using 5 minutes default');
+          // console.warn('[MyPage] Invalid date format, using 5 minutes default');
           leftSec = 300; // 5분
         } else {
           leftSec = Math.max(0, Math.floor((expire.getTime() - serverNow.getTime()) / 1000));
         }
 
-        console.log('[MyPage] Server time:', createdAtStr, 'Expiry:', expiryStr, 'Time left:', leftSec, 'seconds');
+        // console.log('[MyPage] Server time:', createdAtStr, 'Expiry:', expiryStr, 'Time left:', leftSec, 'seconds');
         setTimeLeft(leftSec);
 
         // 카운트다운 타이머 시작
@@ -327,11 +327,11 @@ const MyPage = () => {
         if (leftSec > 10) {
           refreshTimerRef.current = setTimeout(() => issueQR(), (leftSec + 0.5) * 1000);
         } else {
-          console.warn('[MyPage] QR expiry time too short, not scheduling auto-refresh');
+          // console.warn('[MyPage] QR expiry time too short, not scheduling auto-refresh');
         }
       }
     } catch (err) {
-      console.error("QR 토큰 발급 실패:", err);
+      // console.error("QR 토큰 발급 실패:", err);
       setQrError(true);
     } finally {
       setQrLoading(false);
@@ -575,9 +575,9 @@ const MyPage = () => {
         </div>
       </section>
 
-      {leaderboardError && (
+      {/* {leaderboardError && (
         <p className="error-message">리더보드 업데이트에 실패했습니다.</p>
-      )}
+      )} */}
     </div>
   );
 };

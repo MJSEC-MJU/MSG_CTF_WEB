@@ -37,7 +37,7 @@ export const fetchAllSolveRecords = async () => {
 
     throw new Error(response.data?.message || "제출 기록 조회 실패");
   } catch (error) {
-    console.error("Fetch All Solve Records API Error:", error);
+    // console.error("Fetch All Solve Records API Error:", error);
     throw error;
   }
 };
@@ -64,7 +64,7 @@ export const fetchSolveRecordsByChallenge = async (challengeId) => {
 
     throw new Error(response.data?.message || "문제 제출 기록 조회 실패");
   } catch (error) {
-    console.error("Fetch Solve Records By Challenge API Error:", error);
+    // console.error("Fetch Solve Records By Challenge API Error:", error);
     throw error;
   }
 };
@@ -88,7 +88,7 @@ export const revokeSolveRecord = async (challengeId, loginId) => {
 
     throw new Error(response.data?.message || "제출 기록 철회 실패");
   } catch (error) {
-    console.error("Revoke Solve Record API Error:", error);
+    // console.error("Revoke Solve Record API Error:", error);
     throw error;
   }
 };
@@ -116,7 +116,7 @@ export const deleteAllSolveRecordsByUser = async (loginId) => {
 
     throw new Error(response.data?.message || "사용자 제출 기록 삭제 실패");
   } catch (error) {
-    console.error("Delete All Solve Records By User API Error:", error);
+    // console.error("Delete All Solve Records By User API Error:", error);
     throw error;
   }
 };

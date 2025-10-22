@@ -101,7 +101,7 @@ const PaymentProcessor = () => {
   };
 
   const handleError = (err) => {
-    console.error('QR Scanner Error:', err);
+    // console.error('QR Scanner Error:', err);
     setMessage({ type: 'error', text: '카메라 접근 오류가 발생했습니다.' });
   };
 

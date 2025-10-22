@@ -22,7 +22,7 @@ export const fetchPaymentQRToken = async () => {
 
     throw new Error(response.data?.message || "QR 토큰 발급 실패");
   } catch (error) {
-    console.error("Payment QR Token API Error:", error);
+    // console.error("Payment QR Token API Error:", error);
     throw error;
   }
 };
@@ -51,7 +51,7 @@ export const checkoutWithMileage = async (paymentToken, mileageUsed, loginId) =>
 
     throw new Error(response.data?.message || "결제 실패");
   } catch (error) {
-    console.error("Payment Checkout API Error:", error);
+    // console.error("Payment Checkout API Error:", error);
     throw error;
   }
 };
@@ -84,7 +84,7 @@ export const fetchPaymentHistory = async () => {
 
     throw new Error(response.data?.message || "결제 히스토리 조회 실패");
   } catch (error) {
-    console.error("Payment History API Error:", error);
+    // console.error("Payment History API Error:", error);
     throw error;
   }
 };
@@ -104,7 +104,7 @@ export const fetchAllPaymentHistory = async () => {
 
     throw new Error(response.data?.message || "전체 결제 히스토리 조회 실패");
   } catch (error) {
-    console.error("Admin Payment History API Error:", error);
+    // console.error("Admin Payment History API Error:", error);
     throw error;
   }
 };
@@ -125,7 +125,7 @@ export const refundPayment = async (paymentHistoryId) => {
 
     throw new Error(response.data?.message || "결제 환불 실패");
   } catch (error) {
-    console.error("Payment Refund API Error:", error);
+    // console.error("Payment Refund API Error:", error);
     throw error;
   }
 };
@@ -149,7 +149,7 @@ export const grantMileageToTeam = async (teamName, mileage) => {
 
     throw new Error(response.data?.message || "마일리지 부여 실패");
   } catch (error) {
-    console.error("Grant Mileage API Error:", error);
+    // console.error("Grant Mileage API Error:", error);
     throw error;
   }
 };
