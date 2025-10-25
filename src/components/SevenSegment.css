@@ -1,0 +1,101 @@
+/* 7-세그먼트 디스플레이 */
+.seven-segment {
+  position: relative;
+  width: 5vw;
+  height: 7.5vw;
+  display: inline-block;
+}
+
+.seven-segment.large {
+  width: 10vw;
+  height: 15vw;
+}
+
+.seven-segment.small {
+  width: 3.75vw;
+  height: 5.625vw;
+}
+
+/* 세그먼트 기본 스타일 */
+.segment {
+  position: absolute;
+  background-color: rgba(255, 107, 53, 0.1);
+  transition: all 0.1s ease;
+}
+
+.segment.active {
+  background-color: #ff6b35;
+  box-shadow:
+    0 0 10px rgba(255, 107, 53, 0.8),
+    0 0 20px rgba(255, 107, 53, 0.6),
+    0 0 30px rgba(255, 107, 53, 0.4);
+}
+
+/* 긴급 모드 (빨간색) */
+.seven-segment.urgent .segment {
+  background-color: rgba(255, 53, 53, 0.1);
+}
+
+.seven-segment.urgent .segment.active {
+  background-color: #ff3535;
+  box-shadow:
+    0 0 15px rgba(255, 53, 53, 1),
+    0 0 25px rgba(255, 53, 53, 0.8),
+    0 0 35px rgba(255, 53, 53, 0.6);
+}
+
+/* 가로 세그먼트 (a, d, g) */
+.segment-a,
+.segment-d,
+.segment-g {
+  height: 15%;
+  width: 75%;
+  left: 12.5%;
+  clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
+}
+
+/* 세로 세그먼트 (b, c, e, f) */
+.segment-b,
+.segment-c,
+.segment-e,
+.segment-f {
+  width: 15%;
+  height: 41.67%;
+  clip-path: polygon(0% 8%, 50% 0%, 100% 8%, 100% 92%, 50% 100%, 0% 92%);
+}
+
+/* 개별 세그먼트 위치 */
+.segment-a {
+  top: 0;
+}
+
+.segment-b {
+  top: 10%;
+  right: 3.75%;
+}
+
+.segment-c {
+  bottom: 10%;
+  right: 3.75%;
+}
+
+.segment-d {
+  bottom: 0;
+}
+
+.segment-e {
+  bottom: 10%;
+  left: 3.75%;
+}
+
+.segment-f {
+  top: 10%;
+  left: 3.75%;
+}
+
+.segment-g {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* large와 small도 퍼센트 기반으로 동작 - 별도 오버라이드 제거 */
