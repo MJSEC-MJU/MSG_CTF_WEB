@@ -86,8 +86,6 @@ const Admin = () => {
     url: '',
     fileUrl: '',
     category: '',
-    date: '',
-    time: '',
     club: '',
   });
 
@@ -399,15 +397,13 @@ const Admin = () => {
       points:        full.points ?? '',
       minPoints:     minPts ?? '',
       initialPoints: initPts ?? '',
-      mileage:       mileage ?? '',                // ✅ 추가
+      mileage:       mileage ?? '',
       startTime:     full.startTime ? convertToDatetimeLocal(full.startTime) : '',
       endTime:       full.endTime   ? convertToDatetimeLocal(full.endTime)   : '',
       file:          null, // 보안상 미리 채울 수 없음
       url:           full.url ?? '',
-      fileUrl:       full.fileUrl ?? '',           // ✅ 파일 URL 추가
+      fileUrl:       full.fileUrl ?? '',
       category:      full.category ?? '',
-      date:          '',
-      time:          '',
       club:          clubName,
     });
   };
@@ -1070,13 +1066,18 @@ const Admin = () => {
                 </div>
 
                 <div className="field">
-                  <label className="label">Date</label>
-                  <input className="input" type="date" name="date" value={formData.date} onChange={onProblemInput} required />
+                  <label className="label">Initial Points</label>
+                  <input className="input" type="number" name="initialPoints" value={formData.initialPoints} onChange={onProblemInput} required />
                 </div>
 
                 <div className="field">
-                  <label className="label">Time</label>
-                  <input className="input" type="time" name="time" value={formData.time} onChange={onProblemInput} required />
+                  <label className="label">Start Time</label>
+                  <input className="input" type="datetime-local" name="startTime" value={formData.startTime} onChange={onProblemInput} required />
+                </div>
+
+                <div className="field">
+                  <label className="label">End Time</label>
+                  <input className="input" type="datetime-local" name="endTime" value={formData.endTime} onChange={onProblemInput} required />
                 </div>
 
                 <div className="field">
