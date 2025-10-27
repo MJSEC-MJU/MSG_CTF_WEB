@@ -79,15 +79,16 @@ const Admin = () => {
     points: '',
     minPoints: '',
     initialPoints: '',
-    mileage: '',        
+    mileage: '',
     startTime: '',
     endTime: '',
     file: null,
     url: '',
+    fileUrl: '',
     category: '',
     date: '',
     time: '',
-    club: '', 
+    club: '',
   });
 
   // ===== Signature Admin (state) =====
@@ -403,6 +404,7 @@ const Admin = () => {
       endTime:       full.endTime   ? convertToDatetimeLocal(full.endTime)   : '',
       file:          null, // 보안상 미리 채울 수 없음
       url:           full.url ?? '',
+      fileUrl:       full.fileUrl ?? '',           // ✅ 파일 URL 추가
       category:      full.category ?? '',
       date:          '',
       time:          '',
@@ -424,10 +426,11 @@ const Admin = () => {
       points:        formData.points,
       minPoints:     formData.minPoints,
       initialPoints: formData.initialPoints || formData.points,
-      mileage:       formData.mileage,             
+      mileage:       formData.mileage,
       startTime:     toServerDateTime(formData.startTime),
       endTime:       toServerDateTime(formData.endTime),
       url:           formData.url,
+      // fileUrl은 읽기 전용이므로 payload에서 제외 (파일 업로드로만 변경 가능)
       category:      formData.category,
       ...(formData.category === 'SIGNATURE' ? { club: String(formData.club).trim() } : {}),
     };
@@ -958,6 +961,18 @@ const Admin = () => {
                   <div className="field">
                     <label className="label">URL</label>
                     <input className="input" type="text" name="url" value={formData.url} onChange={onProblemInput} />
+                  </div>
+
+                  <div className="field">
+                    <label className="label">File URL (읽기 전용)</label>
+                    <input
+                      className="input"
+                      type="text"
+                      name="fileUrl"
+                      value={formData.fileUrl || '(파일 없음)'}
+                      readOnly
+                      style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed', color: '#666' }}
+                    />
                   </div>
 
                   <div className="field">
