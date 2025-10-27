@@ -7,6 +7,7 @@
 
 import './Admin.css';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Axios } from '../api/Axios';
 import { createProblem } from '../api/CreateProblemAPI';
 import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
 import { fetchAdminMembers, deleteUser as removeUser, updateUser, addUser } from '../api/AdminUserAPI';
@@ -349,20 +350,17 @@ const Admin = () => {
     if (!id) return problem;
 
     const candidates = [
-      `/api/admin/challenges/${id}`,
-      `/api/challenges/${id}`,
-      `/api/problems/${id}`,
+      `/admin/challenges/${id}`,
+      `/challenges/${id}`,
+      `/problems/${id}`,
     ];
 
     for (const url of candidates) {
       try {
-        const res = await fetch(url, { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          const body = data?.data ?? data;
-          if (body && typeof body === 'object') {
-            return { ...problem, ...body };
-          }
+        const res = await Axios.get(url);
+        const body = res.data?.data ?? res.data;
+        if (body && typeof body === 'object') {
+          return { ...problem, ...body };
         }
       } catch (e) {
         // 다음 후보 계속
