@@ -1,7 +1,7 @@
 // src/api/IpWhitelistAPI.js
 import { Axios } from './Axios';
 
-const BASE = '/api/admin/ip-whitelist';
+const BASE = '/admin/ip-whitelist';
 
 export const fetchWhitelist = async () => {
   const res = await Axios.get(BASE);

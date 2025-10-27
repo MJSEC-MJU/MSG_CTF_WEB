@@ -1,7 +1,7 @@
 // src/api/IpActivityAPI.js
 import { Axios } from './Axios';
 
-const BASE = '/api/admin/ip-activity';
+const BASE = '/admin/ip-activity';
 
 export const fetchIpActivity = async (params = {}) => {
   const qs = new URLSearchParams();
