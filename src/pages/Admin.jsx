@@ -4,6 +4,7 @@
 // - SIGNATURE 문제 추가/수정 시 club(팀명) 필수 입력 처리
 // - 문제 생성/수정에 mileage 필드 추가 (목록 컬럼 포함)
 // - 편집 시 문제 상세 하이드레이트해 기존 값 주입
+// -  startTime / endTime 자동 주입: 생성·수정 시 비어있으면 현재시각 및 대회 종료(or +12h)로 보정
 
 import './Admin.css';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -61,8 +62,8 @@ const Admin = () => {
 
   // ===== Timer =====
   const { refreshContestTime } = useContestTime();
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [startTime, setStartTime] = useState('');           // contest start
+  const [endTime, setEndTime] = useState('');               // contest end
   const [currentServerTime, setCurrentServerTime] = useState('');
 
   // ===== Problems =====
@@ -192,6 +193,19 @@ const Admin = () => {
     })();
   }, []);
 
+  // Add Problem 폼 열릴 때 기본 start/end 미리 넣기(비어있을 때만)
+  useEffect(() => {
+    if (showAddProblemForm) {
+      const startLocal = nowDatetimeLocal();
+      const endLocal   = endTime || addHoursLocal(startLocal, 12);
+      setFormData((prev) => ({
+        ...prev,
+        startTime: prev.startTime || startLocal,
+        endTime:   prev.endTime   || endLocal,
+      }));
+    }
+  }, [showAddProblemForm, endTime]);
+
   // ===== Helpers =====
   const onNewUserInput = (e) => {
     const { name, value } = e.target;
@@ -218,12 +232,31 @@ const Admin = () => {
     return base.replace(' ', 'T');
   };
 
-  // input(datetime-local) → 서버 형식
+  // input(datetime-local) → 서버 형식 'YYYY-MM-DD HH:mm:ss'
   const toServerDateTime = (val) => {
     if (!val) return '';
     let s = val.replace('T', ' ');
     if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
     return s;
+  };
+
+  // === ★ 추가: datetime-local 헬퍼들 ===
+  // Date → 'YYYY-MM-DDTHH:mm'
+  const toDatetimeLocalFromDate = (d) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+  // 현재 시각을 'YYYY-MM-DDTHH:mm'
+  const nowDatetimeLocal = () => toDatetimeLocalFromDate(new Date());
+  // 'YYYY-MM-DDTHH:mm' + hours → 같은 형식 반환
+  const addHoursLocal = (localStr, hours) => {
+    const base = localStr || nowDatetimeLocal();
+    const [datePart, timePart] = base.split('T');
+    const [y, m, d] = datePart.split('-').map(Number);
+    const [hh, mm] = timePart.split(':').map(Number);
+    const dt = new Date(y, (m - 1), d, hh, mm);
+    dt.setHours(dt.getHours() + Number(hours || 0));
+    return toDatetimeLocalFromDate(dt);
   };
 
   // ===== Users =====
@@ -415,6 +448,10 @@ const Admin = () => {
       return;
     }
 
+    // ★ start/end 자동 보정: 비어있으면 현재시각 & 대회 종료(or +12h)
+    const startLocal = formData.startTime || nowDatetimeLocal();
+    const endLocal   = formData.endTime || (endTime || addHoursLocal(startLocal, 12));
+
     const payload = {
       title:         formData.title,
       description:   formData.description,
@@ -423,8 +460,8 @@ const Admin = () => {
       minPoints:     formData.minPoints,
       initialPoints: formData.initialPoints || formData.points,
       mileage:       formData.mileage,
-      startTime:     toServerDateTime(formData.startTime),
-      endTime:       toServerDateTime(formData.endTime),
+      startTime:     toServerDateTime(startLocal),
+      endTime:       toServerDateTime(endLocal),
       url:           formData.url,
       // fileUrl은 읽기 전용이므로 payload에서 제외 (파일 업로드로만 변경 가능)
       category:      formData.category,
@@ -974,10 +1011,12 @@ const Admin = () => {
                   <div className="field">
                     <label className="label">Start Time</label>
                     <input className="input" type="datetime-local" name="startTime" value={formData.startTime} onChange={onProblemInput} />
+                    <p className="hint">비워두면 현재시각이 자동 설정됩니다.</p>
                   </div>
                   <div className="field">
                     <label className="label">End Time</label>
                     <input className="input" type="datetime-local" name="endTime" value={formData.endTime} onChange={onProblemInput} />
+                    <p className="hint">비워두면 대회 종료시간(있으면) 또는 시작시각+12시간으로 자동 설정됩니다.</p>
                   </div>
 
                   <div className="field">
@@ -1012,12 +1051,24 @@ const Admin = () => {
               className="card form"
               onSubmit={async (e) => {
                 e.preventDefault();
+
                 if (formData.category === 'SIGNATURE' && !String(formData.club || '').trim()) {
                   alert('SIGNATURE 카테고리는 club(팀명)이 필수입니다.');
                   return;
                 }
+
+                // ★ start/end 자동 보정: 비어있으면 현재시각 & 대회 종료(or +12h)
+                const startLocal = formData.startTime || nowDatetimeLocal();
+                const endLocal   = formData.endTime || (endTime || addHoursLocal(startLocal, 12));
+
+                const payload = {
+                  ...formData,
+                  startTime: toServerDateTime(startLocal),
+                  endTime:   toServerDateTime(endLocal),
+                };
+
                 try {
-                  const res = await createProblem(formData);
+                  const res = await createProblem(payload);
                   alert(res?.message || '생성 완료');
                 } catch (err) {
                   alert(err?.message || '문제 생성 실패');
@@ -1072,12 +1123,26 @@ const Admin = () => {
 
                 <div className="field">
                   <label className="label">Start Time</label>
-                  <input className="input" type="datetime-local" name="startTime" value={formData.startTime} onChange={onProblemInput} required />
+                  <input
+                    className="input"
+                    type="datetime-local"
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={onProblemInput}
+                  />
+                  <p className="hint">비워두면 현재시각이 자동 설정됩니다.</p>
                 </div>
 
                 <div className="field">
                   <label className="label">End Time</label>
-                  <input className="input" type="datetime-local" name="endTime" value={formData.endTime} onChange={onProblemInput} required />
+                  <input
+                    className="input"
+                    type="datetime-local"
+                    name="endTime"
+                    value={formData.endTime}
+                    onChange={onProblemInput}
+                  />
+                  <p className="hint">비워두면 대회 종료시간(있으면) 또는 시작시각+12시간으로 자동 설정됩니다.</p>
                 </div>
 
                 <div className="field">
