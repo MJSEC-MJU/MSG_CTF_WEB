@@ -1,7 +1,7 @@
 // src/api/IpBanAPI.js
 import { Axios } from './Axios';
 
-const BASE = '/api/admin/ip-ban';
+const BASE = '/admin/ip-ban';
 
 export const fetchIpBans = async () => {
   const res = await Axios.get(BASE);
