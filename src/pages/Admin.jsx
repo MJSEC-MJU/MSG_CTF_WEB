@@ -7,6 +7,7 @@
 // - 파일 수정 UX: 기존 파일 URL 노출 + 업로드(교체) 한 자리에서 처리
 // - ⚠️ CreateProblemAPI.js 수정 없이 동작하도록 Add 폼에서 date/time을 항상 세팅
 //   (해당 API는 start/end 모두 `${date} ${time}:00`로 보내므로, 최소히 start용으로만 사용)
+// - IP 관리 탭 추가 (차단/화이트리스트/활동로그 서브탭)
 
 import './Admin.css';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -38,6 +39,30 @@ import {
   adminPurgeChallenge,
   adminForceUnlock,
 } from '../api/SignatureAdminAPI';
+
+// ── IP 관리 API ────────────────────────────────────────────────────
+import {
+  fetchIpBans,
+  fetchIpBanByAddress,
+  createIpBan,
+  unbanIp,
+  extendIpBan,
+  rebuildIpBanCache,
+} from '../api/IpBanAPI';
+import {
+  fetchWhitelist,
+  addWhitelistIp,
+  removeWhitelistIp,
+  checkWhitelistIp,
+} from '../api/IpWhitelistAPI';
+import { fetchIpActivity } from '../api/IpActivityAPI';
+
+// ───────────────────────────────────────────────────────────────────
+// 공통 유틸 (IP 탭 포함 전역에서 사용)
+// ───────────────────────────────────────────────────────────────────
+const isIPv4 = (ip) =>
+  /^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)$/.test(ip || '');
+const fmtDate = (s) => (s ? new Date(s).toLocaleString('ko-KR') : '-');
 
 const Admin = () => {
   // ===== UI state =====
@@ -788,6 +813,488 @@ const Admin = () => {
     }
   };
 
+  // ─────────────────────────────────────────────────────────────────
+  // IP 관리 내부 서브탭 컴포넌트 (Ban / Whitelist / Activity)
+  // ─────────────────────────────────────────────────────────────────
+  const IpBanTab = () => {
+    const [loading, setLoading] = useState(false);
+    const [rows, setRows] = useState([]);
+    const [form, setForm] = useState({
+      ipAddress: '',
+      reason: '',
+      banType: 'TEMPORARY',
+      durationMinutes: '120',
+    });
+    const [extendVal, setExtendVal] = useState({});
+    const [qIp, setQIp] = useState('');
+    const [qRes, setQRes] = useState(null);
+
+    const refresh = async () => {
+      setLoading(true);
+      try {
+        const res = await fetchIpBans();
+        setRows(Array.isArray(res?.data) ? res.data : []);
+      } catch (e) {
+        alert('차단목록 조회 실패');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    useEffect(() => { refresh(); }, []);
+
+    const handleCreate = async () => {
+      if (!isIPv4(form.ipAddress)) return alert('올바른 IPv4를 입력하세요.');
+      if (!form.reason.trim()) return alert('차단 사유를 입력하세요.');
+      if (form.banType === 'TEMPORARY' && (!form.durationMinutes || Number(form.durationMinutes) < 1)) {
+        return alert('임시 차단은 1분 이상이어야 합니다.');
+      }
+      try {
+        const res = await createIpBan({
+          ipAddress: form.ipAddress.trim(),
+          reason: form.reason.trim(),
+          banType: form.banType,
+          durationMinutes: form.banType === 'TEMPORARY' ? Number(form.durationMinutes) : undefined,
+        });
+        alert(res?.message || '차단 성공');
+        setForm({ ipAddress: '', reason: '', banType: 'TEMPORARY', durationMinutes: '120' });
+        refresh();
+      } catch (e) {
+        alert(e?.response?.data?.message || '차단 실패');
+      }
+    };
+
+    const handleUnban = async (ip) => {
+      if (!window.confirm(`${ip} 차단 해제할까요?`)) return;
+      try {
+        const res = await unbanIp(ip);
+        alert(res?.message || '해제 완료');
+        refresh();
+      } catch (e) {
+        alert(e?.response?.data?.message || '해제 실패');
+      }
+    };
+
+    const handleExtend = async (ip) => {
+      const minutes = Number(extendVal[ip] || 60);
+      if (!minutes || minutes < 1) return alert('1 이상 분을 입력하세요.');
+      try {
+        const res = await extendIpBan(ip, minutes);
+        alert(res?.message || `연장 성공 (+${minutes}분)`);
+        refresh();
+      } catch (e) {
+        alert(e?.response?.data?.message || '연장 실패');
+      }
+    };
+
+    const handleQuery = async () => {
+      if (!isIPv4(qIp)) return alert('IPv4를 입력하세요.');
+      try {
+        const res = await fetchIpBanByAddress(qIp.trim());
+        setQRes(res?.data || null);
+        if (!res?.data) alert(res?.message || '활성 차단이 없습니다.');
+      } catch (e) {
+        alert(e?.response?.data?.message || '조회 실패');
+      }
+    };
+
+    const handleRebuild = async () => {
+      if (!window.confirm('Redis 캐시를 재구축할까요?')) return;
+      try {
+        const res = await rebuildIpBanCache();
+        alert(res?.message || '재구축 완료');
+      } catch (e) {
+        alert(e?.response?.data?.message || '재구축 실패');
+      }
+    };
+
+    return (
+      <div>
+        <div className="card">
+          <h3 className="card__title">IP 수동 차단</h3>
+          <div className="form form-grid">
+            <div className="field">
+              <label className="label">IP</label>
+              <input className="input" placeholder="e.g. 192.168.1.100" value={form.ipAddress}
+                     onChange={(e) => setForm((p) => ({ ...p, ipAddress: e.target.value }))} />
+            </div>
+            <div className="field">
+              <label className="label">차단 타입</label>
+              <select className="select" value={form.banType}
+                      onChange={(e) => setForm((p) => ({ ...p, banType: e.target.value }))}>
+                <option value="TEMPORARY">TEMPORARY</option>
+                <option value="PERMANENT">PERMANENT</option>
+              </select>
+            </div>
+            <div className="field">
+              <label className="label">기간(분) – TEMPORARY만</label>
+              <input className="input" type="number" min={1} disabled={form.banType !== 'TEMPORARY'}
+                     value={form.durationMinutes}
+                     onChange={(e) => setForm((p) => ({ ...p, durationMinutes: e.target.value }))} />
+            </div>
+            <div className="field" style={{ gridColumn: '1 / -1' }}>
+              <label className="label">사유</label>
+              <input className="input" placeholder="예: 악성 행위 반복 - 수동 차단" value={form.reason}
+                     onChange={(e) => setForm((p) => ({ ...p, reason: e.target.value }))} />
+            </div>
+          </div>
+          <div className="actions">
+            <button className="btn btn--primary" onClick={handleCreate}>차단 추가</button>
+            <button className="btn" onClick={handleRebuild}>Redis 캐시 재구축</button>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="card__title">활성 차단 목록</h3>
+          <div className="actions" style={{ gap: 8 }}>
+            <button className="btn" onClick={refresh} disabled={loading}>{loading ? '갱신 중…' : '새로고침'}</button>
+            <div style={{ flex: 1 }} />
+            <input className="input" style={{ width: 240 }} placeholder="특정 IP 조회" value={qIp} onChange={(e) => setQIp(e.target.value)} />
+            <button className="btn" onClick={handleQuery}>조회</button>
+          </div>
+
+          {qRes && (
+            <div className="card" style={{ marginTop: 12 }}>
+              <div className="form">
+                <div><b>IP</b> {qRes.ipAddress}</div>
+                <div><b>사유</b> {qRes.reason}</div>
+                <div><b>유형</b> {qRes.banType}</div>
+                <div><b>차단시각</b> {fmtDate(qRes.bannedAt)}</div>
+                <div><b>만료</b> {fmtDate(qRes.expiresAt)}</div>
+                <div><b>관리자</b> {qRes.bannedByAdminLoginId || '-'}</div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ overflowX: 'auto', marginTop: 8 }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>IP</th>
+                  <th>사유</th>
+                  <th>타입</th>
+                  <th>차단시각</th>
+                  <th>만료</th>
+                  <th>관리자</th>
+                  <th style={{ width: 260 }}>액션</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(rows || []).map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.ipAddress}</td>
+                    <td title={r.reason}>{r.reason?.slice(0, 60) || '-'}</td>
+                    <td>{r.banType}</td>
+                    <td>{fmtDate(r.bannedAt)}</td>
+                    <td>{fmtDate(r.expiresAt)}</td>
+                    <td>{r.bannedByAdminLoginId || '-'}</td>
+                    <td>
+                      <div className="actions" style={{ justifyContent: 'flex-start', gap: 8 }}>
+                        <button className="btn btn--danger" onClick={() => handleUnban(r.ipAddress)}>해제</button>
+                        {r.banType === 'TEMPORARY' && (
+                          <>
+                            <input className="input" style={{ width: 80 }} type="number" min={1}
+                                   placeholder="+분"
+                                   value={extendVal[r.ipAddress] ?? ''}
+                                   onChange={(e) =>
+                                     setExtendVal((p) => ({ ...p, [r.ipAddress]: e.target.value }))
+                                   } />
+                            <button className="btn" onClick={() => handleExtend(r.ipAddress)}>연장</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {(!rows || rows.length === 0) && (
+                  <tr><td colSpan={7} style={{ textAlign: 'center' }}>활성 차단 없음</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const IpWhitelistTab = () => {
+    const [loading, setLoading] = useState(false);
+    const [rows, setRows] = useState([]);
+    const [form, setForm] = useState({ ipAddress: '', reason: '' });
+    const [qIp, setQIp] = useState('');
+    const [qRes, setQRes] = useState(null);
+
+    const refresh = async () => {
+      setLoading(true);
+      try {
+        const res = await fetchWhitelist();
+        setRows(Array.isArray(res?.data) ? res.data : []);
+      } catch {
+        alert('화이트리스트 조회 실패');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    useEffect(() => { refresh(); }, []);
+
+    const handleAdd = async () => {
+      if (!isIPv4(form.ipAddress)) return alert('올바른 IPv4를 입력하세요.');
+      if (!form.reason.trim()) return alert('사유를 입력하세요.');
+      try {
+        const res = await addWhitelistIp({ ipAddress: form.ipAddress.trim(), reason: form.reason.trim() });
+        alert(res?.message || '추가 완료');
+        setForm({ ipAddress: '', reason: '' });
+        refresh();
+      } catch (e) {
+        alert(e?.response?.data?.message || '추가 실패');
+      }
+    };
+
+    const handleRemove = async (ip) => {
+      if (!window.confirm(`${ip} 화이트리스트에서 제거할까요?`)) return;
+      try {
+        const res = await removeWhitelistIp(ip);
+        alert(res?.message || '제거 완료');
+        refresh();
+      } catch (e) {
+        alert(e?.response?.data?.message || '제거 실패');
+      }
+    };
+
+    const handleQuery = async () => {
+      if (!isIPv4(qIp)) return alert('IPv4를 입력하세요.');
+      try {
+        const res = await checkWhitelistIp(qIp.trim());
+        setQRes(res?.data || null);
+        if (!res?.data?.isWhitelisted) alert(res?.message || '화이트리스트에 없음');
+      } catch (e) {
+        alert(e?.response?.data?.message || '조회 실패');
+      }
+    };
+
+    return (
+      <div>
+        <div className="card">
+          <h3 className="card__title">화이트리스트 추가</h3>
+          <div className="form form-grid">
+            <div className="field">
+              <label className="label">IP</label>
+              <input className="input" placeholder="e.g. 203.0.113.10"
+                     value={form.ipAddress}
+                     onChange={(e) => setForm((p) => ({ ...p, ipAddress: e.target.value }))} />
+            </div>
+            <div className="field" style={{ gridColumn: '1 / -1' }}>
+              <label className="label">사유</label>
+              <input className="input" placeholder="예: 모니터링 시스템 IP"
+                     value={form.reason}
+                     onChange={(e) => setForm((p) => ({ ...p, reason: e.target.value }))} />
+            </div>
+          </div>
+          <div className="actions">
+            <button className="btn btn--primary" onClick={handleAdd}>추가</button>
+            <div style={{ flex: 1 }} />
+            <input className="input" style={{ width: 240 }} placeholder="특정 IP 확인"
+                   value={qIp} onChange={(e) => setQIp(e.target.value)} />
+            <button className="btn" onClick={handleQuery}>조회</button>
+          </div>
+
+          {qRes && (
+            <div className="card" style={{ marginTop: 12 }}>
+              <div className="form">
+                <div><b>IP</b> {qRes.ipAddress || qIp}</div>
+                <div><b>등록됨?</b> {String(qRes.isWhitelisted ?? qRes.isActive ?? false)}</div>
+                {qRes.reason && <div><b>사유</b> {qRes.reason}</div>}
+                {qRes.addedAt && <div><b>등록시각</b> {fmtDate(qRes.addedAt)}</div>}
+                {qRes.addedByAdminLoginId && <div><b>관리자</b> {qRes.addedByAdminLoginId}</div>}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <h3 className="card__title">화이트리스트 목록</h3>
+          <div className="actions">
+            <button className="btn" onClick={refresh} disabled={loading}>{loading ? '갱신 중…' : '새로고침'}</button>
+          </div>
+          <div style={{ overflowX: 'auto', marginTop: 8 }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>IP</th>
+                  <th>사유</th>
+                  <th>등록시각</th>
+                  <th>관리자</th>
+                  <th style={{ width: 140 }}>액션</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(rows || []).map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.ipAddress}</td>
+                    <td title={r.reason}>{r.reason?.slice(0, 60) || '-'}</td>
+                    <td>{fmtDate(r.addedAt)}</td>
+                    <td>{r.addedByAdminLoginId || '-'}</td>
+                    <td>
+                      <button className="btn btn--danger" onClick={() => handleRemove(r.ipAddress)}>제거</button>
+                    </td>
+                  </tr>
+                ))}
+                {(!rows || rows.length === 0) && (
+                  <tr><td colSpan={5} style={{ textAlign: 'center' }}>등록된 IP 없음</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const IpActivityTab = () => {
+    const [loading, setLoading] = useState(false);
+    const [logs, setLogs] = useState([]);
+    const [filters, setFilters] = useState({
+      ipAddress: '',
+      activityType: '',
+      isSuspicious: '',
+      hoursBack: '24',
+      limit: '100',
+    });
+    const ACTIVITY_TYPES = [
+      'API_REQUEST',
+      'LOGIN_SUCCESS',
+      'LOGIN_FAILED',
+      'FLAG_SUBMIT_WRONG',
+      'RATE_LIMIT_EXCEEDED',
+      'SUSPICIOUS_PAYLOAD',
+      'NOT_FOUND_ACCESS',
+    ];
+
+    const fetchLogs = async () => {
+      setLoading(true);
+      try {
+        const params = {};
+        if (filters.ipAddress) params.ipAddress = filters.ipAddress.trim();
+        if (filters.activityType) params.activityType = filters.activityType;
+        if (filters.isSuspicious !== '') params.isSuspicious = filters.isSuspicious === 'true';
+        if (filters.hoursBack) params.hoursBack = Number(filters.hoursBack);
+        if (filters.limit) params.limit = Number(filters.limit);
+        const res = await fetchIpActivity(params);
+        setLogs(Array.isArray(res?.data) ? res.data : []);
+      } catch (e) {
+        alert(e?.response?.data?.message || '활동 로그 조회 실패');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    useEffect(() => { fetchLogs(); }, []); // 기본 로드
+
+    return (
+      <div>
+        <div className="card">
+          <h3 className="card__title">필터</h3>
+          <div className="form form-grid">
+            <div className="field">
+              <label className="label">IP</label>
+              <input className="input" placeholder="필터링할 IP (선택)"
+                     value={filters.ipAddress}
+                     onChange={(e) => setFilters((p) => ({ ...p, ipAddress: e.target.value }))} />
+            </div>
+            <div className="field">
+              <label className="label">활동 타입</label>
+              <select className="select" value={filters.activityType}
+                      onChange={(e) => setFilters((p) => ({ ...p, activityType: e.target.value }))}>
+                <option value="">(전체)</option>
+                {ACTIVITY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label className="label">의심 여부</label>
+              <select className="select" value={filters.isSuspicious}
+                      onChange={(e) => setFilters((p) => ({ ...p, isSuspicious: e.target.value }))}>
+                <option value="">(전체)</option>
+                <option value="true">의심만</option>
+                <option value="false">정상만</option>
+              </select>
+            </div>
+            <div className="field">
+              <label className="label">시간범위(시간)</label>
+              <input className="input" type="number" min={1}
+                     value={filters.hoursBack}
+                     onChange={(e) => setFilters((p) => ({ ...p, hoursBack: e.target.value }))} />
+            </div>
+            <div className="field">
+              <label className="label">최대 결과 수</label>
+              <input className="input" type="number" min={1} max={1000}
+                     value={filters.limit}
+                     onChange={(e) => setFilters((p) => ({ ...p, limit: e.target.value }))} />
+            </div>
+          </div>
+          <div className="actions">
+            <button className="btn btn--primary" onClick={fetchLogs} disabled={loading}>{loading ? '조회 중…' : '조회'}</button>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="card__title">활동 로그</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>IP</th>
+                  <th>타입</th>
+                  <th>시간</th>
+                  <th>URI</th>
+                  <th>상세</th>
+                  <th>의심</th>
+                  <th>사용자</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(logs || []).map((l) => (
+                  <tr key={l.id}>
+                    <td>{l.id}</td>
+                    <td>{l.ipAddress || '-'}</td>
+                    <td>{l.activityType}</td>
+                    <td>{fmtDate(l.activityTime)}</td>
+                    <td title={l.requestUri}>{(l.requestUri || '-').slice(0, 40)}</td>
+                    <td title={l.details}>{(l.details || '-').slice(0, 40)}</td>
+                    <td>{String(l.isSuspicious)}</td>
+                    <td>{l.loginId || (l.userId ? `#${l.userId}` : '-')}</td>
+                  </tr>
+                ))}
+                {(!logs || logs.length === 0) && (
+                  <tr><td colSpan={8} style={{ textAlign: 'center' }}>로그 없음</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // IP 관리 컨테이너: 내부 서브탭 전환
+  const IpAdminPanel = () => {
+    const [sub, setSub] = useState('ban'); // 'ban' | 'whitelist' | 'activity'
+    return (
+      <section>
+        <h2>IP 관리</h2>
+        <div className="tabs" style={{ marginBottom: 8 }}>
+          <button aria-current={sub==='ban' ? 'page' : undefined} onClick={() => setSub('ban')}>차단</button>
+          <button aria-current={sub==='whitelist' ? 'page' : undefined} onClick={() => setSub('whitelist')}>화이트리스트</button>
+          <button aria-current={sub==='activity' ? 'page' : undefined} onClick={() => setSub('activity')}>활동 로그</button>
+        </div>
+        {sub === 'ban' && <IpBanTab />}
+        {sub === 'whitelist' && <IpWhitelistTab />}
+        {sub === 'activity' && <IpActivityTab />}
+      </section>
+    );
+  };
+
   return (
     <div className="admin">
       <h1>Admin Page</h1>
@@ -800,6 +1307,7 @@ const Admin = () => {
         <button aria-current={tab==='payment' ? 'page' : undefined} onClick={() => setTab('payment')}>Payment</button>
         <button aria-current={tab==='timer' ? 'page' : undefined} onClick={() => setTab('timer')}>Set Time</button>
         <button aria-current={tab==='signature' ? 'page' : undefined} onClick={() => setTab('signature')}>Signature</button>
+        <button aria-current={tab==='ip' ? 'page' : undefined} onClick={() => setTab('ip')}>IP 관리</button>
       </div>
 
       {/* ================= Users Tab ================= */}
@@ -1723,8 +2231,12 @@ const Admin = () => {
           </div>
         </section>
       )}
+
+      {/* ================= IP 관리 탭 ================= */}
+      {tab === 'ip' && <IpAdminPanel />}
     </div>
   );
 };
 
 export default Admin;
+
