@@ -1,15 +1,17 @@
 // src/pages/Admin.jsx
-// - Admin 페이지 전체 (Admin.css 스타일 전면 적용)
+// - Admin.css 전면 적용
 // - Signature Codes(관리자) 탭 포함
-// - SIGNATURE 문제 추가/수정 시 club(팀명) 필수 입력 처리
-// - 문제 생성/수정에 mileage 필드 추가 (목록 컬럼 포함)
-// - 편집 시 문제 상세 하이드레이트해 기존 값 주입
-// -  startTime / endTime 자동 주입: 생성·수정 시 비어있으면 현재시각 및 대회 종료(or +12h)로 보정
+// - SIGNATURE 문제 추가/수정 시 club(팀명) 필수
+// - 문제 생성/수정에 mileage 필드 포함 (목록까지)
+// - 편집시 문제 상세 하이드레이트해 기존 값 주입
+// - 파일 수정 UX: 기존 파일 URL 노출 + 업로드(교체) 한 자리에서 처리
+// - ⚠️ CreateProblemAPI.js 수정 없이 동작하도록 Add 폼에서 date/time을 항상 세팅
+//   (해당 API는 start/end 모두 `${date} ${time}:00`로 보내므로, 최소히 start용으로만 사용)
 
 import './Admin.css';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Axios } from '../api/Axios';
-import { createProblem } from '../api/CreateProblemAPI';
+import { createProblem } from '../api/CreateProblemAPI'; // 수정 없이 그대로 사용
 import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
 import { fetchAdminMembers, deleteUser as removeUser, updateUser, addUser } from '../api/AdminUserAPI';
 import { fetchTeamProfileRows, createTeam, addTeamMember } from '../api/TeamAPI';
@@ -20,7 +22,6 @@ import { fetchContestTime, updateContestTime } from '../api/ContestTimeAPI';
 import { fetchAllPaymentHistory, refundPayment, grantMileageToTeam } from '../api/PaymentAPI';
 import {
   fetchAllSolveRecords,
-  fetchSolveRecordsByChallenge,
   revokeSolveRecord,
   deleteAllSolveRecordsByUser
 } from '../api/SolveRecordsAPI';
@@ -62,8 +63,8 @@ const Admin = () => {
 
   // ===== Timer =====
   const { refreshContestTime } = useContestTime();
-  const [startTime, setStartTime] = useState('');           // contest start
-  const [endTime, setEndTime] = useState('');               // contest end
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [currentServerTime, setCurrentServerTime] = useState('');
 
   // ===== Problems =====
@@ -72,8 +73,8 @@ const Admin = () => {
   const [showEditProblemForm, setShowEditProblemForm] = useState(false);
   const [showAddProblemForm, setShowAddProblemForm] = useState(false);
 
-  // 문제 생성/수정 폼 상태
-  const [formData, setFormData] = useState({
+  // 문제 폼 상태 분리 (Add / Edit)
+  const emptyProblem = {
     title: '',
     description: '',
     flag: '',
@@ -81,14 +82,16 @@ const Admin = () => {
     minPoints: '',
     initialPoints: '',
     mileage: '',
-    startTime: '',
-    endTime: '',
+    startTime: '', // UI용(datetime-local)
+    endTime: '',   // UI용(datetime-local) — CreateProblemAPI는 사용하지 않지만 유지
     file: null,
     url: '',
     fileUrl: '',
     category: '',
     club: '',
-  });
+  };
+  const [addForm, setAddForm] = useState(emptyProblem);
+  const [editForm, setEditForm] = useState(emptyProblem);
 
   // ===== Signature Admin (state) =====
   const [sigBulkText, setSigBulkText] = useState('[\n  {"teamName":"alpha","challengeId":5,"code":"123456"}\n]');
@@ -193,37 +196,28 @@ const Admin = () => {
     })();
   }, []);
 
-  // Add Problem 폼 열릴 때 기본 start/end 미리 넣기(비어있을 때만)
-  useEffect(() => {
-    if (showAddProblemForm) {
-      const startLocal = nowDatetimeLocal();
-      const endLocal   = endTime || addHoursLocal(startLocal, 12);
-      setFormData((prev) => ({
-        ...prev,
-        startTime: prev.startTime || startLocal,
-        endTime:   prev.endTime   || endLocal,
-      }));
-    }
-  }, [showAddProblemForm, endTime]);
-
   // ===== Helpers =====
   const onNewUserInput = (e) => {
     const { name, value } = e.target;
     setNewUser((prev) => ({ ...prev, [name]: value }));
   };
-
   const onUserInput = (e) => {
     const { name, value } = e.target;
     if (!editingUser) return;
     setEditingUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  const onProblemInput = (e) => {
+  // Add/Edit 입력 핸들러
+  const onAddInput = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setAddForm((prev) => ({ ...prev, [name]: value }));
   };
-
-  const onFile = (e) => setFormData((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
+  const onEditInput = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+  const onAddFile = (e) => setAddForm((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
+  const onEditFile = (e) => setEditForm((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }));
 
   // 서버 → input(datetime-local)
   const convertToDatetimeLocal = (serverTime) => {
@@ -231,24 +225,18 @@ const Admin = () => {
     const base = serverTime.replace('T', ' ').slice(0, 16);
     return base.replace(' ', 'T');
   };
-
-  // input(datetime-local) → 서버 형식 'YYYY-MM-DD HH:mm:ss'
+  // input(datetime-local) → 서버 형식
   const toServerDateTime = (val) => {
     if (!val) return '';
     let s = val.replace('T', ' ');
     if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(s)) s += ':00';
     return s;
   };
-
-  // === ★ 추가: datetime-local 헬퍼들 ===
-  // Date → 'YYYY-MM-DDTHH:mm'
-  const toDatetimeLocalFromDate = (d) => {
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  };
-  // 현재 시각을 'YYYY-MM-DDTHH:mm'
+  // datetime-local 유틸
+  const pad = (n) => String(n).padStart(2, '0');
+  const toDatetimeLocalFromDate = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   const nowDatetimeLocal = () => toDatetimeLocalFromDate(new Date());
-  // 'YYYY-MM-DDTHH:mm' + hours → 같은 형식 반환
   const addHoursLocal = (localStr, hours) => {
     const base = localStr || nowDatetimeLocal();
     const [datePart, timePart] = base.split('T');
@@ -257,6 +245,12 @@ const Admin = () => {
     const dt = new Date(y, (m - 1), d, hh, mm);
     dt.setHours(dt.getHours() + Number(hours || 0));
     return toDatetimeLocalFromDate(dt);
+  };
+  // CreateProblemAPI.js가 요구하는 date/time 생성(무조건 채움)
+  const ensureApiDateTime = (localStr) => {
+    const v = localStr || nowDatetimeLocal();
+    const [date, time] = v.split('T'); // 'YYYY-MM-DD', 'HH:mm'
+    return { date, time };
   };
 
   // ===== Users =====
@@ -375,7 +369,6 @@ const Admin = () => {
   };
 
   // ===== Problems =====
-
   // 상세 하이드레이트(가능한 엔드포인트 순회)
   const hydrateProblemDetail = async (problem) => {
     const id = problem?.challengeId;
@@ -394,8 +387,8 @@ const Admin = () => {
         if (body && typeof body === 'object') {
           return { ...problem, ...body };
         }
-      } catch (e) {
-        // 다음 후보 계속
+      } catch (_) {
+        // 계속 시도
       }
     }
     return problem;
@@ -412,6 +405,7 @@ const Admin = () => {
     }
   };
 
+  // 수정 진입
   const handleEditProblem = async (problem) => {
     const full = await hydrateProblemDetail(problem);
 
@@ -422,8 +416,9 @@ const Admin = () => {
 
     setEditingProblem(full);
     setShowEditProblemForm(true);
+    setShowAddProblemForm(false);
 
-    setFormData({
+    setEditForm({
       title:         full.title ?? '',
       description:   full.description ?? '',
       flag:          full.flag ?? '',
@@ -441,52 +436,74 @@ const Admin = () => {
     });
   };
 
+  // 수정 저장
   const handleSaveProblem = async () => {
     if (!editingProblem) return alert('수정할 문제를 선택하세요.');
-    if (formData.category === 'SIGNATURE' && !String(formData.club || '').trim()) {
+    if (editForm.category === 'SIGNATURE' && !String(editForm.club || '').trim()) {
       alert('SIGNATURE 카테고리는 club(팀명)이 필수입니다.');
       return;
     }
 
-    // ★ start/end 자동 보정: 비어있으면 현재시각 & 대회 종료(or +12h)
-    const startLocal = formData.startTime || nowDatetimeLocal();
-    const endLocal   = formData.endTime || (endTime || addHoursLocal(startLocal, 12));
+    // 비어있으면 기본치(지금/시작+12h)로 보정 (서버 포맷)
+    const startLocal = editForm.startTime || nowDatetimeLocal();
+    const endLocal   = editForm.endTime || addHoursLocal(startLocal, 12);
 
     const payload = {
-      title:         formData.title,
-      description:   formData.description,
-      flag:          formData.flag,
-      points:        formData.points,
-      minPoints:     formData.minPoints,
-      initialPoints: formData.initialPoints || formData.points,
-      mileage:       formData.mileage,
+      title:         editForm.title,
+      description:   editForm.description,
+      flag:          editForm.flag,
+      points:        editForm.points,
+      minPoints:     editForm.minPoints,
+      initialPoints: editForm.initialPoints || editForm.points,
+      mileage:       editForm.mileage,
       startTime:     toServerDateTime(startLocal),
       endTime:       toServerDateTime(endLocal),
-      url:           formData.url,
-      // fileUrl은 읽기 전용이므로 payload에서 제외 (파일 업로드로만 변경 가능)
-      category:      formData.category,
-      ...(formData.category === 'SIGNATURE' ? { club: String(formData.club).trim() } : {}),
+      url:           editForm.url,
+      category:      editForm.category,
+      ...(editForm.category === 'SIGNATURE' ? { club: String(editForm.club).trim() } : {}),
     };
 
     const fd = new FormData();
     fd.append('challenge', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-    if (formData.file) fd.append('file', formData.file);
+    if (editForm.file) fd.append('file', editForm.file);
 
     try {
       const res = await updateProblem(editingProblem.challengeId, fd);
       if (res?.code === 'SUCCESS') {
         setProblems((prev) =>
           (Array.isArray(prev)
-            ? prev.map((p) => (p.challengeId === editingProblem.challengeId ? { ...p, ...payload } : p))
+            ? prev.map((p) =>
+                (p.challengeId === editingProblem.challengeId
+                  ? { ...p, ...payload, fileUrl: p.fileUrl }
+                  : p))
             : []),
         );
         setEditingProblem(null);
         setShowEditProblemForm(false);
+        setEditForm(emptyProblem);
       }
       alert(res?.message || '문제 수정 결과 확인');
     } catch {
       alert('문제 수정 실패');
     }
+  };
+
+  // Add 폼 토글 (열 때 기본 시간 주입)
+  const toggleAddForm = () => {
+    setShowAddProblemForm((v) => {
+      const next = !v;
+      if (next) {
+        const startLocal = nowDatetimeLocal();
+        const endLocal   = endTime || addHoursLocal(startLocal, 12);
+        setAddForm({
+          ...emptyProblem,
+          startTime: startLocal,
+          endTime: endLocal,
+        });
+      }
+      return next;
+    });
+    setShowEditProblemForm(false);
   };
 
   // ===== Timer =====
@@ -946,7 +963,7 @@ const Admin = () => {
           <h2>Problems</h2>
 
           <div className="actions" style={{ marginBottom: 8 }}>
-            <button className="btn" onClick={() => setShowAddProblemForm((v) => !v)}>
+            <button className="btn" onClick={toggleAddForm}>
               {showAddProblemForm ? 'Close Add Problem' : 'Add Problem'}
             </button>
           </div>
@@ -961,84 +978,81 @@ const Admin = () => {
                 <div className="form-grid">
                   <div className="field">
                     <label className="label">Title</label>
-                    <input className="input" type="text" name="title" value={formData.title} onChange={onProblemInput} />
+                    <input className="input" type="text" name="title" value={editForm.title} onChange={onEditInput} />
                   </div>
                   <div className="field">
                     <label className="label">Points</label>
-                    <input className="input" type="number" name="points" value={formData.points} onChange={onProblemInput} />
+                    <input className="input" type="number" name="points" value={editForm.points} onChange={onEditInput} />
                   </div>
                   <div className="field">
                     <label className="label">Mileage</label>
-                    <input className="input" type="number" name="mileage" value={formData.mileage} onChange={onProblemInput} />
+                    <input className="input" type="number" name="mileage" value={editForm.mileage} onChange={onEditInput} />
                   </div>
 
                   <div className="field" style={{ gridColumn: '1 / -1' }}>
                     <label className="label">Description</label>
-                    <textarea className="textarea" name="description" value={formData.description} onChange={onProblemInput} />
-                    <div className="hint">{formData.description?.length ?? 0} / 300</div>
+                    <textarea className="textarea" name="description" value={editForm.description} onChange={onEditInput} />
+                    <div className="hint">{editForm.description?.length ?? 0} / 300</div>
                   </div>
 
                   <div className="field">
                     <label className="label">Flag</label>
-                    <input className="input" type="text" name="flag" value={formData.flag} onChange={onProblemInput} />
+                    <input className="input" type="text" name="flag" value={editForm.flag} onChange={onEditInput} />
                   </div>
                   <div className="field">
                     <label className="label">Min Points</label>
-                    <input className="input" type="number" name="minPoints" value={formData.minPoints} onChange={onProblemInput} />
+                    <input className="input" type="number" name="minPoints" value={editForm.minPoints} onChange={onEditInput} />
                   </div>
 
                   <div className="field">
                     <label className="label">Initial Points</label>
-                    <input className="input" type="number" name="initialPoints" value={formData.initialPoints} onChange={onProblemInput} />
+                    <input className="input" type="number" name="initialPoints" value={editForm.initialPoints} onChange={onEditInput} />
                   </div>
                   <div className="field">
                     <label className="label">URL</label>
-                    <input className="input" type="text" name="url" value={formData.url} onChange={onProblemInput} />
+                    <input className="input" type="text" name="url" value={editForm.url} onChange={onEditInput} />
                   </div>
 
-                  <div className="field">
-                    <label className="label">File URL (읽기 전용)</label>
-                    <input
-                      className="input"
-                      type="text"
-                      name="fileUrl"
-                      value={formData.fileUrl || '(파일 없음)'}
-                      readOnly
-                      style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed', color: '#666' }}
-                    />
+                  {/* 파일 표시/교체 한 자리 */}
+                  <div className="field" style={{ gridColumn: '1 / -1' }}>
+                    <label className="label">Attachment</label>
+                    {editForm.fileUrl ? (
+                      <div style={{ marginBottom: 6 }}>
+                        <a href={editForm.fileUrl} target="_blank" rel="noreferrer">현재 파일 열기</a>
+                      </div>
+                    ) : (
+                      <div className="hint" style={{ marginBottom: 6 }}>(현재 파일 없음)</div>
+                    )}
+                    <input className="input" type="file" name="file" onChange={onEditFile} />
+                    <p className="hint">파일을 선택하면 기존 파일이 교체됩니다. 선택하지 않으면 기존 파일이 유지됩니다.</p>
                   </div>
 
                   <div className="field">
                     <label className="label">Start Time</label>
-                    <input className="input" type="datetime-local" name="startTime" value={formData.startTime} onChange={onProblemInput} />
-                    <p className="hint">비워두면 현재시각이 자동 설정됩니다.</p>
+                    <input className="input" type="datetime-local" name="startTime" value={editForm.startTime} onChange={onEditInput} />
+                    <p className="hint">비워두면 현재시각으로 보정되어 저장됩니다.</p>
                   </div>
                   <div className="field">
                     <label className="label">End Time</label>
-                    <input className="input" type="datetime-local" name="endTime" value={formData.endTime} onChange={onProblemInput} />
-                    <p className="hint">비워두면 대회 종료시간(있으면) 또는 시작시각+12시간으로 자동 설정됩니다.</p>
-                  </div>
-
-                  <div className="field">
-                    <label className="label">File</label>
-                    <input className="input" type="file" name="file" onChange={onFile} />
+                    <input className="input" type="datetime-local" name="endTime" value={editForm.endTime} onChange={onEditInput} />
+                    <p className="hint">비워두면 시작시각+12시간으로 보정되어 저장됩니다.</p>
                   </div>
 
                   <div className="field">
                     <label className="label">Category</label>
-                    <input className="input" type="text" name="category" value={formData.category} onChange={onProblemInput} />
+                    <input className="input" type="text" name="category" value={editForm.category} onChange={onEditInput} />
                   </div>
 
-                  {formData.category === 'SIGNATURE' && (
+                  {editForm.category === 'SIGNATURE' && (
                     <div className="field">
                       <label className="label">Club (팀명) — SIGNATURE 필수</label>
-                      <input className="input" type="text" name="club" value={formData.club} onChange={onProblemInput} placeholder="예) alpha" />
+                      <input className="input" type="text" name="club" value={editForm.club} onChange={onEditInput} placeholder="예) alpha" />
                     </div>
                   )}
                 </div>
 
                 <div className="actions">
-                  <button type="button" className="btn" onClick={() => setShowEditProblemForm(false)}>Cancel</button>
+                  <button type="button" className="btn" onClick={() => { setShowEditProblemForm(false); setEditingProblem(null); }}>Cancel</button>
                   <button type="button" className="btn btn--primary" onClick={handleSaveProblem}>Save</button>
                 </div>
               </form>
@@ -1052,26 +1066,35 @@ const Admin = () => {
               onSubmit={async (e) => {
                 e.preventDefault();
 
-                if (formData.category === 'SIGNATURE' && !String(formData.club || '').trim()) {
+                if (addForm.category === 'SIGNATURE' && !String(addForm.club || '').trim()) {
                   alert('SIGNATURE 카테고리는 club(팀명)이 필수입니다.');
                   return;
                 }
 
-                // ★ start/end 자동 보정: 비어있으면 현재시각 & 대회 종료(or +12h)
-                const startLocal = formData.startTime || nowDatetimeLocal();
-                const endLocal   = formData.endTime || (endTime || addHoursLocal(startLocal, 12));
-
-                const payload = {
-                  ...formData,
-                  startTime: toServerDateTime(startLocal),
-                  endTime:   toServerDateTime(endLocal),
-                };
-
                 try {
-                  const res = await createProblem(payload);
+                  // CreateProblemAPI.js는 date/time만 신뢰하므로 반드시 세팅
+                  const { date, time } = ensureApiDateTime(addForm.startTime);
+
+                  const res = await createProblem({
+                    ...addForm,
+                    date,  // 'YYYY-MM-DD'
+                    time,  // 'HH:mm'
+                    // 파일/기타 필드는 API에서 그대로 사용
+                  });
+
                   alert(res?.message || '생성 완료');
+
+                  // 성공 후 초기화 + 기본 시간 재주입
+                  const startLocal = nowDatetimeLocal();
+                  const endLocal   = endTime || addHoursLocal(startLocal, 12);
+                  setAddForm({ ...emptyProblem, startTime: startLocal, endTime: endLocal });
+
+                  // 목록 갱신
+                  const latestProblems = await fetchProblems();
+                  setProblems(Array.isArray(latestProblems) ? latestProblems : []);
                 } catch (err) {
-                  alert(err?.message || '문제 생성 실패');
+                  console.error('[create challenge] error', err);
+                  alert(err?.response?.data?.message || err?.message || '문제 생성 실패');
                 }
               }}
               style={{ marginTop: 12 }}
@@ -1081,17 +1104,17 @@ const Admin = () => {
               <div className="form-grid">
                 <div className="field">
                   <label className="label">Title</label>
-                  <input className="input" type="text" name="title" value={formData.title} onChange={onProblemInput} required />
+                  <input className="input" type="text" name="title" value={addForm.title} onChange={onAddInput} required />
                 </div>
 
                 <div className="field">
                   <label className="label">Points</label>
-                  <input className="input" type="number" name="points" value={formData.points} onChange={onProblemInput} required />
+                  <input className="input" type="number" name="points" value={addForm.points} onChange={onAddInput} required />
                 </div>
 
                 <div className="field">
                   <label className="label">Mileage</label>
-                  <input className="input" type="number" name="mileage" value={formData.mileage} onChange={onProblemInput} />
+                  <input className="input" type="number" name="mileage" value={addForm.mileage} onChange={onAddInput} />
                 </div>
 
                 <div className="field" style={{ gridColumn: '1 / -1' }}>
@@ -1099,26 +1122,36 @@ const Admin = () => {
                   <textarea
                     className="textarea"
                     name="description"
-                    value={formData.description}
-                    onChange={(e) => { if (e.target.value.length <= 300) onProblemInput(e); }}
+                    value={addForm.description}
+                    onChange={(e) => { if (e.target.value.length <= 300) onAddInput(e); }}
                     required
                   />
-                  <div className="hint">{formData.description.length} / 300</div>
+                  <div className="hint">{addForm.description.length} / 300</div>
                 </div>
 
                 <div className="field">
                   <label className="label">Flag</label>
-                  <input className="input" type="text" name="flag" value={formData.flag} onChange={onProblemInput} required />
+                  <input className="input" type="text" name="flag" value={addForm.flag} onChange={onAddInput} required />
                 </div>
 
                 <div className="field">
                   <label className="label">Min Points</label>
-                  <input className="input" type="number" name="minPoints" value={formData.minPoints} onChange={onProblemInput} required />
+                  <input className="input" type="number" name="minPoints" value={addForm.minPoints} onChange={onAddInput} required />
                 </div>
 
                 <div className="field">
                   <label className="label">Initial Points</label>
-                  <input className="input" type="number" name="initialPoints" value={formData.initialPoints} onChange={onProblemInput} required />
+                  <input className="input" type="number" name="initialPoints" value={addForm.initialPoints} onChange={onAddInput} required />
+                </div>
+
+                <div className="field" style={{ gridColumn: '1 / -1' }}>
+                  <label className="label">Attachment</label>
+                  <input className="input" type="file" name="file" onChange={onAddFile} />
+                </div>
+
+                <div className="field">
+                  <label className="label">URL</label>
+                  <input className="input" type="url" name="url" value={addForm.url} onChange={onAddInput} />
                 </div>
 
                 <div className="field">
@@ -1127,10 +1160,10 @@ const Admin = () => {
                     className="input"
                     type="datetime-local"
                     name="startTime"
-                    value={formData.startTime}
-                    onChange={onProblemInput}
+                    value={addForm.startTime}
+                    onChange={onAddInput}
                   />
-                  <p className="hint">비워두면 현재시각이 자동 설정됩니다.</p>
+                  <p className="hint">비워두면 제출 시점으로 자동 보정됩니다.</p>
                 </div>
 
                 <div className="field">
@@ -1139,25 +1172,15 @@ const Admin = () => {
                     className="input"
                     type="datetime-local"
                     name="endTime"
-                    value={formData.endTime}
-                    onChange={onProblemInput}
+                    value={addForm.endTime}
+                    onChange={onAddInput}
                   />
-                  <p className="hint">비워두면 대회 종료시간(있으면) 또는 시작시각+12시간으로 자동 설정됩니다.</p>
-                </div>
-
-                <div className="field">
-                  <label className="label">File Upload</label>
-                  <input className="input" type="file" name="file" onChange={onFile} />
-                </div>
-
-                <div className="field">
-                  <label className="label">URL</label>
-                  <input className="input" type="url" name="url" value={formData.url} onChange={onProblemInput} />
+                  <p className="hint">CreateProblemAPI는 현재 endTime을 사용하지 않습니다.</p>
                 </div>
 
                 <div className="field">
                   <label className="label">CATEGORY</label>
-                  <select className="select" name="category" value={formData.category} onChange={onProblemInput} required>
+                  <select className="select" name="category" value={addForm.category} onChange={onAddInput} required>
                     <option value="">카테고리 선택</option>
                     <option value="MISC">MISC</option>
                     <option value="REV">REV</option>
@@ -1170,10 +1193,10 @@ const Admin = () => {
                   </select>
                 </div>
 
-                {formData.category === 'SIGNATURE' && (
+                {addForm.category === 'SIGNATURE' && (
                   <div className="field">
                     <label className="label">Club (팀명) — SIGNATURE 필수</label>
-                    <input className="input" type="text" name="club" value={formData.club} onChange={onProblemInput} required placeholder="예) alpha" />
+                    <input className="input" type="text" name="club" value={addForm.club} onChange={onAddInput} required placeholder="예) alpha" />
                   </div>
                 )}
               </div>
@@ -1537,7 +1560,6 @@ const Admin = () => {
       {tab === 'timer' && (
         <section className="section--timer">
           <h2 style={{ gridColumn: '1 / -1' }}>Set Contest Time</h2>
-          {/* 설정 폼 */}
           <div className="card">
             <div className="form form-grid">
               <div className="field">
