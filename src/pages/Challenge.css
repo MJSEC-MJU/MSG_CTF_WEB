@@ -271,6 +271,122 @@ background: #181818; color: #fff; border: 1px solid #333;
   cursor: not-allowed;
 }
 
+.category-filter {
+  position: sticky;
+  top: 80px;
+  z-index: 20;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 12px 16px;
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 칩 래퍼 */
+.category-filter__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 1024px;
+}
+
+/* 액션 버튼 (Clear / Select All) */
+.category-filter__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cf-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.cf-btn.primary {
+  background: #00d003;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.15);
+  font-size: 20px;
+  font-weight: 1000;
+}
+.cf-btn.primary:hover { filter: brightness(1.08); }
+.cf-btn.primary:active { transform: translateY(1px); }
+
+.cf-btn.ghost {
+  background: rgb(253, 24, 24);
+  color: #e6e9f2;
+  font-size: 20px;
+  font-weight: 1000;
+}
+.cf-btn.ghost:hover { background: rgb(255, 73, 73); }
+.cf-btn.ghost:active { transform: translateY(1px); }
+
+/* 텍스트 전용 칩 */
+.category-chip {
+  --chip-bg: rgba(175, 175, 175, 0.805);
+  --chip-br: rgba(255, 255, 255, 0.14);
+  --chip-tx: #e6e9f2;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-br);
+  color: var(--chip-tx);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.08s ease;
+}
+
+.category-chip:hover {
+  background: rgba(59, 131, 246, 0.975);
+}
+.category-chip:active {
+  transform: translateY(1px);
+}
+.category-chip.is-checked {
+  background: rgba(59, 131, 246, 0.975);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.18);
+}
+
+/* 실제 체크박스 숨기기 */
+.category-chip > input[type="checkbox"] {
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 텍스트 */
+.category-chip__label {
+  font-weight: 1000;
+  letter-spacing: 0.2px;
+  font-size: 20px;
+}
+
+/* 모바일(390x844 기준) */
+@media (max-width: 420px) {
+  .category-filter { padding: 10px 12px; }
+  .category-chip { padding: 8px 10px; }
+  .category-chip__label { font-size: 12px; }
+  .cf-btn { height: 32px; font-size: 12px; }
+}
+
+
 /* === 모바일(폭 390 기준)에서 한 줄에 한 문제 + 가로 꽉 채움 === */
 @media (max-width: 640px) {
   /* 컨테이너도 모바일에선 고정폭(1200px) 제거 */
