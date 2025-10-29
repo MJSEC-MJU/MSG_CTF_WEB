@@ -343,6 +343,15 @@ function Challenge() {
                         {problem.points}
                       </div>
                     )}
+
+                    {!hideTextForSolvedSignature && (
+                      <div
+                        className="button-mileage"
+                        style={solved ? { color: "#00FF00" } : undefined}
+                      >
+                        M{problem.mileage}
+                      </div>
+                    )}
                   </div>
                 </Link>
               </div>
