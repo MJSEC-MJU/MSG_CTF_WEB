@@ -135,6 +135,20 @@
   pointer-events: none;
 }
 
+.button-mileage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 105%);
+  font-size: 25px;
+  font-family: "Impact", sans-serif;
+  font-weight: 1000;
+  color: white;
+  -webkit-text-stroke: 2px;
+  -webkit-text-stroke-color: black;
+  pointer-events: none;
+}
+
 .pagination {
   position: fixed;       /* 화면에 고정 */
   bottom: -50px;          /*화면 하단에서 10px 위 */
