@@ -11,43 +11,57 @@
 }
 .problem-grid {
   position: relative;
-  width: 90%; 
-  max-width: 2000px; 
-  height: 500px;
+  width: 90%;
+  max-width: 2000px;
+
+
+  --pad: 50px;     /* 내부 패딩 */
+  --tile: 300px;   /* 카드(이미지) 한 줄 높이 */
+  --gap:  40px;    /* 행 간격 */
+  --offset: 26px;  /* 카펫을 살짝 아래로 내리는 미세 오프셋 */
+
+  height: calc((var(--pad) * 2) + (var(--tile) * 2) + var(--gap));
+
   display: grid;
   grid-template-columns: repeat(5, 1fr);
+
+  grid-auto-rows: var(--tile);
+  row-gap: var(--gap);
+
   justify-content: center;
-  align-items: center;
+
+  align-content: start;
+
+  align-items: center; /* 각 셀 안의 아이템은 중앙정렬 유지 */
   background-size: contain;
-  padding: 50px;
+  padding: var(--pad);
   top: 50px;
   z-index: 0;
 }
+
 .problem-grid::before,
 .problem-grid::after {
   content: "";
   position: absolute;
-  left: -150px;     /* grid padding과 맞춤 */
-  right: -150px;    /* 양쪽 고정 → 가운데 기준으로 늘어남 */
-  width: auto;    /* 반드시 auto로 */
-  height: 100px;                  /* 카펫 두께 */
+  left: -150px;
+  right: -150px;
+  width: auto;
+  height: 100px;
   border-radius: 10px;
   background: linear-gradient(90deg, #b90f0f 0%, #e31b1b 50%, #b90f0f 100%);
   box-shadow: 0 6px 18px rgba(227, 27, 27, 0.35), inset 0 1px 0 rgba(255,255,255,0.25);
-  z-index: 1;                    /* 버튼(z=2)보다 아래, 배경(z=0)보다 위 */
-  pointer-events: none;          /* 클릭 방해 X */
+  z-index: 1;
+  pointer-events: none;
 }
 
-/* 2줄 기준 위치: 각 행의 중앙보다 살짝 아래로 */
+/* 1행 중앙(살짝 아래) */
 .problem-grid::before {
-  /* 그리드 패딩(50px) + 첫 행의 중간(대략)에서 약간 아래 */
-  top: calc(50px + 150px + 26px); /* 150px=이미지 절반, +26px로 ‘살짝 아래’ */
+  top: calc(var(--pad) + (var(--tile) / 2) + var(--offset));
 }
 
+/* 2행 중앙(살짝 아래) = pad + tile + gap + tile/2 + offset */
 .problem-grid::after {
-  /* 두 번째 줄은 더 아래. 그리드 전체 높이(500px)와 패딩(50px*2)을 고려 */
-  top: calc(50px + 150px + 26px + 300px); 
-  /* 200px은 첫 줄과 두 번째 줄 사이 대략 간격(이미지 크기/여백 기준) */
+  top: calc(var(--pad) + var(--tile) + var(--gap) + (var(--tile) / 2) + var(--offset));
 }
 .problem-button {
   text-decoration: none;
