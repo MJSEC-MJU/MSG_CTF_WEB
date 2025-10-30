@@ -121,6 +121,9 @@ function Challenge() {
   const isSignatureProblem = (problem) =>
     problem?.isSignature === true || problem?.category === "SIGNATURE";
 
+  const effectiveCategoryOf = (problem) =>
+    isSignatureProblem(problem) ? "SIGNATURE" : problem?.category;
+
   const handleSignatureClick = async (e, problem) => {
     e.preventDefault();
     const cid = String(problem.challengeId);
@@ -219,6 +222,7 @@ function Challenge() {
                   : challengeImg);
 
             const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
+            const categoryKey = effectiveCategoryOf(problem);
 
             // ▼ 여기서부터 요구사항 반영: 시그니처 + 풀었을 때 제목/점수 숨김
             const hideTextForSolvedSignature = isSignature && solved;
@@ -238,11 +242,15 @@ function Challenge() {
                     <OptimizedImage
                       src={mainImgSrc}
                       alt={displayTitle}
+                      width="100%"
+                      height="auto"
                     />
                     <OptimizedImage
-                      src={categoryImages[problem.category] ?? categoryFallback}
-                      alt={problem.category}
+                      src={categoryImages[categoryKey] ?? categoryFallback}
+                      alt={categoryKey}
                       className="category-icon"
+                      width="32"
+                      height="32"
                     />
 
                     {/* 제목(클럽) - 시그니처 문제를 풀었으면 렌더링하지 않음 */}
@@ -344,5 +352,3 @@ function Challenge() {
 }
 
 export default Challenge;
-
-
