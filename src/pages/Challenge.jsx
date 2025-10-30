@@ -8,6 +8,7 @@ import {
   submitSignatureCode,
 } from "../api/SignatureAPI";
 import Loading from "../components/Loading";
+import OptimizedImage from "../components/OptimizedImage";
 import "./Challenge.css";
 
 import forensicsImg from "/src/assets/Challenge/forensics.svg";
@@ -234,11 +235,11 @@ function Challenge() {
                   }}
                 >
                   <div className="button-wrapper">
-                    <img
+                    <OptimizedImage
                       src={mainImgSrc}
                       alt={displayTitle}
                     />
-                    <img
+                    <OptimizedImage
                       src={categoryImages[problem.category] ?? categoryFallback}
                       alt={problem.category}
                       className="category-icon"
