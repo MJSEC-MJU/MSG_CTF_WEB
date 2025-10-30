@@ -49,19 +49,61 @@ function Challenge() {
 
   const navigate = useNavigate();
 
-  // useMemo로 categoryImages 메모이제이션 (재생성 방지)
-  const categoryImages = useMemo(() => ({
-    FORENSICS: forensicsImg,
-    CRYPTO: cryptoImg,
-    PWN: pwnImg,
-    ANDROID: androidImg,
-    REV: revImg,
-    MISC: miscImg,
-    WEB: webImg,
-    SIGNATURE: signatureImg,
-  }), []);
-
+  // 카테고리 매핑
+  const categoryImages = useMemo(
+    () => ({
+      FORENSICS: forensicsImg,
+      CRYPTO: cryptoImg,
+      PWN: pwnImg,
+      ANDROID: androidImg,
+      REV: revImg,
+      MISC: miscImg,
+      WEB: webImg,
+      SIGNATURE: signatureImg,
+    }),
+    []
+  );
   const categoryFallback = miscImg;
+
+  // 필터 대상 카테고리 목록
+  const CATEGORY_LIST = useMemo(
+    () => [
+      { key: "FORENSICS", label: "Forensics" },
+      { key: "CRYPTO", label: "Crypto" },
+      { key: "PWN", label: "Pwn" },
+      { key: "ANDROID", label: "Android" },
+      { key: "REV", label: "Reversing" },
+      { key: "MISC", label: "Misc" },
+      { key: "WEB", label: "Web" },
+      { key: "SIGNATURE", label: "Signature" },
+    ],
+    []
+  );
+
+  // 선택된 카테고리 (기본: 전체 선택)
+  const [selectedCategories, setSelectedCategories] = useState(
+    () => new Set(CATEGORY_LIST.map((c) => c.key))
+  );
+
+  const toggleCategory = (key) => {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedCategories(new Set(CATEGORY_LIST.map((c) => c.key)));
+  };
+
+  const clearAll = () => {
+    setSelectedCategories(new Set());
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -85,15 +127,15 @@ function Challenge() {
 
         if (!isMounted) return;
 
-        if (problemsResult.status === 'fulfilled') {
+        if (problemsResult.status === "fulfilled") {
           const { problems, totalPages } = problemsResult.value;
           setProblems(problems);
           setTotalPages(totalPages);
         } else {
-          console.error('fetchProblems failed:', problemsResult.reason);
+          console.error("fetchProblems failed:", problemsResult.reason);
         }
 
-        if (solvedResult.status === 'fulfilled') {
+        if (solvedResult.status === "fulfilled") {
           const solvedData = solvedResult.value;
           cachedSolvedRef.current = solvedData;
           setSolvedChallenges(new Set(solvedData.map((s) => String(s.challengeId))));
@@ -101,7 +143,7 @@ function Challenge() {
           setSolvedChallenges(new Set());
         }
 
-        if (unlockedResult.status === 'fulfilled') {
+        if (unlockedResult.status === "fulfilled") {
           const unlocked = unlockedResult.value;
           cachedUnlockedRef.current = unlocked;
           setUnlockedSet(new Set((unlocked?.challengeIds || []).map(String)));
@@ -109,13 +151,15 @@ function Challenge() {
           setUnlockedSet(new Set());
         }
       } catch (e) {
-        console.error('Challenge data fetch error:', e);
+        console.error("Challenge data fetch error:", e);
       } finally {
         if (isMounted) setLoading(false);
       }
     })();
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [currentPage]);
 
   const isSignatureProblem = (problem) =>
@@ -123,6 +167,12 @@ function Challenge() {
 
   const effectiveCategoryOf = (problem) =>
     isSignatureProblem(problem) ? "SIGNATURE" : problem?.category;
+
+  // 선택된 카테고리만 필터링
+  const filteredProblems = useMemo(() => {
+    if (!problems || selectedCategories.size === 0) return [];
+    return problems.filter((p) => selectedCategories.has(effectiveCategoryOf(p)));
+  }, [problems, selectedCategories]);
 
   const handleSignatureClick = async (e, problem) => {
     e.preventDefault();
@@ -140,7 +190,9 @@ function Challenge() {
         navigate(`/problem/${problem.challengeId}`);
         return;
       }
-    } catch {}
+    } catch {
+      // ignore unlock check errors
+    }
 
     setSelectedProblem(problem);
     setSignatureInput("");
@@ -205,10 +257,41 @@ function Challenge() {
 
   return (
     <div className="challenge-container">
-     
+      {/* ====== 상단 중앙 카테고리 필터 ====== */}
+      <div className="category-filter">
+        <div className="category-filter__row">
+          {CATEGORY_LIST.map((cat) => {
+            const checked = selectedCategories.has(cat.key);
+            return (
+              <label
+                key={cat.key}
+                className={`category-chip ${checked ? "is-checked" : ""}`}
+                title={cat.label}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => toggleCategory(cat.key)}
+                />
+                <span className="category-chip__label">{cat.label}</span>
+              </label>
+            );
+          })}
+        </div>
+        <div className="category-filter__actions">
+          <button className="cf-btn ghost" onClick={clearAll}>
+            Clear
+          </button>
+          <button className="cf-btn primary" onClick={selectAll}>
+            Select All
+          </button>
+        </div>
+      </div>
+
+      {/* ====== 문제 그리드 ====== */}
       <div className="problem-grid">
-        {problems.length > 0 ? (
-          problems.map((problem) => {
+        {filteredProblems.length > 0 ? (
+          filteredProblems.map((problem) => {
             const solved = solvedChallenges.has(String(problem.challengeId));
             const isSignature = isSignatureProblem(problem);
             const unlocked = unlockedSet.has(String(problem.challengeId));
@@ -217,20 +300,26 @@ function Challenge() {
               ? (solved
                   ? getSignatureSolvedImg(problem.club)
                   : signatureChallengeImg)
-              : (solved
-                  ? challengeSolvedImg
-                  : challengeImg);
+              : solved
+              ? challengeSolvedImg
+              : challengeImg;
 
             const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
             const categoryKey = effectiveCategoryOf(problem);
 
-            // ▼ 여기서부터 요구사항 반영: 시그니처 + 풀었을 때 제목/점수 숨김
+            // 시그니처 문제를 풀었으면 텍스트 숨김
             const hideTextForSolvedSignature = isSignature && solved;
 
             return (
               <div key={problem.challengeId} className="problem-button-wrapper">
                 <Link
-                  to={isSignature ? (unlocked ? `/problem/${problem.challengeId}` : "#") : `/problem/${problem.challengeId}`}
+                  to={
+                    isSignature
+                      ? unlocked
+                        ? `/problem/${problem.challengeId}`
+                        : "#"
+                      : `/problem/${problem.challengeId}`
+                  }
                   className="problem-button"
                   onClick={(e) => {
                     if (isSignature && !unlocked) {
@@ -253,7 +342,6 @@ function Challenge() {
                       height="32"
                     />
 
-                    {/* 제목(클럽) - 시그니처 문제를 풀었으면 렌더링하지 않음 */}
                     {!hideTextForSolvedSignature && (
                       <div
                         className="button-title"
@@ -263,13 +351,21 @@ function Challenge() {
                       </div>
                     )}
 
-                    {/* 점수 - 시그니처 문제를 풀었으면 렌더링하지 않음 */}
                     {!hideTextForSolvedSignature && (
                       <div
                         className="button-score"
                         style={solved ? { color: "#00FF00" } : undefined}
                       >
                         {problem.points}
+                      </div>
+                    )}
+
+                    {!hideTextForSolvedSignature && (
+                      <div
+                        className="button-mileage"
+                        style={solved ? { color: "#00FF00" } : undefined}
+                      >
+                        M{problem.mileage}
                       </div>
                     )}
                   </div>
@@ -279,7 +375,9 @@ function Challenge() {
           })
         ) : (
           <p style={{ color: "white", textAlign: "center", marginTop: "20px" }}>
-            문제 목록을 불러오는 중...
+            {selectedCategories.size === 0
+              ? "선택한 카테고리가 없습니다."
+              : "해당 카테고리에 문제가 없습니다."}
           </p>
         )}
       </div>
@@ -309,7 +407,9 @@ function Challenge() {
         <div
           className="signature-modal"
           onClick={(e) => {
-            if (e.target.classList.contains("signature-modal")) closeSignature();
+            if (e.target.classList.contains("signature-modal")) {
+              closeSignature();
+            }
           }}
         >
           <div className="signature-form">
@@ -330,7 +430,9 @@ function Challenge() {
               autoFocus
             />
             <div className="signature-buttons">
-              <button onClick={closeSignature} disabled={submitting}>취소</button>
+              <button onClick={closeSignature} disabled={submitting}>
+                취소
+              </button>
               <button
                 className="submit-btn"
                 onClick={submitSignature}
