@@ -55,8 +55,8 @@ export async function addTeamMember(teamName, email) {
   return data;
 }
 
-export async function deleteTeam(teamId) {
-  const { data } = await Axios.delete(`/admin/team/delete/${encodeURIComponent(teamId)}`);
+export async function deleteTeam(teamName) {
+  const { data } = await Axios.delete(`/admin/team/delete/${encodeURIComponent(teamName)}`);
   return data;
 }
 

@@ -393,15 +393,15 @@ const Admin = () => {
     }
   };
 
-  const handleDeleteTeam = async (teamId, teamName) => {
-    if (!teamId) {
-      alert('유효한 팀 ID를 확인할 수 없습니다.');
+  const handleDeleteTeam = async (teamName) => {
+    const name = teamName?.trim();
+    if (!name) {
+      alert('유효한 팀 이름을 확인할 수 없습니다.');
       return;
     }
-    const name = teamName ? `${teamName}` : '선택한';
     if (!window.confirm(`${name} 팀을 삭제하시겠습니까?`)) return;
     try {
-      const res = await deleteTeam(teamId);
+      const res = await deleteTeam(name);
       if (res?.code === 'SUCCESS') {
         alert('팀이 삭제되었습니다.');
         const latestRows = await fetchTeamProfileRows();
@@ -1483,7 +1483,7 @@ const Admin = () => {
                     <div className="actions" style={{ justifyContent: 'center' }}>
                       <button
                         className="btn btn--danger"
-                        onClick={() => handleDeleteTeam(row.teamId, row.teamName)}
+                        onClick={() => handleDeleteTeam(row.teamName)}
                       >
                         삭제
                       </button>
