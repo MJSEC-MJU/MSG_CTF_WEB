@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import { memo } from "react";
 import "./ScoreRank.css";
-import rank1 from "/src/assets/Ranking/First_place.svg";
-import rank2 from "/src/assets/Ranking/Second_place.svg";
-import rank3 from "/src/assets/Ranking/Third_place.svg";
+import rank1 from "/src/assets/Ranking/First_place.webp";
+import rank2 from "/src/assets/Ranking/Second_place.webp";
+import rank3 from "/src/assets/Ranking/Third_place.webp";
 
 const ScoreRank = ({ data }) => {
   // 최신 점수 기준 내림차순 정렬

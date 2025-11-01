@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import './Home.css';
 
-import bofImg from '/src/assets/HomePage/BOF.svg';
-import shelladImg from '/src/assets/HomePage/shellad.svg';
-import hashBrownImg from '/src/assets/HomePage/hashBrown.svg';
-import card1Img from '/src/assets/HomePage/card1.svg';
-import card2Img from '/src/assets/HomePage/card2.svg';
-import card3Img from '/src/assets/HomePage/card3.svg';
+import bofImg from '../assets/HomePage/BOF.webp';
+import shelladImg from '../assets/HomePage/shellad.webp';
+import hashBrownImg from '../assets/HomePage/hashBrown.webp';
+import card1Img from '../assets/HomePage/card1.webp';
+import card2Img from '../assets/HomePage/card2.webp';
+import card3Img from '../assets/HomePage/card3.svg';
 
 
 function Home() {

@@ -46,12 +46,16 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
         // console.log("파싱된 데이터:", parsedData);
 
         const timeLabels = [...new Set(parsedData.map((item) => item.solvedTime.slice(0, 19)))].sort();
+
+        // O(1) 조회를 위한 Map 생성
+        const timeLabelsMap = new Map(timeLabels.map((label, idx) => [label, idx]));
+
         const individualRanking = {};
 
         parsedData.forEach((item) => {
           const userId = item.teamName;
           const timeLabel = item.solvedTime.slice(0, 19);
-          const timeIndex = timeLabels.indexOf(timeLabel);
+          const timeIndex = timeLabelsMap.get(timeLabel); // O(n) → O(1) 개선
 
           if (!individualRanking[userId]) {
             individualRanking[userId] = {

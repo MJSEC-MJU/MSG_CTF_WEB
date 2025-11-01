@@ -20,9 +20,9 @@ import miscImg from "/src/assets/Challenge/misc.svg";
 import webImg from "/src/assets/Challenge/web.svg";
 import signatureImg from "/src/assets/Challenge/signature.svg";
 
-import signatureChallengeImg from "/src/assets/Challenge/signature_challenge.svg";
+import signatureChallengeImg from "/src/assets/Challenge/signature_challenge.webp";
 import challengeSolvedImg from "/src/assets/Challenge/challenge_solved.svg";
-import challengeImg from "/src/assets/Challenge/challenge.svg";
+import challengeImg from "/src/assets/Challenge/challenge.webp";
 import backgroundImg from "/src/assets/background.svg";
 
 const areSetsEqual = (a, b) => {
