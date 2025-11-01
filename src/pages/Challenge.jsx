@@ -490,6 +490,58 @@ function Challenge() {
   );
 }
 
+// Intersection Observer 기반 지연 로딩 이미지 컴포넌트
+const LazyImage = memo(function LazyImage({ src, alt, className }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    const currentImg = imgRef.current;
+    if (!currentImg) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: "50px", // 뷰포트 50px 전에 미리 로드
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(currentImg);
+
+    return () => {
+      if (currentImg) observer.unobserve(currentImg);
+    };
+  }, []);
+
+  return (
+    <div ref={imgRef} className={className} style={{ position: "relative" }}>
+      {isVisible ? (
+        <OptimizedImage
+          src={src}
+          alt={alt}
+          className={className}
+        />
+      ) : (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(255, 255, 255, 0.05)",
+          }}
+        />
+      )}
+    </div>
+  );
+});
+
 const ProblemCard = memo(function ProblemCard({
   problem,
   solved,
@@ -521,8 +573,8 @@ const ProblemCard = memo(function ProblemCard({
     <div className="problem-button-wrapper">
       <Link to={linkTarget} className="problem-button" onClick={handleClick}>
         <div className="button-wrapper">
-          <OptimizedImage src={mainImgSrc} alt={displayTitle} />
-          <OptimizedImage
+          <LazyImage src={mainImgSrc} alt={displayTitle} />
+          <LazyImage
             src={categoryImgSrc}
             alt={categoryKey}
             className="category-icon"

@@ -113,7 +113,7 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
         sortIndividuals.forEach((user, index) => {
           user.color = colors[index % colors.length];
         });
-        
+
         // ✅ 각 팀별 마지막 제출 시각까지만 남기기
         sortIndividuals.forEach((user) => {
           const lastTime = new Date(user.lastSubmissionTime);
@@ -166,6 +166,18 @@ export const fetchLeaderboardData = (setDatasetsConfig, setLoading) => {
   connectSSE();
 
   reconnectInterval = setInterval(connectSSE, 60 * 60 * 1000);
+
+  // Cleanup 함수 반환: 컴포넌트 언마운트 시 EventSource와 interval 정리
+  return () => {
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+    if (reconnectInterval) {
+      clearInterval(reconnectInterval);
+      reconnectInterval = null;
+    }
+  };
 };
 
 export const options = {
