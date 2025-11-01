@@ -55,6 +55,11 @@ export async function addTeamMember(teamName, email) {
   return data;
 }
 
+export async function deleteTeam(teamName) {
+  const { data } = await Axios.delete(`/admin/team/delete/${encodeURIComponent(teamName)}`);
+  return data;
+}
+
 /**
  * 팀 히스토리 조회 API
  * GET /api/team/history

@@ -15,7 +15,7 @@ import { Axios } from '../api/Axios';
 import { createProblem } from '../api/CreateProblemAPI'; // 수정 없이 그대로 사용
 import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
 import { fetchAdminMembers, deleteUser as removeUser, updateUser, addUser } from '../api/AdminUserAPI';
-import { fetchTeamProfileRows, createTeam, addTeamMember } from '../api/TeamAPI';
+import { fetchTeamProfileRows, createTeam, addTeamMember, deleteTeam } from '../api/TeamAPI';
 import { updateProblem } from '../api/ProblemUpdateAPI';
 import PaymentProcessor from '../components/PaymentProcessor';
 import { useContestTime } from "../components/Timer";
@@ -390,6 +390,27 @@ const Admin = () => {
       }
     } catch {
       alert('팀원 추가 요청 실패 (존재하지 않는 팀/이메일일 수 있습니다)');
+    }
+  };
+
+  const handleDeleteTeam = async (teamName) => {
+    const name = teamName?.trim();
+    if (!name) {
+      alert('유효한 팀 이름을 확인할 수 없습니다.');
+      return;
+    }
+    if (!window.confirm(`${name} 팀을 삭제하시겠습니까?`)) return;
+    try {
+      const res = await deleteTeam(name);
+      if (res?.code === 'SUCCESS') {
+        alert('팀이 삭제되었습니다.');
+        const latestRows = await fetchTeamProfileRows();
+        setTeamRows(Array.isArray(latestRows) ? latestRows : []);
+      } else {
+        alert(res?.message || '팀 삭제 실패');
+      }
+    } catch {
+      alert('팀 삭제 요청 실패 (권한 또는 네트워크 오류일 수 있습니다)');
     }
   };
 
@@ -1443,7 +1464,7 @@ const Admin = () => {
           <table className="table">
             <thead>
               <tr>
-                {['Team ID','Team Name','Member Email','Team Mileage','Team Total'].map((h) => (<th key={h}>{h}</th>))}
+                {['Team ID','Team Name','Member Email','Team Mileage','Team Total','Actions'].map((h) => (<th key={h}>{h}</th>))}
               </tr>
             </thead>
             <tbody>
@@ -1458,6 +1479,16 @@ const Admin = () => {
                   </td>
                   <td>{row.teamMileage ?? 0}</td>
                   <td>{row.teamTotalPoint ?? 0}</td>
+                  <td>
+                    <div className="actions" style={{ justifyContent: 'center' }}>
+                      <button
+                        className="btn btn--danger"
+                        onClick={() => handleDeleteTeam(row.teamName)}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -2239,4 +2270,3 @@ const Admin = () => {
 };
 
 export default Admin;
-
