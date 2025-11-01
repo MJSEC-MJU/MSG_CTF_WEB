@@ -88,11 +88,8 @@ function Challenge() {
   const toggleCategory = (key) => {
     setSelectedCategories((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
@@ -297,17 +294,11 @@ function Challenge() {
             const unlocked = unlockedSet.has(String(problem.challengeId));
 
             const mainImgSrc = isSignature
-              ? (solved
-                  ? getSignatureSolvedImg(problem.club)
-                  : signatureChallengeImg)
-              : solved
-              ? challengeSolvedImg
-              : challengeImg;
+              ? (solved ? getSignatureSolvedImg(problem.club) : signatureChallengeImg)
+              : (solved ? challengeSolvedImg : challengeImg);
 
             const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
             const categoryKey = effectiveCategoryOf(problem);
-
-            // 시그니처 문제를 풀었으면 텍스트 숨김
             const hideTextForSolvedSignature = isSignature && solved;
 
             return (
@@ -315,9 +306,7 @@ function Challenge() {
                 <Link
                   to={
                     isSignature
-                      ? unlocked
-                        ? `/problem/${problem.challengeId}`
-                        : "#"
+                      ? (unlocked ? `/problem/${problem.challengeId}` : "#")
                       : `/problem/${problem.challengeId}`
                   }
                   className="problem-button"

@@ -11,43 +11,57 @@
 }
 .problem-grid {
   position: relative;
-  width: 90%; 
-  max-width: 2000px; 
-  height: 500px;
+  width: 90%;
+  max-width: 2000px;
+
+
+  --pad: 50px;     /* 내부 패딩 */
+  --tile: 300px;   /* 카드(이미지) 한 줄 높이 */
+  --gap:  40px;    /* 행 간격 */
+  --offset: 26px;  /* 카펫을 살짝 아래로 내리는 미세 오프셋 */
+
+  height: calc((var(--pad) * 2) + (var(--tile) * 2) + var(--gap));
+
   display: grid;
   grid-template-columns: repeat(5, 1fr);
+
+  grid-auto-rows: var(--tile);
+  row-gap: var(--gap);
+
   justify-content: center;
-  align-items: center;
+
+  align-content: start;
+
+  align-items: center; /* 각 셀 안의 아이템은 중앙정렬 유지 */
   background-size: contain;
-  padding: 50px;
+  padding: var(--pad);
   top: 50px;
   z-index: 0;
 }
+
 .problem-grid::before,
 .problem-grid::after {
   content: "";
   position: absolute;
-  left: -150px;     /* grid padding과 맞춤 */
-  right: -150px;    /* 양쪽 고정 → 가운데 기준으로 늘어남 */
-  width: auto;    /* 반드시 auto로 */
-  height: 100px;                  /* 카펫 두께 */
+  left: -150px;
+  right: -150px;
+  width: auto;
+  height: 100px;
   border-radius: 10px;
   background: linear-gradient(90deg, #b90f0f 0%, #e31b1b 50%, #b90f0f 100%);
   box-shadow: 0 6px 18px rgba(227, 27, 27, 0.35), inset 0 1px 0 rgba(255,255,255,0.25);
-  z-index: 1;                    /* 버튼(z=2)보다 아래, 배경(z=0)보다 위 */
-  pointer-events: none;          /* 클릭 방해 X */
+  z-index: 1;
+  pointer-events: none;
 }
 
-/* 2줄 기준 위치: 각 행의 중앙보다 살짝 아래로 */
+/* 1행 중앙(살짝 아래) */
 .problem-grid::before {
-  /* 그리드 패딩(50px) + 첫 행의 중간(대략)에서 약간 아래 */
-  top: calc(50px + 150px + 26px); /* 150px=이미지 절반, +26px로 ‘살짝 아래’ */
+  top: calc(var(--pad) + (var(--tile) / 2) + var(--offset));
 }
 
+/* 2행 중앙(살짝 아래) = pad + tile + gap + tile/2 + offset */
 .problem-grid::after {
-  /* 두 번째 줄은 더 아래. 그리드 전체 높이(500px)와 패딩(50px*2)을 고려 */
-  top: calc(50px + 150px + 26px + 300px); 
-  /* 200px은 첫 줄과 두 번째 줄 사이 대략 간격(이미지 크기/여백 기준) */
+  top: calc(var(--pad) + var(--tile) + var(--gap) + (var(--tile) / 2) + var(--offset));
 }
 .problem-button {
   text-decoration: none;
@@ -112,6 +126,20 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, 15%);
+  font-size: 25px;
+  font-family: "Impact", sans-serif;
+  font-weight: 1000;
+  color: white;
+  -webkit-text-stroke: 2px;
+  -webkit-text-stroke-color: black;
+  pointer-events: none;
+}
+
+.button-mileage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 105%);
   font-size: 25px;
   font-family: "Impact", sans-serif;
   font-weight: 1000;
@@ -270,6 +298,122 @@ background: #181818; color: #fff; border: 1px solid #333;
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.category-filter {
+  position: sticky;
+  top: 80px;
+  z-index: 20;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 12px 16px;
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 칩 래퍼 */
+.category-filter__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 1024px;
+}
+
+/* 액션 버튼 (Clear / Select All) */
+.category-filter__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cf-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.cf-btn.primary {
+  background: #00d003;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.15);
+  font-size: 20px;
+  font-weight: 1000;
+}
+.cf-btn.primary:hover { filter: brightness(1.08); }
+.cf-btn.primary:active { transform: translateY(1px); }
+
+.cf-btn.ghost {
+  background: rgb(253, 24, 24);
+  color: #e6e9f2;
+  font-size: 20px;
+  font-weight: 1000;
+}
+.cf-btn.ghost:hover { background: rgb(255, 73, 73); }
+.cf-btn.ghost:active { transform: translateY(1px); }
+
+/* 텍스트 전용 칩 */
+.category-chip {
+  --chip-bg: rgba(175, 175, 175, 0.805);
+  --chip-br: rgba(255, 255, 255, 0.14);
+  --chip-tx: #e6e9f2;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-br);
+  color: var(--chip-tx);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.08s ease;
+}
+
+.category-chip:hover {
+  background: rgba(59, 131, 246, 0.975);
+}
+.category-chip:active {
+  transform: translateY(1px);
+}
+.category-chip.is-checked {
+  background: rgba(59, 131, 246, 0.975);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.18);
+}
+
+/* 실제 체크박스 숨기기 */
+.category-chip > input[type="checkbox"] {
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 텍스트 */
+.category-chip__label {
+  font-weight: 1000;
+  letter-spacing: 0.2px;
+  font-size: 20px;
+}
+
+/* 모바일(390x844 기준) */
+@media (max-width: 420px) {
+  .category-filter { padding: 10px 12px; }
+  .category-chip { padding: 8px 10px; }
+  .category-chip__label { font-size: 12px; }
+  .cf-btn { height: 32px; font-size: 12px; }
+}
+
 
 /* === 모바일(폭 390 기준)에서 한 줄에 한 문제 + 가로 꽉 채움 === */
 @media (max-width: 640px) {
