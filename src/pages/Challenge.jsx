@@ -325,8 +325,6 @@ function Challenge() {
                       src={categoryImages[categoryKey] ?? categoryFallback}
                       alt={categoryKey}
                       className="category-icon"
-                      width="32"
-                      height="32"
                     />
 
                     {!hideTextForSolvedSignature && (
