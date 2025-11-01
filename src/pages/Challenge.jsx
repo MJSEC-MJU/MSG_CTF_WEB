@@ -8,6 +8,7 @@ import {
   submitSignatureCode,
 } from "../api/SignatureAPI";
 import Loading from "../components/Loading";
+import OptimizedImage from "../components/OptimizedImage";
 import "./Challenge.css";
 
 import forensicsImg from "/src/assets/Challenge/forensics.svg";
@@ -186,7 +187,9 @@ function Challenge() {
         navigate(`/problem/${problem.challengeId}`);
         return;
       }
-    } catch {}
+    } catch {
+      // ignore unlock check errors
+    }
 
     setSelectedProblem(problem);
     setSignatureInput("");
@@ -291,14 +294,11 @@ function Challenge() {
             const unlocked = unlockedSet.has(String(problem.challengeId));
 
             const mainImgSrc = isSignature
-              ? solved
-                ? getSignatureSolvedImg(problem.club)
-                : signatureChallengeImg
-              : solved
-              ? challengeSolvedImg
-              : challengeImg;
+              ? (solved ? getSignatureSolvedImg(problem.club) : signatureChallengeImg)
+              : (solved ? challengeSolvedImg : challengeImg);
 
-            const displayTitle = isSignature ? problem.club ?? problem.title : problem.title;
+            const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
+            const categoryKey = effectiveCategoryOf(problem);
             const hideTextForSolvedSignature = isSignature && solved;
 
             return (
@@ -306,9 +306,7 @@ function Challenge() {
                 <Link
                   to={
                     isSignature
-                      ? unlocked
-                        ? `/problem/${problem.challengeId}`
-                        : "#"
+                      ? (unlocked ? `/problem/${problem.challengeId}` : "#")
                       : `/problem/${problem.challengeId}`
                   }
                   className="problem-button"
@@ -319,10 +317,13 @@ function Challenge() {
                   }}
                 >
                   <div className="button-wrapper">
-                    <img src={mainImgSrc} alt={displayTitle} />
-                    <img
-                      src={categoryImages[effectiveCategoryOf(problem)] ?? categoryFallback}
-                      alt={effectiveCategoryOf(problem)}
+                    <OptimizedImage
+                      src={mainImgSrc}
+                      alt={displayTitle}
+                    />
+                    <OptimizedImage
+                      src={categoryImages[categoryKey] ?? categoryFallback}
+                      alt={categoryKey}
                       className="category-icon"
                     />
 
@@ -391,7 +392,9 @@ function Challenge() {
         <div
           className="signature-modal"
           onClick={(e) => {
-            if (e.target.classList.contains("signature-modal")) closeSignature();
+            if (e.target.classList.contains("signature-modal")) {
+              closeSignature();
+            }
           }}
         >
           <div className="signature-form">
@@ -436,6 +439,3 @@ function Challenge() {
 }
 
 export default Challenge;
-
-
-
