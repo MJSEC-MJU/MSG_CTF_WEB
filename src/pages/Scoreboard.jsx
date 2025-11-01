@@ -9,7 +9,8 @@ const Scoreboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLeaderboardData(setDatasetsConfig, setLoading);
+    const cleanup = fetchLeaderboardData(setDatasetsConfig, setLoading);
+    return cleanup; // 컴포넌트 언마운트 시 EventSource와 interval 정리
   }, []);
 
   if (loading) {
