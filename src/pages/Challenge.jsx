@@ -320,8 +320,6 @@ function Challenge() {
                     <OptimizedImage
                       src={mainImgSrc}
                       alt={displayTitle}
-                      width="100%"
-                      height="auto"
                     />
                     <OptimizedImage
                       src={categoryImages[categoryKey] ?? categoryFallback}
