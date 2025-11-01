@@ -4,7 +4,7 @@ import { fetchProblemDetail } from '../api/ProblemDetailAPI';
 import { submitFlag } from '../api/SubmitAPI';
 import { downloadFile } from '../api/ProblemDownloadAPI';
 import './ProblemDetail.css';
-import heroImg from '/src/assets/Challenge/hamburger.svg';
+import heroImg from '/src/assets/Challenge/hamburger.webp';
 
 const ProblemDetail = () => {
   const { id } = useParams();
