@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, useDeferredValue, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchProblems } from "../api/ChallengeAllAPI";
 import { fetchSolvedChallenges } from "../api/UserChallengeAPI";
@@ -25,6 +25,15 @@ import challengeSolvedImg from "/src/assets/Challenge/challenge_solved.svg";
 import challengeImg from "/src/assets/Challenge/challenge.svg";
 import backgroundImg from "/src/assets/background.svg";
 
+const areSetsEqual = (a, b) => {
+  if (a === b) return true;
+  if (!a || !b || a.size !== b.size) return false;
+  for (const value of a) {
+    if (!b.has(value)) return false;
+  }
+  return true;
+};
+
 function Challenge() {
   // 문제/페이지네이션
   const [problems, setProblems] = useState([]);
@@ -35,10 +44,12 @@ function Challenge() {
   // API 캐싱 (페이지 변경 시 불필요한 재호출 방지)
   const cachedSolvedRef = useRef(null);
   const cachedUnlockedRef = useRef(null);
+  const problemsCacheRef = useRef(new Map());
 
   // 해결/언락 상태
   const [solvedChallenges, setSolvedChallenges] = useState(new Set());
   const [unlockedSet, setUnlockedSet] = useState(new Set());
+  const unlockedSetRef = useRef(new Set());
 
   // 시그니처 모달 관련
   const [signatureForm, setSignatureForm] = useState(false);
@@ -84,6 +95,11 @@ function Challenge() {
   const [selectedCategories, setSelectedCategories] = useState(
     () => new Set(CATEGORY_LIST.map((c) => c.key))
   );
+  const selectedCategoryKeys = useMemo(
+    () => Array.from(selectedCategories),
+    [selectedCategories]
+  );
+  const deferredCategoryKeys = useDeferredValue(selectedCategoryKeys);
 
   const toggleCategory = (key) => {
     setSelectedCategories((prev) => {
@@ -103,10 +119,22 @@ function Challenge() {
   };
 
   useEffect(() => {
+    unlockedSetRef.current = unlockedSet;
+  }, [unlockedSet]);
+
+  useEffect(() => {
     let isMounted = true;
 
-    (async () => {
+    const cachedPage = problemsCacheRef.current.get(currentPage);
+    if (cachedPage) {
+      setProblems(cachedPage.problems);
+      setTotalPages(cachedPage.totalPages);
+      setLoading(false);
+    } else {
       setLoading(true);
+    }
+
+    (async () => {
       try {
         const solvedPromise = cachedSolvedRef.current
           ? Promise.resolve(cachedSolvedRef.current)
@@ -125,27 +153,58 @@ function Challenge() {
         if (!isMounted) return;
 
         if (problemsResult.status === "fulfilled") {
-          const { problems, totalPages } = problemsResult.value;
-          setProblems(problems);
-          setTotalPages(totalPages);
+          const { problems: nextProblems, totalPages: nextTotalPages } = problemsResult.value;
+          problemsCacheRef.current.set(currentPage, {
+            problems: nextProblems,
+            totalPages: nextTotalPages,
+            timestamp: Date.now(),
+          });
+          setProblems((prev) => (prev === nextProblems ? prev : nextProblems));
+          setTotalPages(nextTotalPages);
         } else {
           console.error("fetchProblems failed:", problemsResult.reason);
+          if (!cachedPage) {
+            setProblems([]);
+          }
         }
 
         if (solvedResult.status === "fulfilled") {
           const solvedData = solvedResult.value;
           cachedSolvedRef.current = solvedData;
-          setSolvedChallenges(new Set(solvedData.map((s) => String(s.challengeId))));
+          const nextSolvedSet = new Set(solvedData.map((s) => String(s.challengeId)));
+          setSolvedChallenges((prev) => {
+            if (areSetsEqual(prev, nextSolvedSet)) return prev;
+            return nextSolvedSet;
+          });
         } else {
-          setSolvedChallenges(new Set());
+          setSolvedChallenges((prev) => (prev.size === 0 ? prev : new Set()));
         }
 
         if (unlockedResult.status === "fulfilled") {
           const unlocked = unlockedResult.value;
-          cachedUnlockedRef.current = unlocked;
-          setUnlockedSet(new Set((unlocked?.challengeIds || []).map(String)));
+          const nextUnlockedSet = new Set((unlocked?.challengeIds || []).map(String));
+          const updatedUnlockedCache = {
+            ...(unlocked ?? {}),
+            challengeIds: Array.from(nextUnlockedSet),
+          };
+          cachedUnlockedRef.current = updatedUnlockedCache;
+          setUnlockedSet((prev) => {
+            if (areSetsEqual(prev, nextUnlockedSet)) return prev;
+            unlockedSetRef.current = nextUnlockedSet;
+            cachedUnlockedRef.current = updatedUnlockedCache;
+            return nextUnlockedSet;
+          });
         } else {
-          setUnlockedSet(new Set());
+          setUnlockedSet((prev) => {
+            if (prev.size === 0) return prev;
+            const emptySet = new Set();
+            unlockedSetRef.current = emptySet;
+            cachedUnlockedRef.current = {
+              ...(cachedUnlockedRef.current ?? {}),
+              challengeIds: [],
+            };
+            return emptySet;
+          });
         }
       } catch (e) {
         console.error("Challenge data fetch error:", e);
@@ -159,43 +218,62 @@ function Challenge() {
     };
   }, [currentPage]);
 
-  const isSignatureProblem = (problem) =>
-    problem?.isSignature === true || problem?.category === "SIGNATURE";
+  const isSignatureProblem = useCallback(
+    (problem) =>
+      problem?.isSignature === true || problem?.category === "SIGNATURE",
+    []
+  );
 
-  const effectiveCategoryOf = (problem) =>
-    isSignatureProblem(problem) ? "SIGNATURE" : problem?.category;
+  const effectiveCategoryOf = useCallback(
+    (problem) =>
+      isSignatureProblem(problem) ? "SIGNATURE" : problem?.category,
+    [isSignatureProblem]
+  );
 
   // 선택된 카테고리만 필터링
   const filteredProblems = useMemo(() => {
-    if (!problems || selectedCategories.size === 0) return [];
-    return problems.filter((p) => selectedCategories.has(effectiveCategoryOf(p)));
-  }, [problems, selectedCategories]);
+    if (!problems || deferredCategoryKeys.length === 0) return [];
+    const categorySet = new Set(deferredCategoryKeys);
+    return problems.filter((p) => categorySet.has(effectiveCategoryOf(p)));
+  }, [problems, deferredCategoryKeys, effectiveCategoryOf]);
 
-  const handleSignatureClick = async (e, problem) => {
-    e.preventDefault();
-    const cid = String(problem.challengeId);
+  const handleSignatureClick = useCallback(
+    async (problem) => {
+      const cid = String(problem.challengeId);
 
-    if (unlockedSet.has(cid)) {
-      navigate(`/problem/${problem.challengeId}`);
-      return;
-    }
-
-    try {
-      const st = await fetchUnlockStatus(problem.challengeId);
-      if (st?.unlocked) {
-        setUnlockedSet((prev) => new Set([...prev, cid]));
+      if (unlockedSetRef.current.has(cid)) {
         navigate(`/problem/${problem.challengeId}`);
         return;
       }
-    } catch {
-      // ignore unlock check errors
-    }
 
-    setSelectedProblem(problem);
-    setSignatureInput("");
-    setSubmitMsg("");
-    setSignatureForm(true);
-  };
+      try {
+        const st = await fetchUnlockStatus(problem.challengeId);
+        if (st?.unlocked) {
+          setUnlockedSet((prev) => {
+            if (prev.has(cid)) return prev;
+            const next = new Set(prev);
+            next.add(cid);
+            unlockedSetRef.current = next;
+            cachedUnlockedRef.current = {
+              ...(cachedUnlockedRef.current ?? {}),
+              challengeIds: Array.from(next),
+            };
+            return next;
+          });
+          navigate(`/problem/${problem.challengeId}`);
+          return;
+        }
+      } catch {
+        // ignore unlock check errors
+      }
+
+      setSelectedProblem(problem);
+      setSignatureInput("");
+      setSubmitMsg("");
+      setSignatureForm(true);
+    },
+    [navigate]
+  );
 
   const onChangeSignature = (e) => {
     const onlyDigits = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
@@ -220,7 +298,18 @@ function Challenge() {
     setSubmitMsg("");
     try {
       const resp = await submitSignatureCode(selectedProblem.challengeId, signatureInput);
-      setUnlockedSet((prev) => new Set([...prev, String(selectedProblem.challengeId)]));
+      const cid = String(selectedProblem.challengeId);
+      setUnlockedSet((prev) => {
+        if (prev.has(cid)) return prev;
+        const next = new Set(prev);
+        next.add(cid);
+        unlockedSetRef.current = next;
+        cachedUnlockedRef.current = {
+          ...(cachedUnlockedRef.current ?? {}),
+          challengeIds: Array.from(next),
+        };
+        return next;
+      });
       setSubmitMsg(resp?.message || "언락 성공! 이동합니다…");
       setTimeout(() => {
         closeSignature();
@@ -289,9 +378,10 @@ function Challenge() {
       <div className="problem-grid">
         {filteredProblems.length > 0 ? (
           filteredProblems.map((problem) => {
-            const solved = solvedChallenges.has(String(problem.challengeId));
+            const challengeIdStr = String(problem.challengeId);
+            const solved = solvedChallenges.has(challengeIdStr);
             const isSignature = isSignatureProblem(problem);
-            const unlocked = unlockedSet.has(String(problem.challengeId));
+            const unlocked = unlockedSet.has(challengeIdStr);
 
             const mainImgSrc = isSignature
               ? (solved ? getSignatureSolvedImg(problem.club) : signatureChallengeImg)
@@ -299,63 +389,25 @@ function Challenge() {
 
             const displayTitle = isSignature ? (problem.club ?? problem.title) : problem.title;
             const categoryKey = effectiveCategoryOf(problem);
+            const categoryImgSrc = categoryImages[categoryKey] ?? categoryFallback;
             const hideTextForSolvedSignature = isSignature && solved;
 
             return (
-              <div key={problem.challengeId} className="problem-button-wrapper">
-                <Link
-                  to={
-                    isSignature
-                      ? (unlocked ? `/problem/${problem.challengeId}` : "#")
-                      : `/problem/${problem.challengeId}`
-                  }
-                  className="problem-button"
-                  onClick={(e) => {
-                    if (isSignature && !unlocked) {
-                      handleSignatureClick(e, problem);
-                    }
-                  }}
-                >
-                  <div className="button-wrapper">
-                    <OptimizedImage
-                      src={mainImgSrc}
-                      alt={displayTitle}
-                    />
-                    <OptimizedImage
-                      src={categoryImages[categoryKey] ?? categoryFallback}
-                      alt={categoryKey}
-                      className="category-icon"
-                    />
-
-                    {!hideTextForSolvedSignature && (
-                      <div
-                        className="button-title"
-                        style={solved ? { color: "#00FF00" } : undefined}
-                      >
-                        {displayTitle}
-                      </div>
-                    )}
-
-                    {!hideTextForSolvedSignature && (
-                      <div
-                        className="button-score"
-                        style={solved ? { color: "#00FF00" } : undefined}
-                      >
-                        {problem.points}
-                      </div>
-                    )}
-
-                    {!hideTextForSolvedSignature && (
-                      <div
-                        className="button-mileage"
-                        style={solved ? { color: "#00FF00" } : undefined}
-                      >
-                        M{problem.mileage}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              </div>
+              <ProblemCard
+                key={problem.challengeId}
+                problem={problem}
+                solved={solved}
+                unlocked={unlocked}
+                isSignature={isSignature}
+                mainImgSrc={mainImgSrc}
+                categoryImgSrc={categoryImgSrc}
+                categoryKey={categoryKey}
+                displayTitle={displayTitle}
+                hideTextForSolvedSignature={hideTextForSolvedSignature}
+                points={problem.points}
+                mileage={problem.mileage}
+                onLockedSignatureClick={handleSignatureClick}
+              />
             );
           })
         ) : (
@@ -437,5 +489,75 @@ function Challenge() {
     </div>
   );
 }
+
+const ProblemCard = memo(function ProblemCard({
+  problem,
+  solved,
+  unlocked,
+  isSignature,
+  mainImgSrc,
+  categoryImgSrc,
+  categoryKey,
+  displayTitle,
+  hideTextForSolvedSignature,
+  points,
+  mileage,
+  onLockedSignatureClick,
+}) {
+  const linkTarget =
+    isSignature && !unlocked ? "#" : `/problem/${problem.challengeId}`;
+
+  const handleClick = useCallback(
+    (event) => {
+      if (isSignature && !unlocked) {
+        event.preventDefault();
+        onLockedSignatureClick?.(problem);
+      }
+    },
+    [isSignature, unlocked, onLockedSignatureClick, problem]
+  );
+
+  return (
+    <div className="problem-button-wrapper">
+      <Link to={linkTarget} className="problem-button" onClick={handleClick}>
+        <div className="button-wrapper">
+          <OptimizedImage src={mainImgSrc} alt={displayTitle} />
+          <OptimizedImage
+            src={categoryImgSrc}
+            alt={categoryKey}
+            className="category-icon"
+          />
+
+          {!hideTextForSolvedSignature && (
+            <div
+              className="button-title"
+              style={solved ? { color: "#00FF00" } : undefined}
+            >
+              {displayTitle}
+            </div>
+          )}
+
+          {!hideTextForSolvedSignature && (
+            <div
+              className="button-score"
+              style={solved ? { color: "#00FF00" } : undefined}
+            >
+              {points}
+            </div>
+          )}
+
+          {!hideTextForSolvedSignature && (
+            <div
+              className="button-mileage"
+              style={solved ? { color: "#00FF00" } : undefined}
+            >
+              M{mileage}
+            </div>
+          )}
+        </div>
+      </Link>
+    </div>
+  );
+});
 
 export default Challenge;
