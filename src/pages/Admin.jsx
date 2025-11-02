@@ -1855,9 +1855,17 @@ const Admin = () => {
               <div className="form" style={{ paddingTop: 0 }}>
                 <div>created: {genResult.created}</div>
                 {Array.isArray(genResult.codes) && genResult.codes.length > 0 && (
-                  <details style={{ marginTop: 6 }}>
-                    <summary>생성된 코드 보기</summary>
-                    <pre style={{ whiteSpace: 'pre-wrap' }}>{genResult.codes.join(', ')}</pre>
+                  <details open style={{ marginTop: 6 }}>
+                    <summary style={{ cursor: 'pointer', fontWeight: 'bold', marginBottom: 8 }}>생성된 코드 보기</summary>
+                    <pre style={{
+                      whiteSpace: 'pre-wrap',
+                      backgroundColor: '#f5f5f5',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      color: '#333',
+                      maxHeight: '300px',
+                      overflow: 'auto'
+                    }}>{genResult.codes.join(', ')}</pre>
                   </details>
                 )}
               </div>
