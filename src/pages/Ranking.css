@@ -160,7 +160,7 @@
 /* Mobile - max 768px */
 @media (max-width: 768px) {
   .ranking-wrapper {
-    padding: 16px;
+    padding: 20px;
   }
 
   .title {
@@ -205,7 +205,7 @@
 /* Small Mobile - max 480px */
 @media (max-width: 480px) {
   .ranking-wrapper {
-    padding: 12px;
+    padding:  20px 40px 20px 0px;
   }
 
   .title {
@@ -216,7 +216,8 @@
   .card {
     flex-direction: row;
     flex-wrap: wrap;
-    min-width: 190px;
+    max-width: 270px;
+    min-width: 100px;
     padding: 10px;
   }
 
