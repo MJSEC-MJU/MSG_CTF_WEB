@@ -241,13 +241,13 @@ const UserSection = styled.div`
 `;
 
 const AuthIcon = styled.img`
-  width: 40px;
+  width: 35px;
   height: auto;
   cursor: pointer;
   flex-shrink: 0;
-
-  @media (max-width: 768px) { width: 34px; }
-  @media (max-width: 420px) { width: 30px; }
+  margin-right: 20px;
+  @media (max-width: 768px) { width: 30px; }
+  @media (max-width: 420px) { width: 328px; }
 `;
 
 const ProfileIcon = styled.img`
