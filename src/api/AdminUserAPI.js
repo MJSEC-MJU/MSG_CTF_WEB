@@ -29,3 +29,12 @@ export async function addUser(payload) {
   }
   return resp.data;
 }
+
+// PUT /api/admin/member/{userId}/early-exit
+export async function toggleEarlyExit(userId) {
+  const resp = await Axios.put(`/admin/member/${userId}/early-exit`);
+  if (resp.status === 200) {
+    return { code: 'SUCCESS', ...(resp.data || {}) };
+  }
+  return resp.data;
+}
