@@ -252,9 +252,7 @@
     position: relative;
   }
 
-  .PatternWrapper::after {
-    display: none; /* 모바일에서는 그라데이션 효과 제거 */
-  }
+
 
   .Pattern,
   .PatternReverse {
