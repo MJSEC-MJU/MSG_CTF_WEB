@@ -50,7 +50,7 @@
   border-radius: 10px;
   background: linear-gradient(90deg, #b90f0f 0%, #e31b1b 50%, #b90f0f 100%);
   box-shadow: 0 6px 18px rgba(227, 27, 27, 0.35), inset 0 1px 0 rgba(255,255,255,0.25);
-  z-index: 1;
+  z-index: -1;
   pointer-events: none;
 }
 
@@ -93,7 +93,7 @@
   top: 0;
   left: 5%;
   margin: 5px; /* 버튼 테두리와 살짝 띄우기 */
-  z-index: 3; /* 다른 요소보다 위에 오도록 설정 */
+  z-index: 1005; /* 다른 요소보다 위에 오도록 설정 */
 }
 
 .button-wrapper:hover {
