@@ -490,7 +490,7 @@ function Challenge() {
   );
 }
 
-// Intersection Observer 기반 지연 로딩 이미지 컴포넌트
+// Intersection Observer 기반 지연 로딩 이미지 컴포넌트 (메인 이미지만 사용)
 const LazyImage = memo(function LazyImage({ src, alt, className }) {
   const [isVisible, setIsVisible] = useState(false);
   const imgRef = useRef(null);
@@ -509,7 +509,7 @@ const LazyImage = memo(function LazyImage({ src, alt, className }) {
         });
       },
       {
-        rootMargin: "50px", // 뷰포트 50px 전에 미리 로드
+        rootMargin: "50px",
         threshold: 0.01,
       }
     );
@@ -574,7 +574,9 @@ const ProblemCard = memo(function ProblemCard({
       <Link to={linkTarget} className="problem-button" onClick={handleClick}>
         <div className="button-wrapper">
           <LazyImage src={mainImgSrc} alt={displayTitle} />
-          <LazyImage
+          
+          {/* category-icon은 LazyImage 사용 안 함 (즉시 로드) */}
+          <OptimizedImage
             src={categoryImgSrc}
             alt={categoryKey}
             className="category-icon"
