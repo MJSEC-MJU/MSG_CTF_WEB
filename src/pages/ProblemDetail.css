@@ -17,6 +17,7 @@
   min-height: 100vh;
   background: #fafafa;
   color: #111;
+  font-family: "Noto Sans KR", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
 /* ===========================
@@ -26,7 +27,7 @@
   position: relative;
   width: 100%;
   max-width: var(--page-width);
-  height: 320px;
+  height: 220px;
   margin: 0 auto;            /* 중앙 정렬 */
   overflow: hidden;
   --hero-y: 50%;
@@ -91,6 +92,7 @@
   font-size: 32px;
   font-weight: 600;
   color: #fff;
+  font-family: "Do Hyeon", "Black Han Sans", "Noto Sans KR", sans-serif;
 
   /* 제목 2줄 클램프 */
   line-height: 1.25;
@@ -148,10 +150,10 @@
 =========================== */
 .pd-card {
   width: 100%;
-  border-radius: 16px;
+  border-radius: 14px;
   background: #fff;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
 }
 .pd-section {
   padding: 24px;
@@ -165,22 +167,26 @@
   align-items: center;
   justify-content: space-between;
 }
-.pd-solved {
-  font-size: 14px;
-  color: #4b5563;
-
-  /* 한 줄 고정 */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.pd-solved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 9999px;
+  background: rgba(234, 82, 0, 0.08);
+  border: 1px solid rgba(234, 82, 0, 0.25);
+  color: #ea5200;
+  font-weight: 800;
+  font-size: 13px;
 }
+.pd-solved-badge svg { color: #ea5200; }
 
 /* ===========================
    본문 설명 (길어도 레이아웃 고정)
 =========================== */
 .pd-description {
   color: #374151;
-  line-height: 1.6;
+  line-height: 1.8;
   white-space: pre-line;
 
   /* 섹션 내부 높이 채우고 넘치면 스크롤 */
@@ -189,10 +195,107 @@
   padding-right: 4px; /* 스크롤바 여백 */
 }
 
+/* 설명 영역 fade indicator wrapper */
+.pd-description-wrap { position: relative; flex: 1 1 auto; display: block; }
+.pd-description { height: 100%; }
+.pd-fade-top, .pd-fade-bottom {
+  position: absolute; left: 0; right: 0; height: 22px; pointer-events: none;
+  opacity: 0; transition: opacity .18s ease; z-index: 1;
+}
+.pd-fade-top { top: 0; background: linear-gradient(to bottom, rgba(255,255,255,0.96), rgba(255,255,255,0)); }
+.pd-fade-bottom { bottom: 0; background: linear-gradient(to top, rgba(255,255,255,0.96), rgba(255,255,255,0)); }
+.pd-fade-top.visible, .pd-fade-bottom.visible { opacity: 1; }
+
+/* 설명 하단 스크롤 안내 배지 */
+.pd-scroll-hint {
+  position: fixed; left: 0; right: 0; bottom: 28px;
+  display: flex; justify-content: center; align-items: center;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none; z-index: 1000;
+}
+.pd-scroll-hint.visible { opacity: 1; transform: translateY(0); }
+/* 화살표 가이드 (반투명) */
+.pd-arrow { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pd-chev {
+  width: 120px; height: 40px; color: #60a5fa; opacity: 1;
+  animation: pd-chev-bounce 1.4s infinite ease-in-out;
+  filter: drop-shadow(0 0 10px rgba(96,165,250,.45)) drop-shadow(0 2px 4px rgba(0,0,0,.12));
+}
+.pd-chev.delay-1 { animation-delay: .15s; }
+.pd-chev.delay-2 { animation-delay: .3s; }
+@keyframes pd-chev-bounce {
+  0% { transform: translateY(0); opacity: .6; }
+  50% { transform: translateY(10px); opacity: 1; }
+  100% { transform: translateY(0); opacity: .7; }
+}
+
+/* 스크롤 힌트 텍스트 */
+.pd-hint-text {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,.9);
+  border: 2px solid rgba(96,165,250,.45);
+  color: #2563eb; /* 짙은 블루 텍스트 */
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: .2px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+
+/* Markdown-like link styles inside description */
+.pd-description a {
+  color: #ea5200;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1.5px;
+  font-weight: 500;
+  word-break: break-all;
+  transition: color .15s ease;
+}
+.pd-description a:hover { color: #d14900; }
+.pd-description a:visited { color: #b54700; }
+.pd-description a:focus-visible {
+  outline: 2px solid rgba(234, 82, 0, 0.35);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.pd-description code {
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: #333;
+  font-size: 0.9em;
+}
+
+/* 복사 버튼 (접속 정보용) */
+.copy-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(234, 82, 0, 0.35);
+  background: rgba(234, 82, 0, 0.08);
+  color: #ea5200;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.copy-btn:hover { background: rgba(234, 82, 0, 0.12); border-color: rgba(234, 82, 0, 0.5); }
+.copy-btn:active { transform: translateY(1px); }
+.copy-btn:focus-visible { outline: 2px solid rgba(234, 82, 0, 0.35); outline-offset: 2px; }
+
 /* 메인 카드: 전체 높이 고정 + 설명 영역만 스크롤 */
 .pd-main {
   display: flex;
   flex-direction: column;
+  position: relative;
   min-height: 550px;      /* 데스크톱 기준 고정 높이 */
 }
 /* 두 번째 섹션(설명)만 유동, 나머지는 고정 */
@@ -202,6 +305,58 @@
   display: flex;
   flex-direction: column;
 }
+
+/* 인라인 정보/링크 카드 & 구분선 */
+.pd-inline-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px 18px;
+  align-items: start;
+}
+.pd-separator {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 20px 0;
+  border: 0;
+}
+.pd-inline-link {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 220px;
+  word-break: break-all;
+  border: 1px solid #ececec;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.pd-inline-link:hover { background: #fff7f2; border-color: #ffd6c2; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.pd-inline-link-label {
+  font-size: 14px;
+  opacity: 0.8;
+}
+.pd-inline-info .pd-download { width: auto; min-width: 150px; }
+.pd-info-label {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 800;
+  letter-spacing: .2px;
+  margin-bottom: 6px;
+}
+.pd-info-value {
+  font-weight: 700;
+  color: #111;
+}
+
+/* 기본 정보 카드 강조 스타일 */
+.pd-info.primary { border-left-width: 8px; padding: 16px; }
+.pd-primary-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f2f2f2; }
+.pd-primary-title { font-weight: 900; color: #111; font-family: "Do Hyeon", "Black Han Sans", "Noto Sans KR", sans-serif; font-size: 18px; letter-spacing: .2px; }
+.pd-primary-badge { background: rgba(234, 82, 0, 0.1); color: #ea5200; font-weight: 700; padding: 5px 10px; border-radius: 8px; font-size: 13px; letter-spacing: 0.2px; }
+.pd-primary-actions { margin-top: 10px; }
+.pd-primary-actions .pd-download { width: auto; min-width: 160px; }
 
 /* ===========================
    Link 버튼 (모던)
@@ -247,12 +402,18 @@
   font-weight: 600;
   margin-bottom: 12px;
 }
+/* 제출 카드 (우측) */
+.pd-submit-card { position: sticky; top: 100px; align-self: start; }
+.pd-submit-card .flag-submit { flex-direction: column; align-items: stretch; }
+.pd-submit-card .flag-submit input { width: 100%; max-width: 100%; }
 .pd-info {
-  background: #fafafa;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 13px;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-left: 6px solid #ea5200;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 .pd-info + .pd-download,
 .pd-info + .link-btn-modern,
@@ -283,6 +444,11 @@
   color: #fff;
   cursor: pointer;
 }
+/* 오렌지 테마 버튼 (기본정보/추가정보 컨텍스트에서만) */
+.pd-primary-actions .pd-download,
+.pd-inline-info .pd-download { background: #ea5200; }
+.pd-primary-actions .pd-download:hover,
+.pd-inline-info .pd-download:hover { background: #d14900; }
 
 /* ===========================
    제출/뒤로가기/입력 스타일
@@ -371,14 +537,22 @@ button:hover {
   .pd-main {
     min-height: 560px;
   }
+  .pd-hero { height: 200px; }
 }
 @media (max-width: 640px) {
   .pd-main {
     min-height: 480px;
   }
+  .pd-hero { height: 160px; }
   .flag-submit input {
     width: 500px;  /* 가로 고정 유지 */
   }
 }
-
-
+.pd-section-subtitle {
+  margin: 6px 0 12px;
+  font-weight: 900;
+  color: #111;
+  font-size: 16px;
+  letter-spacing: .2px;
+  font-family: "Do Hyeon", "Black Han Sans", "Noto Sans KR", sans-serif;
+}
