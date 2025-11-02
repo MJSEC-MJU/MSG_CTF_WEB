@@ -347,7 +347,8 @@ const Admin = () => {
     const action = currentStatus ? '해제' : '설정';
     if (!window.confirm(`조기 퇴소를 ${action}하시겠습니까?`)) return;
     try {
-      const res = await toggleEarlyExit(userId);
+      const newEarlyExit = !currentStatus; // 현재 상태의 반대값
+      const res = await toggleEarlyExit(userId, newEarlyExit);
       if (res?.code === 'SUCCESS') {
         const refreshed = await fetchAdminMembers();
         const usersList = Array.isArray(refreshed)
@@ -1102,7 +1103,7 @@ const Admin = () => {
                       name="points"
                       value={editForm.points}
                       onChange={onEditInput}
-                      disabled={!isPointsEditable}
+                      readOnly={!isPointsEditable}
                       onClick={() => setIsPointsEditable(true)}
                       placeholder={isPointsEditable ? "새 점수 입력" : "클릭하여 점수 수정"}
                       style={{
@@ -1135,7 +1136,7 @@ const Admin = () => {
                       name="flag"
                       value={editForm.flag}
                       onChange={onEditInput}
-                      disabled={!isFlagEditable}
+                      readOnly={!isFlagEditable}
                       onClick={() => setIsFlagEditable(true)}
                       placeholder={isFlagEditable ? "새 플래그 입력" : "클릭하여 플래그 수정"}
                       style={{
@@ -1157,7 +1158,7 @@ const Admin = () => {
                       name="minPoints"
                       value={editForm.minPoints}
                       onChange={onEditInput}
-                      disabled={!isPointsEditable}
+                      readOnly={!isPointsEditable}
                       onClick={() => setIsPointsEditable(true)}
                       style={{
                         cursor: isPointsEditable ? 'text' : 'pointer',
@@ -1174,7 +1175,7 @@ const Admin = () => {
                       name="initialPoints"
                       value={editForm.initialPoints}
                       onChange={onEditInput}
-                      disabled={!isPointsEditable}
+                      readOnly={!isPointsEditable}
                       onClick={() => setIsPointsEditable(true)}
                       style={{
                         cursor: isPointsEditable ? 'text' : 'pointer',
