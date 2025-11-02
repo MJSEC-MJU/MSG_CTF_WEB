@@ -175,7 +175,7 @@
   .card {
     padding: 12px;
     font-size: 1rem;
-    min-width: 370px;
+    min-width: 400px;
   }
 
   .rank {
@@ -216,6 +216,7 @@
   .card {
     flex-direction: row;
     flex-wrap: wrap;
+    min-width: 190px;
     padding: 10px;
   }
 
