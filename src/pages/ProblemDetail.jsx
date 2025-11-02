@@ -51,6 +51,11 @@ const ProblemDetail = () => {
 
     const result = await submitFlag(id, flag);
 
+    if (result.code === 'EARLY_EXIT_USER') {
+      alert('조기 퇴소자는 문제를 제출할 수 없습니다.');
+      return;
+    }
+
     if (result.data === 'Correct') {
       // 정답: 입력칸 대신 초록 라벨
       setIsCorrect(true);

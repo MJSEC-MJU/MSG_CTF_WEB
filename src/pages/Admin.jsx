@@ -14,7 +14,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Axios } from '../api/Axios';
 import { createProblem } from '../api/CreateProblemAPI'; // 수정 없이 그대로 사용
 import { fetchProblems, deleteProblem } from '../api/SummaryProblemAPI';
-import { fetchAdminMembers, deleteUser as removeUser, updateUser, addUser } from '../api/AdminUserAPI';
+import { fetchAdminMembers, deleteUser as removeUser, updateUser, addUser, toggleEarlyExit } from '../api/AdminUserAPI';
 import { fetchTeamProfileRows, createTeam, addTeamMember, deleteTeam } from '../api/TeamAPI';
 import { updateProblem } from '../api/ProblemUpdateAPI';
 import PaymentProcessor from '../components/PaymentProcessor';
@@ -102,6 +102,9 @@ const Admin = () => {
   };
   const [addForm, setAddForm] = useState(emptyProblem);
   const [editForm, setEditForm] = useState(emptyProblem);
+  const [isFlagEditable, setIsFlagEditable] = useState(false);
+  const [isFileEditable, setIsFileEditable] = useState(false);
+  const [isPointsEditable, setIsPointsEditable] = useState(false);
 
   // ===== Signature Admin (state) =====
   const [sigBulkText, setSigBulkText] = useState('[\n  {"teamName":"alpha","challengeId":5,"code":"123456"}\n]');
@@ -340,6 +343,26 @@ const Admin = () => {
     }
   };
 
+  const handleToggleEarlyExit = async (userId, currentStatus) => {
+    const action = currentStatus ? '해제' : '설정';
+    if (!window.confirm(`조기 퇴소를 ${action}하시겠습니까?`)) return;
+    try {
+      const res = await toggleEarlyExit(userId);
+      if (res?.code === 'SUCCESS') {
+        const refreshed = await fetchAdminMembers();
+        const usersList = Array.isArray(refreshed)
+          ? refreshed
+          : (Array.isArray(refreshed?.data) ? refreshed.data : []);
+        setUsers(usersList);
+        alert(res?.message || `조기 퇴소가 ${action}되었습니다.`);
+      } else {
+        alert(res?.message || '조기 퇴소 토글 실패');
+      }
+    } catch {
+      alert('조기 퇴소 토글 요청 실패');
+    }
+  };
+
   // ===== Teams =====
   const handleCreateTeam = async () => {
     const name = teamNameForCreate.trim();
@@ -448,11 +471,14 @@ const Admin = () => {
     setEditingProblem(full);
     setShowEditProblemForm(true);
     setShowAddProblemForm(false);
+    setIsFlagEditable(false); // 편집 모드 진입 시 flag 잠금
+    setIsFileEditable(false); // 편집 모드 진입 시 file 잠금
+    setIsPointsEditable(false); // 편집 모드 진입 시 points 잠금
 
     setEditForm({
       title:         full.title ?? '',
       description:   full.description ?? '',
-      flag:          full.flag ?? '',
+      flag:          '', // 보안을 위해 빈칸으로 시작
       points:        full.points ?? '',
       minPoints:     minPts ?? '',
       initialPoints: initPts ?? '',
@@ -929,7 +955,7 @@ const Admin = () => {
           <table className="table">
             <thead>
               <tr>
-                {['ID','Email','LoginId','Role','Univ','Created','Updated','Action'].map((h) => (
+                {['ID','Email','LoginId','Role','Univ','Early Exit','Created','Updated','Action'].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -942,12 +968,33 @@ const Admin = () => {
                   <td>{u.loginId}</td>
                   <td>{u.role}</td>
                   <td>{u.univ}</td>
+                  <td>
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      backgroundColor: u.earlyExit ? '#ffe6e6' : '#e6f7ff',
+                      color: u.earlyExit ? '#e74c3c' : '#1890ff',
+                      fontWeight: 'bold'
+                    }}>
+                      {u.earlyExit ? '조기퇴소' : '정상'}
+                    </span>
+                  </td>
                   <td>{u.createdAt?.slice(0, 19)}</td>
                   <td>{u.updatedAt?.slice(0, 19)}</td>
                   <td>
                     <div className="actions" style={{ justifyContent: 'center' }}>
                       <button className="btn btn--danger" onClick={() => handleDeleteUser(u.userId)}>Delete</button>
                       <button className="btn" onClick={() => setEditingUser(u)}>Change</button>
+                      <button
+                        className="btn"
+                        style={{
+                          backgroundColor: u.earlyExit ? '#52c41a' : '#faad14',
+                          color: '#fff'
+                        }}
+                        onClick={() => handleToggleEarlyExit(u.userId, u.earlyExit)}
+                      >
+                        {u.earlyExit ? '복귀' : '퇴소'}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -1049,7 +1096,25 @@ const Admin = () => {
                   </div>
                   <div className="field">
                     <label className="label">Points</label>
-                    <input className="input" type="number" name="points" value={editForm.points} onChange={onEditInput} />
+                    <input
+                      className="input"
+                      type="number"
+                      name="points"
+                      value={editForm.points}
+                      onChange={onEditInput}
+                      disabled={!isPointsEditable}
+                      onClick={() => setIsPointsEditable(true)}
+                      placeholder={isPointsEditable ? "새 점수 입력" : "클릭하여 점수 수정"}
+                      style={{
+                        cursor: isPointsEditable ? 'text' : 'pointer',
+                        backgroundColor: isPointsEditable ? '#fff' : '#f5f5f5'
+                      }}
+                    />
+                    <p className="hint">
+                      {isPointsEditable
+                        ? '점수 필드를 수정할 수 있습니다.'
+                        : '점수를 수정하려면 클릭하세요.'}
+                    </p>
                   </div>
                   <div className="field">
                     <label className="label">Mileage</label>
@@ -1064,16 +1129,58 @@ const Admin = () => {
 
                   <div className="field">
                     <label className="label">Flag</label>
-                    <input className="input" type="text" name="flag" value={editForm.flag} onChange={onEditInput} />
+                    <input
+                      className="input"
+                      type="text"
+                      name="flag"
+                      value={editForm.flag}
+                      onChange={onEditInput}
+                      disabled={!isFlagEditable}
+                      onClick={() => setIsFlagEditable(true)}
+                      placeholder={isFlagEditable ? "새 플래그 입력" : "클릭하여 플래그 수정"}
+                      style={{
+                        cursor: isFlagEditable ? 'text' : 'pointer',
+                        backgroundColor: isFlagEditable ? '#fff' : '#f5f5f5'
+                      }}
+                    />
+                    <p className="hint">
+                      {isFlagEditable
+                        ? '새 플래그를 입력하면 기존 플래그가 교체됩니다. 비워두면 기존 플래그가 유지됩니다.'
+                        : '플래그를 수정하려면 입력란을 클릭하세요.'}
+                    </p>
                   </div>
                   <div className="field">
                     <label className="label">Min Points</label>
-                    <input className="input" type="number" name="minPoints" value={editForm.minPoints} onChange={onEditInput} />
+                    <input
+                      className="input"
+                      type="number"
+                      name="minPoints"
+                      value={editForm.minPoints}
+                      onChange={onEditInput}
+                      disabled={!isPointsEditable}
+                      onClick={() => setIsPointsEditable(true)}
+                      style={{
+                        cursor: isPointsEditable ? 'text' : 'pointer',
+                        backgroundColor: isPointsEditable ? '#fff' : '#f5f5f5'
+                      }}
+                    />
                   </div>
 
                   <div className="field">
                     <label className="label">Initial Points</label>
-                    <input className="input" type="number" name="initialPoints" value={editForm.initialPoints} onChange={onEditInput} />
+                    <input
+                      className="input"
+                      type="number"
+                      name="initialPoints"
+                      value={editForm.initialPoints}
+                      onChange={onEditInput}
+                      disabled={!isPointsEditable}
+                      onClick={() => setIsPointsEditable(true)}
+                      style={{
+                        cursor: isPointsEditable ? 'text' : 'pointer',
+                        backgroundColor: isPointsEditable ? '#fff' : '#f5f5f5'
+                      }}
+                    />
                   </div>
                   <div className="field">
                     <label className="label">URL</label>
@@ -1083,15 +1190,34 @@ const Admin = () => {
                   {/* 파일 표시/교체 한 자리 */}
                   <div className="field" style={{ gridColumn: '1 / -1' }}>
                     <label className="label">Attachment</label>
-                    {editForm.fileUrl ? (
+                    {editForm.fileUrl && (
                       <div style={{ marginBottom: 6 }}>
                         <a href={editForm.fileUrl} target="_blank" rel="noreferrer">현재 파일 열기</a>
                       </div>
-                    ) : (
-                      <div className="hint" style={{ marginBottom: 6 }}>(현재 파일 없음)</div>
                     )}
-                    <input className="input" type="file" name="file" onChange={onEditFile} />
-                    <p className="hint">파일을 선택하면 기존 파일이 교체됩니다. 선택하지 않으면 기존 파일이 유지됩니다.</p>
+                    {!isFileEditable ? (
+                      <div
+                        onClick={() => setIsFileEditable(true)}
+                        style={{
+                          padding: '8px 12px',
+                          border: '2px dashed #ccc',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          backgroundColor: '#f5f5f5',
+                          textAlign: 'center',
+                          color: '#666'
+                        }}
+                      >
+                        클릭하여 파일 변경
+                      </div>
+                    ) : (
+                      <input className="input" type="file" name="file" onChange={onEditFile} />
+                    )}
+                    <p className="hint">
+                      {isFileEditable
+                        ? '새 파일을 선택하면 기존 파일이 교체됩니다. 선택하지 않으면 기존 파일이 유지됩니다.'
+                        : '파일을 변경하려면 위 영역을 클릭하세요.'}
+                    </p>
                   </div>
 
                   <div className="field">
