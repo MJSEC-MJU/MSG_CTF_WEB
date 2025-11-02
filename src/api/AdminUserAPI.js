@@ -31,8 +31,10 @@ export async function addUser(payload) {
 }
 
 // PUT /api/admin/member/{userId}/early-exit
-export async function toggleEarlyExit(userId) {
-  const resp = await Axios.put(`/admin/member/${userId}/early-exit`);
+export async function toggleEarlyExit(userId, earlyExit) {
+  const resp = await Axios.put(`/admin/member/${userId}/early-exit`, {
+    earlyExit
+  });
   if (resp.status === 200) {
     return { code: 'SUCCESS', ...(resp.data || {}) };
   }
