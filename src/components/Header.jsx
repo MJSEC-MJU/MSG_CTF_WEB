@@ -247,7 +247,7 @@ const AuthIcon = styled.img`
   flex-shrink: 0;
   margin-right: 20px;
   @media (max-width: 768px) { width: 30px; }
-  @media (max-width: 420px) { width: 328px; }
+  @media (max-width: 420px) { width: 28px; }
 `;
 
 const ProfileIcon = styled.img`
