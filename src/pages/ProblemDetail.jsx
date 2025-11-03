@@ -365,18 +365,7 @@ const ProblemDetail = () => {
                       aria-hidden="true"
                       style={{ opacity: (fadeBottom || !descCanScroll) ? hintOpacity : 0 }}
                     >
-                      <div className="pd-arrow">
-                        <svg className="pd-chev" viewBox="0 0 24 24" preserveAspectRatio="none" fill="currentColor" aria-hidden="true">
-                          <path d="M7 10l5 5 5-5H7z"/>
-                        </svg>
-                        <svg className="pd-chev delay-1" viewBox="0 0 24 24" preserveAspectRatio="none" fill="currentColor" aria-hidden="true">
-                          <path d="M7 10l5 5 5-5H7z"/>
-                        </svg>
-                        <svg className="pd-chev delay-2" viewBox="0 0 24 24" preserveAspectRatio="none" fill="currentColor" aria-hidden="true">
-                          <path d="M7 10l5 5 5-5H7z"/>
-                        </svg>
-                        <div className="pd-hint-text">아래로 스크롤하면 추가로 증설한 링크/서버 정보가 있어요</div>
-                      </div>
+                      <div className="pd-hint-text">아래로 스크롤하면 추가로 증설한 링크/서버 정보가 있어요</div>
                     </div>
                   )}
 
