@@ -326,13 +326,21 @@ const ProblemDetail = () => {
                   if (dlFromLinks) movedDownloadUrl = dlFromLinks;
                 }
               }
-              // 접속 정보는 항상 상단 카드로 승격 (있다면)
-              const connFromCards = linkCardsAll.find((c) => c.type === 'connect');
-              if (connFromCards) movedConnCmd = connFromCards.cmd;
+              // 접속 정보 승격: 공식 URL이 nc/telnet이면 추가 접속은 하단 섹션에 유지
+              const officialIsConn = !!(officialUrl && /^(?:\s*)(?:nc|telnet)\b/i.test(String(officialUrl)));
+              if (!officialIsConn) {
+                const connFromCards = linkCardsAll.find((c) => c.type === 'connect');
+                if (connFromCards) movedConnCmd = connFromCards.cmd;
+              }
 
-              // 공식 URL/이동된 다운로드를 하단 카드/요약에서 제거
+              // 공식 URL/이동된 다운로드/공식 접속(포너블)을 하단 카드/요약에서 제거
+              const normCmd = (s) => String(s || '').trim().toLowerCase();
               const linkCards = linkCardsAll.filter((c) => {
-                if (c.type === 'connect') return !movedConnCmd || c.cmd !== movedConnCmd;
+                if (c.type === 'connect') {
+                  if (movedConnCmd) return normCmd(c.cmd) !== normCmd(movedConnCmd);
+                  if (officialIsConn && officialUrl) return normCmd(c.cmd) !== normCmd(officialUrl);
+                  return true;
+                }
                 return (!officialUrl || norm(c.url) !== norm(officialUrl)) && (!movedDownloadUrl || norm(c.url) !== norm(movedDownloadUrl));
               });
               const descLinks = descLinksAll.filter(
