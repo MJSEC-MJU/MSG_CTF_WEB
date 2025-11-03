@@ -1343,10 +1343,17 @@ const Admin = () => {
                   <input className="input" type="file" name="file" onChange={onAddFile} />
                 </div>
 
-                <div className="field">
-                  <label className="label">URL</label>
-                  <input className="input" type="url" name="url" value={addForm.url} onChange={onAddInput} />
-                </div>
+                  <div className="field">
+                    <label className="label">URL</label>
+                    <input
+                      className="input"
+                      type="text"
+                      name="url"
+                      value={addForm.url}
+                      onChange={onAddInput}
+                      placeholder="예) https://example.com 또는 nc host 1234"
+                    />
+                  </div>
 
                 <div className="field">
                   <label className="label">Start Time</label>
