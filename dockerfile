@@ -3,8 +3,11 @@ WORKDIR /app
 
 RUN corepack enable
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
+
+# Ensure optional dependencies are installed
+RUN yarn add --optional @rollup/rollup-linux-x64-musl
 
 COPY . .
 RUN yarn build
