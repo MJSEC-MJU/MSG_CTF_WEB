@@ -450,6 +450,37 @@
 .pd-primary-actions .pd-download:hover,
 .pd-inline-info .pd-download:hover { background: #d14900; }
 
+/* 다운로드 진행 상태 */
+.pd-download[disabled] {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+.pd-download[aria-busy="true"] { position: relative; }
+.pd-download[aria-busy="true"] svg { opacity: 0; }
+.pd-download[aria-busy="true"]::before {
+  content: "";
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.6);
+  border-top-color: #fff; border-radius: 50%;
+  animation: pd-spin .8s linear infinite;
+}
+/* 텍스트를 '다운로드중'으로 교체 */
+.pd-download[aria-busy="true"] { color: transparent; }
+.pd-download[aria-busy="true"]::after {
+  content: "다운로드중";
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  color: #fff; font-weight: 800; font-size: 14px;
+}
+.pd-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.6);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: pd-spin .8s linear infinite;
+}
+@keyframes pd-spin { to { transform: rotate(360deg); } }
+
 /* ===========================
    제출/뒤로가기/입력 스타일
 =========================== */

@@ -27,6 +27,17 @@ const ProblemDetail = () => {
   const [fadeBottom, setFadeBottom] = useState(false);
   const [descCanScroll, setDescCanScroll] = useState(false);
   const [hintOpacity, setHintOpacity] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      await downloadFile(id);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const copyText = async (text, onSuccess) => {
     try {
@@ -247,7 +258,7 @@ const ProblemDetail = () => {
       setIsCorrect(true);
       localStorage.setItem(`isCorrect-${id}`, 'true');
     } else if (result.data === 'Wait') {
-      alert('30초 동안 제출할 수 없습니다!');
+      alert('오답 3회로 인해 30초 동안 제출할 수 없습니다!');
     } else if (result.error) {
       alert(result.error);
     }
@@ -382,7 +393,7 @@ const ProblemDetail = () => {
                     <div className="pd-info primary" role="region" aria-label="문제 기본 정보" style={{ marginTop: 16 }}>
                       <div className="pd-primary-header">
                         <div className="pd-primary-title">기본 정보</div>
-                        <div className="pd-primary-badge">제출 제한 · 30초</div>
+                        <div className="pd-primary-badge">오답 3회 시 · 30초 쿨다운</div>
                       </div>
 
                       {officialUrl && (
@@ -438,8 +449,8 @@ const ProblemDetail = () => {
                         {hasFileAttachment ? (
                           <button
                             className="download-btn pd-download"
-                            onClick={() => downloadFile(id)}
-                            aria-label="첨부 다운로드"
+                            onClick={handleDownload}
+                            aria-label="첨부 다운로드" aria-busy={isDownloading} disabled={isDownloading}
                           >
                             <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                               <path d="M3 14.5A1.5 1.5 0 0 0 4.5 16h11a1.5 1.5 0 0 0 1.5-1.5V12h-2v2h-10v-2H3v2.5zM10 3a1 1 0 0 1 1 1v6.586l1.293-1.293 1.414 1.414L10 14.414 6.293 10.707l1.414-1.414L9 10.586V4a 1 1 0 0 1 1-1z" />
