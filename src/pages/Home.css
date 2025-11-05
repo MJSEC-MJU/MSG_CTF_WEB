@@ -11,7 +11,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(800px, 80vw);
+  width: min(630px, 80vw);
   aspect-ratio: 8 / 5;
   z-index: 2;
   display: flex;
@@ -84,7 +84,7 @@
   font-size: 95px;
   margin-bottom: 1.5rem;
   position: absolute;
-  top: 32%;
+  top: 28%;
   left: 7%;
   z-index: 1;
   font-family:"Black Han Sans","Noto Sans KR",sans-serif;
@@ -191,9 +191,9 @@
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
 
-  /* 고정 세로 길이 (필요 시 숫자만 조정) */
-  --typoH: 200vh;
-  height: var(--typoH);
+  /* 고정 세로 길이 (데스크탑에서 3개 카드 모두 보이도록 증가) */
+  --typoH: 350vh;
+  height: var(--typoH)-50vh;
   min-height: 100vh;
 
   box-sizing: border-box;
@@ -221,13 +221,13 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* space-evenly → space-between */
+  justify-content: space-between;
   gap: 0;
-  padding: clamp(6px, 2.2vw, 24px) 0;
+  padding: 0; /* padding 제거하여 문구가 끝까지 채워지도록 */
 }
 
-/* 상하 잘림 방지 (변경 없음) */
-.Row { position: relative; overflow: visible; padding-block: 0.18em; }
+/* 상하 잘림 방지 */
+.Row { position: relative; overflow: visible; padding-block: 0; } /* padding-block 제거 */
 .RowViewport { position: relative; overflow: hidden; }
 .RowStack { display: grid; }
 .RowStack > * { grid-area: 1 / 1; }
@@ -275,12 +275,12 @@
 .CardRail {
   position: absolute;
   inset: 0;
-  /* 세로 스크롤 동안 중앙 정렬된 “가로형 카드”가 아래로 나열 */
+  /* 세로 스크롤 동안 중앙 정렬된 "가로형 카드"가 아래로 나열 */
   display: grid;
   grid-template-columns: 1fr;
   align-content: start;
   justify-items: center;
-  gap: clamp(300px, 10vw, 500px);
+  gap: clamp(300px, 8vw, 350px); /* 데스크탑에서 gap 줄임 */
   padding: clamp(32px, 6vw, 72px)  min(4vw, 32px);
   pointer-events: none; /* 카드 위에 마우스 이벤트 비활성(필요 시 해제) */
   z-index: 2; /* 타이포 위에 올리고 싶으면 2, 아래로 내리려면 0 또는 1 */
@@ -302,7 +302,7 @@
 
   /* 등장 애니메이션 초기 상태 */
   opacity: 0;
-  transform: translateX(-36px);      /* “옆에서 나타나는” 느낌 */
+  transform: translateX(-36px);      /* "옆에서 나타나는" 느낌 */
   transition:
     opacity 520ms ease-out var(--delay, 0ms),
     transform 520ms ease-out var(--delay, 0ms);
@@ -403,7 +403,7 @@
     font-size: clamp(14px, 3.6vw, 18px);
   }
 
-  .TypeRowsSection { --typoH: 260vh;; }
+  .TypeRowsSection { --typoH: 260vh; }
   .Word {
     font-size: clamp(32px, 11vw, 90px);
     margin-right: clamp(8px, 2.4vw, 20px);

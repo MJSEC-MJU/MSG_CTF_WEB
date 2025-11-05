@@ -42,7 +42,7 @@
   z-index: 2;
   position: fixed;
   width: 100%;
-  top: 270px;
+  top: 150px;
   left: 70px;
 }
 
@@ -52,7 +52,7 @@
   font-size: 95px;
   margin-bottom: 1.5rem;
   position: absolute;
-  top: 37%;
+  top: 33%;
   left: 7%;
   font-family:"Black Han Sans","Noto Sans KR",sans-serif;
   letter-spacing:.5px;
