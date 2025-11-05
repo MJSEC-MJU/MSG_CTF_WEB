@@ -281,7 +281,7 @@
   align-content: start;
   justify-items: center;
   gap: clamp(300px, 8vw, 350px); /* 데스크탑에서 gap 줄임 */
-  padding: clamp(32px, 6vw, 72px)  min(4vw, 32px);
+  padding: clamp(250px, 6vw, 272px)  min(4vw, 32px);
   pointer-events: none; /* 카드 위에 마우스 이벤트 비활성(필요 시 해제) */
   z-index: 2; /* 타이포 위에 올리고 싶으면 2, 아래로 내리려면 0 또는 1 */
 }
