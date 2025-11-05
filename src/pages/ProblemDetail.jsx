@@ -91,8 +91,11 @@ const ProblemDetail = () => {
       const line = String(raw).trim();
       if (!line) continue;
       let m;
-      // 접속 정보: nc/telnet (라벨 유무 허용)
-      m = line.match(/^\s*(?:접속|connection|conn)?\s*[:：]?\s*((?:nc|telnet)\s+[^\s]+\s+\d+.*)\s*$/i);
+      // 접속 정보: nc/telnet (라벨 있는 경우 - 접속/connection/conn/추가증설 등)
+      m = line.match(/^\s*(?:접속|connection|conn|추가증설|추가\s*증설)\s*[:：]\s*((?:nc|telnet)\s+[^\s]+\s+\d+.*)\s*$/i);
+      if (m) { results.push({ label: '접속', cmd: m[1].trim(), type: 'connect' }); continue; }
+      // 접속 정보: nc/telnet (라벨 없는 경우)
+      m = line.match(/^\s*((?:nc|telnet)\s+[^\s]+\s+\d+.*)\s*$/i);
       if (m) { results.push({ label: '접속', cmd: m[1].trim(), type: 'connect' }); continue; }
       m = line.match(/^\s*(다운로드|download)\s*[:：]\s*(https?:\/\/\S+)/i);
       if (m) { results.push({ label: m[1].trim(), url: clean(m[2]), type: 'download' }); continue; }
@@ -145,7 +148,11 @@ const ProblemDetail = () => {
     const line = String(raw || '').trim();
     if (!line) return null;
     let m;
-    m = line.match(/^\s*(?:접속|connection|conn)?\s*[:：]?\s*((?:nc|telnet)\s+[^\s]+\s+\d+.*)\s*$/i);
+    // 접속 정보: nc/telnet (라벨 있는 경우 - 접속/connection/conn/추가증설 등)
+    m = line.match(/^\s*(?:접속|connection|conn|추가증설|추가\s*증설)\s*[:：]\s*((?:nc|telnet)\s+[^\s]+\s+\d+.*)\s*$/i);
+    if (m) return { label: '접속', cmd: m[1], type: 'connect' };
+    // 접속 정보: nc/telnet (라벨 없는 경우)
+    m = line.match(/^\s*((?:nc|telnet)\s+[^\s]+\s+\d+.*)\s*$/i);
     if (m) return { label: '접속', cmd: m[1], type: 'connect' };
     m = line.match(/^\s*(다운로드|download)\s*[:：]\s*(https?:\/\/\S+)/i);
     if (m) return { label: m[1].trim(), url: m[2], type: 'download' };
