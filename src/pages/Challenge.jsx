@@ -124,88 +124,55 @@ function Challenge() {
 
   useEffect(() => {
     let isMounted = true;
-
-    const cachedPage = problemsCacheRef.current.get(currentPage);
-    if (cachedPage) {
-      setProblems(cachedPage.problems);
-      setTotalPages(cachedPage.totalPages);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
+    setLoading(true);
 
     (async () => {
       try {
+        // solved/unlocked 캐시 불러오기
         const solvedPromise = cachedSolvedRef.current
           ? Promise.resolve(cachedSolvedRef.current)
           : fetchSolvedChallenges();
-
         const unlockedPromise = cachedUnlockedRef.current
           ? Promise.resolve(cachedUnlockedRef.current)
           : fetchUnlockedList();
 
-        const [problemsResult, solvedResult, unlockedResult] = await Promise.allSettled([
-          fetchProblems(currentPage),
+        // ✅ 모든 페이지의 문제를 한 번에 불러오기
+        const allProblems = [];
+        let page = 0;
+        let totalPages = 1;
+
+        do {
+          const { problems, totalPages: tp } = await fetchProblems(page, 10);
+          allProblems.push(...problems);
+          totalPages = tp;
+          page++;
+        } while (page < totalPages);
+
+        const [solvedResult, unlockedResult] = await Promise.all([
           solvedPromise,
           unlockedPromise,
         ]);
 
         if (!isMounted) return;
 
-        if (problemsResult.status === "fulfilled") {
-          const { problems: nextProblems, totalPages: nextTotalPages } = problemsResult.value;
-          problemsCacheRef.current.set(currentPage, {
-            problems: nextProblems,
-            totalPages: nextTotalPages,
-            timestamp: Date.now(),
-          });
-          setProblems((prev) => (prev === nextProblems ? prev : nextProblems));
-          setTotalPages(nextTotalPages);
-        } else {
-          console.error("fetchProblems failed:", problemsResult.reason);
-          if (!cachedPage) {
-            setProblems([]);
-          }
+        // 전체 문제 상태 갱신
+        setProblems(allProblems);
+        setTotalPages(1); // 더 이상 페이지네이션 안 씀
+
+        // solved 상태 업데이트
+        if (solvedResult) {
+          cachedSolvedRef.current = solvedResult;
+          const nextSolvedSet = new Set(solvedResult.map((s) => String(s.challengeId)));
+          setSolvedChallenges(nextSolvedSet);
         }
 
-        if (solvedResult.status === "fulfilled") {
-          const solvedData = solvedResult.value;
-          cachedSolvedRef.current = solvedData;
-          const nextSolvedSet = new Set(solvedData.map((s) => String(s.challengeId)));
-          setSolvedChallenges((prev) => {
-            if (areSetsEqual(prev, nextSolvedSet)) return prev;
-            return nextSolvedSet;
-          });
-        } else {
-          setSolvedChallenges((prev) => (prev.size === 0 ? prev : new Set()));
+        // unlocked 상태 업데이트
+        if (unlockedResult) {
+          const nextUnlockedSet = new Set((unlockedResult?.challengeIds || []).map(String));
+          cachedUnlockedRef.current = unlockedResult;
+          setUnlockedSet(nextUnlockedSet);
         }
 
-        if (unlockedResult.status === "fulfilled") {
-          const unlocked = unlockedResult.value;
-          const nextUnlockedSet = new Set((unlocked?.challengeIds || []).map(String));
-          const updatedUnlockedCache = {
-            ...(unlocked ?? {}),
-            challengeIds: Array.from(nextUnlockedSet),
-          };
-          cachedUnlockedRef.current = updatedUnlockedCache;
-          setUnlockedSet((prev) => {
-            if (areSetsEqual(prev, nextUnlockedSet)) return prev;
-            unlockedSetRef.current = nextUnlockedSet;
-            cachedUnlockedRef.current = updatedUnlockedCache;
-            return nextUnlockedSet;
-          });
-        } else {
-          setUnlockedSet((prev) => {
-            if (prev.size === 0) return prev;
-            const emptySet = new Set();
-            unlockedSetRef.current = emptySet;
-            cachedUnlockedRef.current = {
-              ...(cachedUnlockedRef.current ?? {}),
-              challengeIds: [],
-            };
-            return emptySet;
-          });
-        }
       } catch (e) {
         console.error("Challenge data fetch error:", e);
       } finally {
@@ -213,10 +180,8 @@ function Challenge() {
       }
     })();
 
-    return () => {
-      isMounted = false;
-    };
-  }, [currentPage]);
+    return () => { isMounted = false; };
+  }, []);
 
   const isSignatureProblem = useCallback(
     (problem) =>
@@ -376,6 +341,18 @@ function Challenge() {
 
       {/* ====== 문제 그리드 ====== */}
       <div className="problem-grid">
+        {/* ====== 레드카펫 (6줄) ====== */}
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={`red-line-${i}`}
+            className="red-carpet-line"
+            style={{
+              top: `calc(var(--pad) + (${i} * (var(--tile) + var(--gap))) + (var(--tile) / 2) + var(--offset))`,
+            }}
+          />
+        ))}
+
+        {/* ====== 문제 카드 ====== */}
         {filteredProblems.length > 0 ? (
           filteredProblems.map((problem) => {
             const challengeIdStr = String(problem.challengeId);
@@ -417,26 +394,6 @@ function Challenge() {
               : "해당 카테고리에 문제가 없습니다."}
           </p>
         )}
-      </div>
-
-      <div className="pagination">
-        <button
-          style={{ height: "5vh", margin: "10px" }}
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
-          disabled={currentPage === 0}
-        >
-          이전
-        </button>
-        <span>
-          {currentPage + 1} / {totalPages}
-        </span>
-        <button
-          style={{ height: "5vh", margin: "10px" }}
-          onClick={() => setCurrentPage((prev) => prev + 1)}
-          disabled={currentPage + 1 >= totalPages}
-        >
-          다음
-        </button>
       </div>
 
       {/* 시그니처 입력 모달 */}

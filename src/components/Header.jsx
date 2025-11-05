@@ -157,7 +157,7 @@ const HeaderContainer = styled.header`
   margin: 0 auto;
 
   height: 72px;
-  padding: 0 16px;
+  padding: 0px;
 
   @media (max-width: 420px) {
     height: 56px;
