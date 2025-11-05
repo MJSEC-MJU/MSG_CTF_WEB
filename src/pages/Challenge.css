@@ -1,13 +1,15 @@
 .challenge-container {
   text-align: center;
   background-size: cover;
-  width: 1200px;
+  width: 100%;
+  max-width: 1200px;
+  min-width: 1200px;
   height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0 auto; 
+  margin: 0 auto;
 }
 .problem-grid {
   position: relative;
@@ -20,7 +22,7 @@
   --gap:  40px;    /* 행 간격 */
   --offset: 26px;  /* 카펫을 살짝 아래로 내리는 미세 오프셋 */
 
-  height: calc((var(--pad) * 2) + (var(--tile) * 2) + var(--gap));
+  min-height: calc((var(--pad) * 2) + (var(--tile) * 6) + (var(--gap) * 5));
 
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -42,8 +44,10 @@
 /* 🔥 레드카펫 줄 (6줄) */
 .red-carpet-line {
   position: absolute;
-  left: -150px;
-  right: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1500px;
+  min-width: 1500px;
   height: 100px;
   border-radius: 10px;
   background: linear-gradient(90deg, #b90f0f 0%, #e31b1b 50%, #b90f0f 100%);
@@ -398,6 +402,7 @@ background: #181818; color: #fff; border: 1px solid #333;
   .challenge-container {
     width: 100%;
     max-width: 100%;
+    min-width: unset;
   }
 
   .problem-grid {
@@ -408,10 +413,9 @@ background: #181818; color: #fff; border: 1px solid #333;
     padding: 0;          /* 가로 꽉 차게 */
   }
 
-  /* 레드카펫 숨김(유지) */
-  .problem-grid::before,
-  .problem-grid::after {
-    display: none;
+  /* 레드카펫 숨김 */
+  .red-carpet-line {
+    display: none !important;
   }
 
   /* 각 아이템이 행 전체를 차지하도록 */
