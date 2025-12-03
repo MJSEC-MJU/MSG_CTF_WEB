@@ -269,8 +269,7 @@ cd discord-bot
 
 <a id="erd"></a>
 ## 📝 ERD
-
-![ERD](https://github.com/user-attachments/assets/196c5e96-2331-4f69-b9a2-59dfa1368858)
+<img width="2228" height="1773" alt="msg_ctf_erd" src="https://github.com/user-attachments/assets/76568aba-99b2-493d-a756-6c5bbfe11c5f" />
 
 ---
 
