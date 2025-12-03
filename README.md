@@ -1,6 +1,6 @@
-# 🔐 MJSEC_CTF PROJECT
+# 🔐 MSG_CTF PROJECT
 
-이 프로젝트는 MJSEC_CTF(Capture The Flag) 대회를 위한 웹 사이트로, CTFd를 사용하지 않고 직접 개발되었습니다.
+이 프로젝트는 MSG_CTF(Capture The Flag) 대회를 위한 웹 사이트로, CTFd를 사용하지 않고 직접 개발되었습니다.
 이 문서는 프로젝트의 설치 방법, 기여자 정보, 기술 스택, 협업 방식, 개발 기간, 시스템 아키텍처, ERD, 구현된 기능, 그리고 화면 구성을 설명합니다.
 ## Technology Stack
 ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
