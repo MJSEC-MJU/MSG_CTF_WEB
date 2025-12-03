@@ -377,79 +377,79 @@ cd discord-bot
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">메인 페이지 1</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/fab53623-7fb8-40a5-a8fa-c338738240ba" style="width:100%; height:auto;" alt="메인 페이지 1">
+      <img src="https://github.com/user-attachments/assets/1eb84948-dfaf-4fcc-86d4-4fc8e617b711" style="width:100%; height:auto;" alt="메인 페이지 1">
     </td>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">메인 페이지 2</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/9bb5333d-b692-4d9c-8be3-89ad40fc7312" style="width:100%; height:auto;" alt="메인 페이지 2">
+      <img src="https://github.com/user-attachments/assets/7c64457d-37d0-4626-b097-1c075814084f" style="width:100%; height:auto;" alt="메인 페이지 2">
     </td>
   </tr>
   <tr>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">메인 페이지 3</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/252e89e1-5fc5-4418-812f-02abed62cb26" style="width:100%; height:auto;" alt="메인 페이지 3">
+      <img src="https://github.com/user-attachments/assets/8a95d5ea-acb3-4e14-9cdc-0c42a29fa55a" style="width:100%; height:auto;" alt="메인 페이지 3">
     </td>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">메인 페이지 4</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/7684a272-cd5a-43b8-bf55-6bfd27fb9a70" style="width:100%; height:auto;" alt="메인 페이지 4">
+      <img src="https://github.com/user-attachments/assets/63f9712f-ce2b-4582-936e-37a0ca5160bd" style="width:100%; height:auto;" alt="메인 페이지 4">
     </td>
   </tr>
   <tr>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">메인 페이지 5</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/7b979b83-a9bb-484d-85ee-83670229b36c" style="width:100%; height:auto;" alt="메인 페이지 5">
+      <img src="https://github.com/user-attachments/assets/2c24bf06-079e-49ca-8bb4-2354305ff73c" style="width:100%; height:auto;" alt="메인 페이지 5">
     </td>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">로그인 페이지</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/e2b36c11-bdee-43f4-b478-d687140c1765" style="width:100%; height:auto;" alt="로그인 페이지">
+      <img src="https://github.com/user-attachments/assets/de365a89-318f-433b-8290-19db452d8b89" style="width:100%; height:auto;" alt="로그인 페이지">
     </td>
   </tr>
   <tr>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">문제 리스트 페이지</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/5b2a8259-ae7a-4044-a97c-d53fd7dd27a4" style="width:100%; height:auto;" alt="문제 리스트 페이지">
+      <img src="https://github.com/user-attachments/assets/48988f46-be5d-4da2-890f-36107fd27d6c" style="width:100%; height:auto;" alt="문제 리스트 페이지">
     </td>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">문제 상세 페이지</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/7c7ffb67-cce9-480b-b2d2-043033a15f96" style="width:100%; height:auto;" alt="문제 상세 페이지">
+      <img src="https://github.com/user-attachments/assets/29ceae79-00d3-4837-83b1-1474c35c0500" style="width:100%; height:auto;" alt="문제 상세 페이지">
     </td>
   </tr>
   <tr>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">리더보드 페이지(상단)</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/28a82754-509b-44c0-bc39-7e78d3b24a80" style="width:100%; height:auto;" alt="리더보드 페이지 상단">
+      <img src="https://github.com/user-attachments/assets/f548fd2b-8f34-4d17-9219-344d026cfc33" style="width:100%; height:auto;" alt="리더보드 페이지 상단">
     </td>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">리더보드 페이지(하단)</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/2d94a50c-7682-4df5-899b-dd69ec36d97a" style="width:100%; height:auto;" alt="리더보드 페이지 하단">
+      <img src="https://github.com/user-attachments/assets/7fcb5104-45f5-4e66-b593-3546fce29ad0" style="width:100%; height:auto;" alt="리더보드 페이지 하단">
     </td>
   </tr>
   <tr>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">랭킹 페이지</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/7f2440a8-c15f-4170-8464-f43f7d684fd2" style="width:100%; height:auto;" alt="랭킹 페이지">
+      <img src="https://github.com/user-attachments/assets/96117bfc-e51c-4eb5-8c8f-55a4b61b27d4" style="width:100%; height:auto;" alt="랭킹 페이지">
     </td>
     <td style="width:50%; vertical-align:top; padding:8px;">
       <div style="text-align:center; font-weight:bold;">마이 페이지</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/8b10fd2e-9892-4269-8f7c-01364ecd0258" style="width:100%; height:auto;" alt="마이 페이지">
+      <img src="https://github.com/user-attachments/assets/9f346d3e-99a3-4692-833e-6721b5bc7372" style="width:100%; height:auto;" alt="마이 페이지">
     </td>
   </tr>
   <tr>
     <td colspan="2" style="padding:8px; vertical-align:top;">
       <div style="text-align:center; font-weight:bold;">타이머 페이지</div>
       <hr style="border:none; border-top:1px solid #ddd; margin:8px 0;">
-      <img src="https://github.com/user-attachments/assets/046363d5-e29d-4625-a9a3-9d6ac0797dba" style="width:100%; height:auto;" alt="타이머 페이지">
+      <img src="https://github.com/user-attachments/assets/99e7c551-9aec-4cc3-acfd-79fe6c8c695b" style="width:100%; height:auto;" alt="타이머 페이지">
     </td>
   </tr>
 </table>
